@@ -4,6 +4,7 @@ import particles.core.Particle;
 import particles.core.ParticleModule;
 import particles.modules.SpawnModule;
 import particles.modules.VelocityModule;
+import particles.modules.VelocityLifeModule;
 
 import luxe.Vector;
 import luxe.Color;
@@ -31,10 +32,15 @@ class ForceModule extends ParticleModule {
 
 	override function init() {
 
-		var vm:VelocityModule = emitter.get_module(VelocityModule);
+		var vm = emitter.get_module(VelocityModule);
+		if(vm == null) {
+			vm = emitter.get_module(VelocityLifeModule);
+		}
+
 		if(vm == null) {
 			throw('VelocityModule is required for ForceModule');
 		}
+		
 		vel_data = vm.data;
 	    
 	}

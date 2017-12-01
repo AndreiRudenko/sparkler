@@ -18,7 +18,7 @@ class VelocityModule extends ParticleModule {
 	var spawn_data:Array<SpawnData>;
 
 	var initial_velocity:Vector;
-	var initial_velocity_variance:Vector;
+	var initial_velocity_max:Vector;
 	var velocity_random:Vector;
 
 
@@ -30,7 +30,7 @@ class VelocityModule extends ParticleModule {
 		data = [];
 
 		initial_velocity = _options.initial_velocity != null ? _options.initial_velocity : new Vector();
-		initial_velocity_variance = _options.initial_velocity_variance;
+		initial_velocity_max = _options.initial_velocity_max;
 		velocity_random = _options.velocity_random;
 
 	}
@@ -38,10 +38,12 @@ class VelocityModule extends ParticleModule {
 	override function spawn(p:Particle) {
 
 		var v:Vector = data[p.id];
-		v.copy_from(initial_velocity);
-		if(initial_velocity_variance != null) {
-			v.x += initial_velocity_variance.x * emitter.random_1_to_1();
-			v.y += initial_velocity_variance.y * emitter.random_1_to_1();
+		if(initial_velocity_max != null) {
+			v.x = emitter.random_float(initial_velocity.x, initial_velocity_max.x);
+			v.y = emitter.random_float(initial_velocity.y, initial_velocity_max.y);
+		} else {
+			v.x = initial_velocity.x;
+			v.y = initial_velocity.y;
 		}
 
 	}
@@ -86,7 +88,7 @@ class VelocityModule extends ParticleModule {
 typedef VelocityModuleOptions = {
 
 	@:optional var initial_velocity : Vector;
-	@:optional var initial_velocity_variance : Vector;
+	@:optional var initial_velocity_max : Vector;
 	@:optional var velocity_random : Vector;
 
 }
