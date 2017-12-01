@@ -12,17 +12,12 @@ class ParticleSystem {
 	public var enabled (default, null):Bool = false;
 	public var paused  (default, null):Bool = false;
 	public var position(default, null):Vector;
-
-	public var emitters:Array<ParticleEmitter>;
-
-	public var random : Void -> Float;
+	public var emitters(default, null):Array<ParticleEmitter>;
 
 	var active_emitters:Int = 0;
 
 
 	public function new(?_emitters:Array<ParticleEmitter>) {
-
-		random = Math.random;
 
 		position = new Vector();
 

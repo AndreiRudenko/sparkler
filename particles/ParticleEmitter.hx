@@ -135,7 +135,6 @@ class ParticleEmitter {
 
 	public function update(dt:Float) {
 
-
 		if(active) {
 
 			if(enabled) {
@@ -204,23 +203,40 @@ class ParticleEmitter {
 	}
 	
 	public function start() {
-		
+
+		enabled = true;
+		time = 0;
+		frame_time = 0;
+
 	}
 
-	public function pause() {
-		
-	}
-
-	public function unpause() {
-		
-	}
-
-	public function stop() {
+	public function stop(_unspawn:Bool = false) {
 
 		enabled = false;
 		time = 0;
 		frame_time = 0;
 
+		if(_unspawn) {
+			for (p in particles) {
+				for (m in modules) {
+					m.unspawn(p);
+				}
+			}
+			particles.reset();
+		}
+
+	}
+
+	public function pause() {
+		
+		active = false;
+
+	}
+
+	public function unpause() {
+
+		active = true;
+		
 	}
 
 	inline function spawn() {
@@ -258,7 +274,11 @@ class ParticleEmitter {
 	}
 
 	@:allow(particles.core.ParticleModule)
-	inline function random_1_to_1(){ return random() * 2 - 1; }
+	inline function random_1_to_1(){ 
+
+		return random() * 2 - 1; 
+
+	}
 
 	@:allow(particles.core.ParticleModule)
     inline function random_int( min:Float, ?max:Null<Float>=null ) : Int {

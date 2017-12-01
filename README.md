@@ -22,7 +22,7 @@ override function ready() {
 			cache_size : 64,
 			cache_wrap : true,
 			modules : [
-				new particles.modules.LifetimeModule({
+				new particles.modules.LifeTimeModule({
 					lifetime : 2
 				}),
 				new particles.modules.VelocityModule({
