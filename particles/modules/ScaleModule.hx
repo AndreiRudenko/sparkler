@@ -68,9 +68,9 @@ class ScaleModule extends ParticleModule {
 		}
 		spawn_data = sm.data;
 
-		var lm:LifetimeModule = emitter.get_module(LifetimeModule);
+		var lm:LifeTimeModule = emitter.get_module(LifeTimeModule);
 		if(lm == null) {
-			throw('LifetimeModule is required for ScaleModule');
+			throw('LifeTimeModule is required for ScaleModule');
 		}
 		life = lm.life;
 

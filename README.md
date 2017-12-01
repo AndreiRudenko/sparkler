@@ -26,12 +26,8 @@ override function ready() {
 					lifetime : 2
 				}),
 				new particles.modules.VelocityModule({
-					initial_velocity : new Vector(0, 0),
-					initial_velocity_variance : new Vector(0, 0)
-				}),
-				new particles.modules.ForceModule({
-					force : new Vector(0, 0),
-					force_random : new Vector(1000, 0)
+					initial_velocity : new Vector(0, -100),
+					initial_velocity_variance : new Vector(0, 20)
 				}),
 				new particles.modules.GravityModule({
 					gravity : new Vector(0, 200)
@@ -39,10 +35,6 @@ override function ready() {
 				new particles.modules.ScaleModule({
 					initial_scale : 1,
 					end_scale : 0
-				}),
-				new particles.modules.SizeModule({
-					initial_size : new Vector(32,32),
-					end_size : new Vector(32,32)
 				}),
 				new particles.modules.SpawnModule({  // SpawnModule must be last
 					position_variance : new Vector(64,64)
@@ -61,3 +53,11 @@ override function update(dt:Float) {
 
 
 ```
+
+## modules    
+
+All particle emitters must have SpawnModule, and it should be added last, to update and sync particle position after other modules changes.
+
+Later i will add more modules.
+If you interested to contribute, it will be nice to have more modules.
+Maybe it will be better to separate modules repo.

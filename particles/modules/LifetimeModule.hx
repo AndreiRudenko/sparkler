@@ -8,7 +8,7 @@ import phoenix.Texture;
 import phoenix.Batcher;
 
 
-class LifetimeModule extends ParticleModule {
+class LifeTimeModule extends ParticleModule {
 
 
 	public var life:Array<Float>;
@@ -17,7 +17,7 @@ class LifetimeModule extends ParticleModule {
 	public var lifetime_max:Float;
 
 
-	public function new(_options:LifetimeModuleOptions) {
+	public function new(_options:LifeTimeModuleOptions) {
 
 		super();
 
@@ -69,7 +69,7 @@ class LifetimeModule extends ParticleModule {
 
 
 
-typedef LifetimeModuleOptions = {
+typedef LifeTimeModuleOptions = {
 
 	@:optional var lifetime : Float;
 	@:optional var lifetime_max : Float;
