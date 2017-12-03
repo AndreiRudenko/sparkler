@@ -2,8 +2,13 @@ package particles;
 
 
 import luxe.Vector;
+import luxe.Sprite;
+import phoenix.Texture;
+import phoenix.Batcher;
 
+import particles.core.ComponentManager;
 import particles.core.Particle;
+import particles.core.ParticleData;
 import particles.core.ParticleModule;
 import particles.containers.ParticleVector;
 import particles.containers.ModuleList;
@@ -14,18 +19,20 @@ class ParticleEmitter {
 
 
 		/** emitter active */
-	public var active:Bool = true;
+	public var active:Bool;
 		/** emitter name */
-	public var name:String;
+	public var name         (default, null):String;
 		/** offset from system position*/
-	public var position:Vector;
+	public var position     (default, null):Vector;
 
-		/** emitter modules */
-	public var modules:ModuleList;
 		/** emitter particles */
-	public var particles:ParticleVector;
+	public var particles 	(default, null):ParticleVector;
+		/** particles components */
+	public var components	(default, null):ComponentManager;
+		/** emitter modules */
+	public var modules   	(default, null):ModuleList;
 		/** reference to system */
-	public var system:ParticleSystem;
+	public var system    	(default, null):ParticleSystem;
 
 		/** number of particles per emit */
 	public var count:Int;
@@ -45,7 +52,14 @@ class ParticleEmitter {
 		/** emitter random function */
 	public var random : Void -> Float;
 
-	public var enabled:Bool = true;
+	public var enabled:Bool;
+
+	var image:Texture;
+	var batcher:Batcher;
+	var depth:Float;
+
+	// @:allow(particles.core.ParticleModule)
+	@:noCompletion public var particles_data:Array<ParticleData>;
 
 	var time:Float;
 	var frame_time:Float;
@@ -62,6 +76,10 @@ class ParticleEmitter {
 
 		time = 0;
 		frame_time = 0;
+
+		active = _options.active != null ? _options.active : true;
+		enabled = _options.enabled != null ? _options.enabled : true;
+
 		duration = _options.duration != null ? _options.duration : -1;
 
 		count = _options.count != null ? _options.count : 1;
@@ -72,6 +90,10 @@ class ParticleEmitter {
 
 		random = _options.random != null ? _options.random : Math.random;
 
+		image = _options.image;
+		batcher = _options.batcher != null ? _options.batcher : Luxe.renderer.batcher;
+		depth = _options.depth != null ? _options.depth : 300;
+
 		cache_wrap = _options.cache_wrap != null ? _options.cache_wrap : false;
 		var cache_size:Int = _options.cache_size != null ? _options.cache_size : 128;
 		if(cache_size <= 0) {
@@ -79,12 +101,35 @@ class ParticleEmitter {
 		}
 
 		particles = new ParticleVector(cache_size);
+		components = new ComponentManager(cache_size);
+		particles_data = [];
 
 		if(_options.modules != null) {
 			for (m in _options.modules) {
 				add_module(m);
 			}
 		}
+
+	}
+
+	public function destroy() {
+		
+		for (m in modules) {
+			m.destroy();
+		}
+
+		for (p in particles_data) {
+			p.sprite.destroy();
+		}
+
+		components.clear();
+
+		name = null;
+		particles = null;
+		particles_data = null;
+		components = null;
+		modules = null;
+		system = null;
 
 	}
 
@@ -95,7 +140,9 @@ class ParticleEmitter {
 			throw('particle module already exists');
 		}
 
-		_module.priority = _priority;
+		if(!_module.override_priority) {
+			_module.priority = _priority;
+		}
 
 		modules.add(_module);
 
@@ -120,24 +167,11 @@ class ParticleEmitter {
 		
 	}
 
-	public function destroy() {
-		
-		for (m in modules) {
-			m.destroy();
-		}
-
-		name = null;
-		particles = null;
-		modules = null;
-		system = null;
-
-	}
-
 	public function update(dt:Float) {
 
 		if(active) {
 
-			if(enabled) {
+			if(enabled && rate > 0) {
 					
 				frame_time += dt;
 
@@ -170,30 +204,20 @@ class ParticleEmitter {
 
 			}
 			
+			// update modules
 			for (m in modules) {
 				if(m.enabled) {
 					m.update(dt);
 				}
 			}
 
+			// update sprites
+			for (p in particles) {
+				particles_data[p.id].sync_transform();
+			}
+
 		}
 		
-	}
-
-	function _emit() {
-
-		var _count:Int;
-
-		if(count_max > 0) {
-			_count = random_int(count, count_max);
-		} else {
-			_count = count;
-		}
-
-		for (_ in 0..._count) {
-			spawn();
-		}
-
 	}
 
 	public function emit() {
@@ -210,13 +234,13 @@ class ParticleEmitter {
 
 	}
 
-	public function stop(_unspawn:Bool = false) {
+	public function stop(_kill:Bool = false) {
 
 		enabled = false;
 		time = 0;
 		frame_time = 0;
 
-		if(_unspawn) {
+		if(_kill) {
 			for (p in particles) {
 				for (m in modules) {
 					m.unspawn(p);
@@ -253,6 +277,11 @@ class ParticleEmitter {
 			var p:Particle = particles.wrap();
 			for (m in modules) {
 				if(m.enabled) {
+					m.unspawn(p);
+				}
+			}
+			for (m in modules) {
+				if(m.enabled) {
 					m.spawn(p);
 				}
 			}
@@ -274,6 +303,30 @@ class ParticleEmitter {
 	}
 
 	@:allow(particles.core.ParticleModule)
+	inline function add_to_bacher(p:Particle):ParticleData { 
+
+		var pd:ParticleData = particles_data[p.id];
+		if(pd.sprite.geometry != null) {
+			batcher.add(pd.sprite.geometry);
+		}
+
+		return pd;
+
+	}
+
+	@:allow(particles.core.ParticleModule)
+	inline function remove_from_bacher(p:Particle):ParticleData { 
+
+		var pd:ParticleData = particles_data[p.id];
+		if(pd.sprite.geometry != null) {
+			batcher.remove(pd.sprite.geometry);
+		}
+
+		return pd;
+
+	}
+
+	@:allow(particles.core.ParticleModule)
 	inline function random_1_to_1(){ 
 
 		return random() * 2 - 1; 
@@ -281,11 +334,11 @@ class ParticleEmitter {
 	}
 
 	@:allow(particles.core.ParticleModule)
-    inline function random_int( min:Float, ?max:Null<Float>=null ) : Int {
+	inline function random_int( min:Float, ?max:Null<Float>=null ) : Int {
 
-        return Math.floor( random_float(min, max) );
+		return Math.floor( random_float(min, max) );
 
-    }
+	}
 
 	@:allow(particles.core.ParticleModule)
 	inline function random_float( min:Float, ?max:Null<Float>=null ) : Float {
@@ -304,12 +357,42 @@ class ParticleEmitter {
 
 		system = _ps;
 
+		var pd:ParticleData;
+		for (i in 0...particles.capacity) {
+			pd = new ParticleData();
+
+			pd.sprite = new Sprite({
+				name: '_particle_'+i,
+				depth: depth,
+				texture: image,
+				no_scene: true,
+				no_batcher_add: true
+			});
+
+			particles_data.push(pd);
+		}
+
 		for (m in modules) {
 			m._init(this);
 		}
 
 	}
 
+	function _emit() {
+
+		var _count:Int;
+
+		if(count_max > 0) {
+			_count = random_int(count, count_max);
+		} else {
+			_count = count;
+		}
+
+		for (_ in 0..._count) {
+			spawn();
+		}
+
+	}
 
 	function set_rate(value:Float):Float {
 
@@ -340,10 +423,11 @@ class ParticleEmitter {
 
 }
 
-
 typedef ParticleEmitterOptions = {
 
 	var name : String;
+	@:optional var active : Bool;
+	@:optional var enabled : Bool;
 	@:optional var cache_wrap : Bool;
 	@:optional var cache_size : Int;
 	@:optional var count : Int;
@@ -351,6 +435,9 @@ typedef ParticleEmitterOptions = {
 	@:optional var rate : Float;
 	@:optional var rate_max : Float;
 	@:optional var duration : Float;
+	@:optional var batcher : Batcher;
+	@:optional var image : Texture;
+	@:optional var depth : Float;
 	@:optional var modules : Array<ParticleModule>;
 	@:optional var random : Void -> Float;
 

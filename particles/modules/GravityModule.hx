@@ -2,8 +2,9 @@ package particles.modules;
 
 import particles.core.Particle;
 import particles.core.ParticleModule;
-import particles.modules.SpawnModule;
-import particles.modules.VelocityModule;
+import particles.core.Components;
+import particles.components.Velocity;
+import particles.modules.VelocityUpdateModule;
 
 import luxe.Vector;
 import luxe.Color;
@@ -14,9 +15,9 @@ import phoenix.Batcher;
 class GravityModule extends ParticleModule {
 
 
-	public var gravity:Vector;
+	public var gravity(default, null):Vector;
 
-	var vel_data:Array<Vector>;
+	var vel_comps:Components<Velocity>;
 
 
 	public function new(_options:GravityModuleOptions) {
@@ -29,19 +30,26 @@ class GravityModule extends ParticleModule {
 
 	override function init() {
 
-		var vm:VelocityModule = emitter.get_module(VelocityModule);
-		if(vm == null) {
-			throw('VelocityModule is required for GravityModule');
+	    if(emitter.get_module(VelocityUpdateModule) == null) {
+			emitter.add_module(new VelocityUpdateModule());
 		}
-		vel_data = vm.data;
-	    
+
+		vel_comps = emitter.components.get(Velocity);
+
+	}
+
+	override function unspawn(p:Particle) {
+
+		var v:Velocity = vel_comps.get(p);
+		v.set_xy(0,0);
+		
 	}
 
 	override function update(dt:Float) {
 
 		var vel:Vector;
 		for (p in particles) {
-			vel = vel_data[p.id];
+			vel = vel_comps.get(p);
 			vel.x += gravity.x * dt;
 			vel.y += gravity.y * dt;
 		}

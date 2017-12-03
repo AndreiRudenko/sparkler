@@ -15,6 +15,7 @@ class ParticleModule {
 	@:noCompletion public var prev : ParticleModule;
 	@:noCompletion public var next : ParticleModule;
 	@:noCompletion public var priority : Int = 0;
+	@:noCompletion public var override_priority : Bool = false;
 
 	var emitter:ParticleEmitter;
 	var particles:ParticleVector;

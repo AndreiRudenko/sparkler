@@ -1,6 +1,7 @@
 
 import luxe.GameConfig;
 import luxe.Input;
+import luxe.Color;
 import luxe.Vector;
 
 import particles.ParticleSystem;
@@ -31,40 +32,29 @@ class Main extends luxe.Game {
 
 		pe = new ParticleEmitter({
 			name : 'test_emitter', 
-			// duration : -1,
-			rate : 30,
-			cache_size : 64,
+			rate : 128,
+			cache_size : 512,
 			cache_wrap : true,
 			modules : [
-				new particles.modules.LifetimeModule({
-					lifetime : 2
-					// lifetime_max : 0
+				new particles.modules.SpawnModule(),
+				new particles.modules.LifeTimeModule({
+					lifetime : 0.5,
+					lifetime_max : 1
 				}),
 				new particles.modules.VelocityModule({
-					initial_velocity : new Vector(0, 0),
-					initial_velocity_variance : new Vector(0, 0)
+					initial_velocity : new Vector(0, 100)
 				}),
-				new particles.modules.ForceModule({
-					force : new Vector(0, 0),
-					force_random : new Vector(1000, 0)
+				new particles.modules.ColorLifeModule({
+					initial_color : new Color(1,0,1,1),
+					end_color : new Color(0,0,1,1),
+					end_color_max : new Color(1,0,0,1)
 				}),
-				new particles.modules.GravityModule({
-					gravity : new Vector(0, 200)
-				}),
-				new particles.modules.ScaleModule({
-					initial_scale : 1,
-					end_scale : 0
-				}),
-				new particles.modules.SizeModule({
-					initial_size : new Vector(32,32),
-					end_size : new Vector(32,32)
-				}),
-				new particles.modules.SpawnModule({  // SpawnModule must be last
-					position_variance : new Vector(64,64)
+				new particles.modules.SizeLifeModule({
+					initial_size : new Vector(16,16),
+					end_size : new Vector(8,8)
 				})
 			]
 		});
-
 		ps.add(pe);
 
 	} //ready
@@ -76,16 +66,12 @@ class Main extends luxe.Game {
 		}
 
 		if(event.keycode == Key.space) {
-			ps.emit();
+			if(pe.enabled) {
+				ps.stop(true);
+			} else {
+				ps.start();
+			}
 		}
-
-		// if(event.keycode == Key.key_q) {
-		// 	pe.modules[2].enabled = !pe.modules[2].enabled;
-		// }
-		
-		// if(event.keycode == Key.key_w) {
-		// 	pe.modules[3].enabled = !pe.modules[3].enabled;
-		// }
 
 	} //onkeyup
 

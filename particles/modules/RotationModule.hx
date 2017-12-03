@@ -2,26 +2,23 @@ package particles.modules;
 
 import particles.core.Particle;
 import particles.core.ParticleModule;
-import particles.modules.SpawnModule;
-
-import luxe.Vector;
-import luxe.Color;
-import phoenix.Texture;
-import phoenix.Batcher;
+import particles.core.ParticleData;
+import particles.core.Components;
+import particles.components.Life;
 
 
 class RotationModule extends ParticleModule {
 
 
-	var rotation_delta:Array<Float>;
-	var life:Array<Float>;
-	var spawn_data:Array<SpawnData>;
+	public var initial_rotation:Float;
+	public var initial_rotation_max:Float;
+	public var end_rotation:Float;
+	public var end_rotation_max:Float;
+	public var rotation_random:Float;
 
-	var initial_rotation:Float;
-	var initial_rotation_max:Float;
-	var end_rotation:Float;
-	var end_rotation_max:Float;
-	var rotation_random:Float;
+	var rotation_delta:Array<Float>;
+	var life:Components<Life>;
+	var particles_data:Array<ParticleData>;
 		/** if this enabled, particle will rotate with end_rotation*360 during lifetime */
 	var use_life:Bool;
 
@@ -43,43 +40,37 @@ class RotationModule extends ParticleModule {
 
 	override function spawn(p:Particle) {
 
-		var sd:SpawnData = spawn_data[p.id];
+		var pd:ParticleData = particles_data[p.id];
 
 		if(initial_rotation_max != 0) {
-			sd.r = emitter.random_float(initial_rotation, initial_rotation_max) * 360;
+			pd.r = emitter.random_float(initial_rotation, initial_rotation_max) * 360;
 		} else {
-			sd.r = initial_rotation * 360;
+			pd.r = initial_rotation * 360;
 		}
 
 		if(end_rotation_max != 0) {
-			rotation_delta[p.id] = emitter.random_float(end_rotation, end_rotation_max) * 360 - sd.r;
+			rotation_delta[p.id] = emitter.random_float(end_rotation, end_rotation_max) * 360 - pd.r;
 		} else {
-			rotation_delta[p.id] = end_rotation * 360 - sd.r;
+			rotation_delta[p.id] = end_rotation * 360 - pd.r;
 		}
 
-		if(use_life) {
+		if(life != null) {
 			if(rotation_delta[p.id] != 0) {
-				rotation_delta[p.id] /= life[p.id];
+				rotation_delta[p.id] /= life.get(p).amount;
 			}
 		}
-
 
 	}
 
 	override function init() {
 
-		var sm:SpawnModule = emitter.get_module(SpawnModule);
-		if(sm == null) {
-			throw('SpawnModule is required for RotationModule');
-		}
-		spawn_data = sm.data;
+		particles_data = emitter.particles_data;
 
 		if(use_life) {
-			var lm:LifeTimeModule = emitter.get_module(LifeTimeModule);
-			if(lm == null) {
-				throw('LifeTimeModule is required for RotationModule');
-			}
-			life = lm.life;
+			life = emitter.components.get(Life);
+			// if(life == null) {
+			// 	throw('LifeModule is required for using life in RotationModule');
+			// }
 		}
 
 		for (i in 0...particles.capacity) {
@@ -92,10 +83,10 @@ class RotationModule extends ParticleModule {
 
 		for (p in particles) {
 			if(rotation_delta[p.id] != 0) {
-				spawn_data[p.id].r += rotation_delta[p.id] * dt;
+				particles_data[p.id].r += rotation_delta[p.id] * dt;
 			}
 			if(rotation_random > 0) {
-				spawn_data[p.id].r += rotation_random * 360 * emitter.random_1_to_1() * dt;
+				particles_data[p.id].r += rotation_random * 360 * emitter.random_1_to_1() * dt;
 			}
 		}
 

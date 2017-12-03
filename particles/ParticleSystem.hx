@@ -8,6 +8,7 @@ import luxe.Vector;
 class ParticleSystem {
 
 
+	public var active:Bool = true;
 	public var inited  (default, null):Bool = false;
 	public var enabled (default, null):Bool = false;
 	public var paused  (default, null):Bool = false;
@@ -68,6 +69,7 @@ class ParticleSystem {
 		for (i in 0...active_emitters) {
 			emitters[i].start();
 		}
+		enabled = true;
 
 	}
 
@@ -79,11 +81,12 @@ class ParticleSystem {
 		
 	}
 
-	public function stop() {
+	public function stop(_kill:Bool = false) {
 		
 		for (i in 0...active_emitters) {
-			emitters[i].stop();
+			emitters[i].stop(_kill);
 		}
+		enabled = false;
 
 	}
 
@@ -109,17 +112,30 @@ class ParticleSystem {
 
 	}
 
-	public function empty() {
+	public function empty() { // ?
 
 		emitters.splice(0, emitters.length);
 		active_emitters = 0;
 		
 	}
 
-	public function update(dt:Float) {
+	public function destroy() {
 
 		for (e in emitters) {
-			e.update(dt);
+			e.destroy();
+		}
+
+		position = null;
+		emitters = null;
+
+	}
+
+	public function update(dt:Float) {
+
+		if(active) {
+			for (e in emitters) {
+				e.update(dt);
+			}
 		}
 		
 	}

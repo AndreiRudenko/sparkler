@@ -2,25 +2,22 @@ package particles.modules;
 
 import particles.core.Particle;
 import particles.core.ParticleModule;
-import particles.modules.SpawnModule;
+import particles.core.Components;
+import particles.components.Life;
+import particles.components.Velocity;
 import particles.modules.VelocityModule;
 
 import luxe.Vector;
-import luxe.Color;
-import phoenix.Texture;
-import phoenix.Batcher;
 
 
 class VelocityLifeModule extends VelocityModule {
 
 
+	public var end_velocity(default, null):Vector;
+	public var end_velocity_max:Vector;
+
 	var velocity_delta:Array<Vector>;
-
-	var life:Array<Float>;
-
-	var end_velocity:Vector;
-	var end_velocity_max:Vector;
-
+	var life:Components<Life>;
 
 
 	public function new(_options:VelocityLifeModuleOptions) {
@@ -36,7 +33,7 @@ class VelocityLifeModule extends VelocityModule {
 
 	override function spawn(p:Particle) {
 
-		var v:Vector = data[p.id];
+		var v:Velocity = vel_comps.get(p);
 		if(initial_velocity_max != null) {
 			v.x = emitter.random_float(initial_velocity.x, initial_velocity_max.x);
 			v.y = emitter.random_float(initial_velocity.y, initial_velocity_max.y);
@@ -54,7 +51,7 @@ class VelocityLifeModule extends VelocityModule {
 		}
 
 		if(velocity_delta[p.id].lengthsq != 0) {
-			velocity_delta[p.id].divideScalar(life[p.id]);
+			velocity_delta[p.id].divideScalar(life.get(p).amount);
 		}
 
 	}
@@ -63,11 +60,10 @@ class VelocityLifeModule extends VelocityModule {
 
 		super.init();
 
-		var lm:LifeTimeModule = emitter.get_module(LifeTimeModule);
-		if(lm == null) {
+		life = emitter.components.get(Life);
+		if(life == null) {
 			throw('LifeTimeModule is required for VelocityLifeModule');
 		}
-		life = lm.life;
 
 		for (i in 0...particles.capacity) {
 			velocity_delta[i] = new Vector();
@@ -78,10 +74,8 @@ class VelocityLifeModule extends VelocityModule {
 	override function update(dt:Float) {
 
 		var v:Vector;
-		var sd:SpawnData;
 		for (p in particles) {
-			v = data[p.id];
-			sd = spawn_data[p.id];
+			v = vel_comps.get(p);
 
 			v.x += velocity_delta[p.id].x * dt;
 			v.y += velocity_delta[p.id].y * dt;
@@ -91,8 +85,6 @@ class VelocityLifeModule extends VelocityModule {
 				v.y += velocity_random.y * emitter.random_1_to_1();
 			}
 
-			sd.x += v.x * dt;
-			sd.y += v.y * dt;
 		}
 
 	}

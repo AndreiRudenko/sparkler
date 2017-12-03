@@ -2,26 +2,22 @@ package particles.modules;
 
 import particles.core.Particle;
 import particles.core.ParticleModule;
-
-import luxe.Vector;
-import phoenix.Texture;
-import phoenix.Batcher;
+import particles.core.Components;
+import particles.components.Life;
 
 
 class LifeTimeModule extends ParticleModule {
 
 
-	public var life:Array<Float>;
-
 	public var lifetime:Float;
 	public var lifetime_max:Float;
+
+	var life:Components<Life>;
 
 
 	public function new(_options:LifeTimeModuleOptions) {
 
 		super();
-
-		life = [];
 
 		lifetime = _options.lifetime != null ? _options.lifetime : 2;
 		lifetime_max = _options.lifetime_max != null ? _options.lifetime_max : 0;
@@ -31,19 +27,27 @@ class LifeTimeModule extends ParticleModule {
 	override function spawn(p:Particle) {
 
 		if(lifetime_max > 0) {
-			life[p.id] = emitter.random_float(lifetime, lifetime_max);
+			life.get(p).amount = emitter.random_float(lifetime, lifetime_max);
 		} else {
-			life[p.id] = lifetime;
+			life.get(p).amount = lifetime;
 		}
 
 	}
 
 	override function init() {
 
-		for (i in 0...particles.capacity) {
-			life[i] = lifetime;
+		life = emitter.components.get(Life);
+
+		if(life == null) {
+			life = emitter.components.set(
+				particles, 
+				Life, 
+				function() {
+					return new Life(lifetime);
+				}
+			);
 		}
-	    
+		
 	}
 
 	override function update(dt:Float) {
@@ -53,8 +57,8 @@ class LifeTimeModule extends ParticleModule {
 		var len:Int = particles.length;
 		while(i < len) {
 			p = particles.get(i);
-			life[p.id] -=dt;
-			if(life[p.id] <= 0) {
+			life.get(p).amount -=dt;
+			if(life.get(p).amount <= 0) {
 				emitter.unspawn(p);
 				len = particles.length;
 			} else {

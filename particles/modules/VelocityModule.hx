@@ -2,32 +2,26 @@ package particles.modules;
 
 import particles.core.Particle;
 import particles.core.ParticleModule;
-import particles.modules.SpawnModule;
+import particles.core.Components;
+import particles.components.Velocity;
+import particles.modules.VelocityUpdateModule;
 
 import luxe.Vector;
-import luxe.Color;
-import phoenix.Texture;
-import phoenix.Batcher;
 
 
 class VelocityModule extends ParticleModule {
 
 
-	public var data:Array<Vector>;
+	public var initial_velocity(default, null):Vector;
+	public var initial_velocity_max:Vector;
+	public var velocity_random:Vector;
 
-	var spawn_data:Array<SpawnData>;
-
-	var initial_velocity:Vector;
-	var initial_velocity_max:Vector;
-	var velocity_random:Vector;
-
+	var vel_comps:Components<Velocity>;
 
 
 	public function new(_options:VelocityModuleOptions) {
 
 		super();
-
-		data = [];
 
 		initial_velocity = _options.initial_velocity != null ? _options.initial_velocity : new Vector();
 		initial_velocity_max = _options.initial_velocity_max;
@@ -35,9 +29,19 @@ class VelocityModule extends ParticleModule {
 
 	}
 
+	override function init() {
+
+		if(emitter.get_module(VelocityUpdateModule) == null) {
+			emitter.add_module(new VelocityUpdateModule());
+		}
+
+		vel_comps = emitter.components.get(Velocity);
+
+	}
+
 	override function spawn(p:Particle) {
 
-		var v:Vector = data[p.id];
+		var v:Velocity = vel_comps.get(p);
 		if(initial_velocity_max != null) {
 			v.x = emitter.random_float(initial_velocity.x, initial_velocity_max.x);
 			v.y = emitter.random_float(initial_velocity.y, initial_velocity_max.y);
@@ -48,35 +52,16 @@ class VelocityModule extends ParticleModule {
 
 	}
 
-	override function init() {
-
-		var sm:SpawnModule = emitter.get_module(SpawnModule);
-		if(sm == null) {
-			throw('SpawnModule is required for VelocityModule');
-		}
-		spawn_data = sm.data;
-
-		for (i in 0...particles.capacity) {
-			data[i] = new Vector();
-		}
-	    
-	}
-
 	override function update(dt:Float) {
 
-		var v:Vector;
-		var sd:SpawnData;
+		var v:Velocity;
 		for (p in particles) {
-			v = data[p.id];
-			sd = spawn_data[p.id];
+			v = vel_comps.get(p);
 
 			if(velocity_random != null) {
 				v.x += velocity_random.x * emitter.random_1_to_1();
 				v.y += velocity_random.y * emitter.random_1_to_1();
 			}
-
-			sd.x += v.x * dt;
-			sd.y += v.y * dt;
 		}
 
 	}

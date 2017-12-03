@@ -31,8 +31,8 @@ class CallbackModule extends ParticleModule {
 
 	override function unspawn(p:Particle) {
 		
-		if(unspawn != null) {
-			unspawn(p, emitter);
+		if(onunspawn != null) {
+			onunspawn(p, emitter);
 		}
 		
 	}
