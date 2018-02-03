@@ -34,6 +34,25 @@ Modular Particle System for [luxe](https://github.com/underscorediscovery/luxe)
 	* `force_random: Vector` — random force during update.
 * `GravityModule` — applies gravity to particle.
 	* `gravity: Vector` — gravity vector.
+* `DirectionModule` — applies velocity towards direction.
+	* `direction: Float` — direction in degrees.
+	* `direction_variance: Float` — direction variance in degrees.
+	* `speed: Float` — speed.
+	* `speed_variance: Float` — speed variance.
+	* `from_angle: Bool` — this will override direction to angle from spawn position, to emitter position.
+* `SizeLifeModule` — module scales the size of the particle by a given value over its lifetime (requires LifeTimeModule).
+	* `initial_size: Vector` — initial size.
+	* `initial_size_max: Vector` — initial size maximum, if this not null, the size will be random between initial_size.
+	* `end_size: Vector` — end size.
+	* `end_size_max: Vector` — end size maximum, if this not null, the size will be random between end_size.
+* `ScaleLifeModule` — module scales particle by a given value over its lifetime (requires LifeTimeModule).
+	* `initial_scale: Float` — initial scale.
+	* `initial_scale_max: Float` — initial scale maximum, if this not null, the scale will be random between initial_scale.
+	* `end_scale: Float` — end scale.
+	* `end_scale_max: Float` — end scale maximum, if this not null, the scale will be random between end_scale.
+* `CallbackModule` — spawn callbacks.
+	* `onspawn_callback: Particle->ParticleEmitter->Void` — called when particle spawn.
+	* `onunspawn_callback: Particle->ParticleEmitter->Void` — called when particle unspawn.
 
 *Some modules is added automaticaly like `VelocityUpdateModule` and `StartPosModule`, you don't need add them manually*
 *There is more modules here, i will update next time.*
@@ -95,8 +114,3 @@ override function update(dt:Float) {
 
 
 ```
-
-##### Performance  
-Overall this particle system is not fast, as solid one class particle system.  
-But you have more flexibility.
-
