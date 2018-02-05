@@ -16,14 +16,11 @@ Modular Particle System for [luxe](https://github.com/underscorediscovery/luxe)
 	* `radius: Float` — circle radius.
 	* `radius_max: Float` — circle radius max.
 	* `inside: Bool` — spawn particles inside area.
-* `LifeTimeModule` — particles lifetime.
-	* `lifetime: Float` — particle lifetime.
-	* `lifetime_max: Float` — particle lifetime max.
 * `VelocityModule` — applies velocity to particle.
 	* `initial_velocity: Vector` — initial particle velocity.
 	* `initial_velocity_max: Vector` — initial particle velocity max.
 	* `velocity_random: Vector` — random velocity during update.
-* `VelocityLifeModule` — applies velocity to particle during life (requires LifeTimeModule).
+* `VelocityLifeModule` — applies velocity to particle during life.
 	* `initial_velocity: Vector` — initial particle velocity.
 	* `initial_velocity_max: Vector` — initial particle velocity max.
 	* `end_velocity: Vector` — particle velocity at the end of lifetime.
@@ -40,12 +37,12 @@ Modular Particle System for [luxe](https://github.com/underscorediscovery/luxe)
 	* `speed: Float` — speed.
 	* `speed_variance: Float` — speed variance.
 	* `from_angle: Bool` — this will override direction to angle from spawn position, to emitter position.
-* `SizeLifeModule` — module scales the size of the particle by a given value over its lifetime (requires LifeTimeModule).
+* `SizeLifeModule` — module scales the size of the particle by a given value over its lifetime.
 	* `initial_size: Vector` — initial size.
 	* `initial_size_max: Vector` — initial size maximum, if this not null, the size will be random between initial_size.
 	* `end_size: Vector` — end size.
 	* `end_size_max: Vector` — end size maximum, if this not null, the size will be random between end_size.
-* `ScaleLifeModule` — module scales particle by a given value over its lifetime (requires LifeTimeModule).
+* `ScaleLifeModule` — module scales particle by a given value over its lifetime.
 	* `initial_scale: Float` — initial scale.
 	* `initial_scale_max: Float` — initial scale maximum, if this not null, the scale will be random between initial_scale.
 	* `end_scale: Float` — end scale.
@@ -60,7 +57,6 @@ Modular Particle System for [luxe](https://github.com/underscorediscovery/luxe)
 
 ##### Components
 *Components is added to `ParticleEmitter` from modules automaticaly.*
-* `Life` — used by: `LifeTimeModule`.
 * `Velocity` — used by: `VelocityModule`, `VelocityLifeModule`, `ForceModule`, `GravityModule`, `DirectionModule`.
 * `StartPos` — used by: `RadialAccelModule`, `TangentalAccelModule`.
 
@@ -82,13 +78,11 @@ override function ready() {
 			name : 'test_emitter', 
 			rate : 30,
 			cache_size : 64,
+			lifetime : 1,
+			lifetime_max : 2,
 			cache_wrap : true,
 			modules : [
 				new particles.modules.SpawnModule(),
-				new particles.modules.LifeTimeModule({
-					lifetime : 1,
-					lifetime_max : 2
-				}),
 				new particles.modules.VelocityModule({
 					initial_velocity : new Vector(0, -100),
 					initial_velocity_variance : new Vector(20, 0)

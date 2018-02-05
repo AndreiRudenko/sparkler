@@ -4,7 +4,6 @@ import sparkler.core.Particle;
 import sparkler.core.ParticleModule;
 import sparkler.core.ParticleData;
 import sparkler.core.Components;
-import sparkler.components.Life;
 
 import luxe.Color;
 
@@ -21,7 +20,6 @@ class ColorLifeModule extends ParticleModule {
 
 	var color_delta:Array<Color>;
 	var particles_data:Array<ParticleData>;
-	var life:Components<Life>;
 
 
 	public function new(_options:ColorLifeModuleOptions) {
@@ -41,11 +39,6 @@ class ColorLifeModule extends ParticleModule {
 
 		particles_data = emitter.particles_data;
 
-		life = emitter.components.get(Life);
-		if(life == null) {
-			throw('LifeTimeModule is required for ScaleModule');
-		}
-
 		for (i in 0...particles.capacity) {
 			color_delta[i] = new Color();
 		}
@@ -55,16 +48,16 @@ class ColorLifeModule extends ParticleModule {
 	override function onremoved() {
 
 	    particles_data = null;
-	    life = null;
 	    color_delta.splice(0, color_delta.length);
 
 	}
 
 	override function onspawn(p:Particle) {
 
+		var pd:ParticleData = particles_data[p.id];
 		var cd:Color = color_delta[p.id];
-		var lf:Float = life.get(p).amount;
-		var pcolor:Color = particles_data[p.id].sprite.color;
+		var lf:Float = pd.lifetime;
+		var pcolor:Color = pd.sprite.color;
 
 		if(initial_color_max != null) {
 			pcolor.r = emitter.random_float(initial_color.r, initial_color_max.r);

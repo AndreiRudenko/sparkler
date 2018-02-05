@@ -11,13 +11,13 @@ import sparkler.core.Particle;
 import sparkler.core.ParticleData;
 import sparkler.core.ParticleModule;
 import sparkler.containers.ParticleVector;
-import sparkler.containers.ModuleList;
 import sparkler.ParticleSystem;
 import sparkler.utils.ModuleTools;
 
 class ParticleEmitter {
 
 
+	public var inited      (default, null):Bool = false;
 		/** if the emitter is active, it will update */
 	public var active:Bool;
 		/** if the emitter is enabled, it's spawn and update modules */
@@ -32,14 +32,21 @@ class ParticleEmitter {
 		/** particles components */
 	public var components	(default, null):ComponentManager;
 		/** emitter modules */
-	public var modules   	(default, null):ModuleList;
+	public var modules   	(default, null):Map<String, ParticleModule>;
+	public var active_modules   	(default, null):Array<ParticleModule>;
 		/** reference to system */
 	public var system    	(default, null):ParticleSystem;
 
 		/** number of particles per emit */
-	public var count:Int;
+	public var count:Int; // todo: if cache_size < count
 		/** number of particles per emit max */
 	public var count_max:Int;
+
+		/** lifetime for particles */
+	public var lifetime:Float;
+		/** max lifetime for particles, if > 0, 
+			particle lifetime is random between lifetime and lifetime_max */
+	public var lifetime_max:Float;
 
 		/** emitter rate, particles per sec */
 	public var rate    	(default, set):Float;
@@ -67,7 +74,6 @@ class ParticleEmitter {
 
 	var batcher:Batcher;
 
-
 	var time:Float;
 	var frame_time:Float;
 	var inv_rate:Float;
@@ -81,7 +87,8 @@ class ParticleEmitter {
 		name = _options.name != null ? _options.name : 'emitter.${Luxe.utils.uniqueid()}';
 
 		position = new Vector();
-		modules = new ModuleList();
+		modules = new Map();
+		active_modules = [];
 
 		time = 0;
 		frame_time = 0;
@@ -103,6 +110,9 @@ class ParticleEmitter {
 
 		count = _options.count != null ? _options.count : 1;
 		count_max = _options.count_max != null ? _options.count_max : 0;
+
+		lifetime = _options.lifetime != null ? _options.lifetime : 1;
+		lifetime_max = _options.lifetime_max != null ? _options.lifetime_max : 0;
 
 		rate = _options.rate != null ? _options.rate : 10;
 		rate_max = _options.rate_max != null ? _options.rate_max : 0;
@@ -152,6 +162,7 @@ class ParticleEmitter {
 		particles_data = null;
 		components = null;
 		modules = null;
+		active_modules = null;
 		system = null;
 
 	}
@@ -166,27 +177,44 @@ class ParticleEmitter {
 
 	public function add_module(_module:ParticleModule) {
 
-		var _module_class = Type.getClass(_module);
-		if(modules.exists(_module_class)) {
+		var cname:String = Type.getClassName(Type.getClass(_module));
+		if(modules.exists(cname)) {
 			throw('particle module already exists');
 		}
 
-		modules.add(_module);
+		modules.set(cname, _module);
+		_module._onadded(this);
 
-		if(system != null && system.inited) {
-			_module._init(this);
+		if(_module.enabled) {
+			_enable_m(_module);
+		}
+
+		if(inited) {
+			_module._init();
 		}
 
 	}
 
 	public function get_module<T:ParticleModule>(_module_class:Class<T>):T {
 
-		var _module:T = null;
-		var _name:String = Type.getClassName(_module_class);
-		for (m in modules) {
-			if(m.name == _name) {
-				_module = cast m;
-				break;
+		return cast modules.get(Type.getClassName(_module_class));
+		
+	}
+
+	public function remove_module<T:ParticleModule>(_module_class:Class<T>):T {
+
+		var cname:String = Type.getClassName(_module_class);
+
+		var _module:T = cast modules.get(cname);
+
+		if(_module != null) {
+			_module._onremoved();
+			modules.remove(cname);
+			if(_module.enabled) {
+				_disable_m(_module);
+			}
+			if(_need_reset) {
+				reset_modules();
 			}
 		}
 
@@ -194,30 +222,79 @@ class ParticleEmitter {
 		
 	}
 
-	public function remove_module<T:ParticleModule>(_module_class:Class<T>):T {
+	public function enable_module(_module_class:Class<Dynamic>) {
+		
+		var cname:String = Type.getClassName(_module_class);
+		var m = modules.get(cname);
+		if(m == null) {
+			throw('module: $cname doesnt exists');
+		}
 
-		var _module:T = null;
-		var _name:String = Type.getClassName(_module_class);
-		for (m in modules) {
-			if(m.name == _name) {
-				_module = cast m;
-				_module._onremoved();
-				modules.remove(_module);
+		if(!m.enabled) {
+			_enable_m(m);
+		}
+
+	}
+
+	public function disable_module(_module_class:Class<Dynamic>) {
+		
+		var cname:String = Type.getClassName(_module_class);
+		var m = modules.get(cname);
+		if(m == null) {
+			throw('module: $cname doesnt exists');
+		}
+
+		if(m.enabled) {
+			_disable_m(m);
+		}
+
+	}
+
+	inline function _enable_m(m:ParticleModule) {
+		
+		var added:Bool = false;
+		var am:ParticleModule = null;
+		for (i in 0...active_modules.length) {
+			am = active_modules[i];
+			if (m.priority <= am.priority) {
+				active_modules.insert(i,m);
+				added = true;
 				break;
 			}
 		}
-
-		if(_module != null && _need_reset) {
-			reset_modules();
+		
+		if(!added) {
+			active_modules.push(m);
 		}
 
-		return _module;
+	}
+
+	inline function _disable_m(m:ParticleModule) {
+
+		active_modules.remove(m);
 		
 	}
 
 	public function update(dt:Float) {
 
 		if(active) {
+
+			// check lifetime
+			var p:Particle;
+			var pd:ParticleData;
+			var i:Int = 0;
+			var len:Int = particles.length;
+			while(i < len) {
+				p = particles.get(i);
+				pd = particles_data[p.id];
+				pd.lifetime -=dt;
+				if(pd.lifetime <= 0) {
+					unspawn(p);
+					len = particles.length;
+				} else {
+					i++;
+				}
+			}
 
 			if(enabled && rate > 0) {
 					
@@ -251,12 +328,10 @@ class ParticleEmitter {
 				}
 
 			}
-			
+
 			// update modules
-			for (m in modules) {
-				if(m.enabled) {
-					m.update(dt);
-				}
+			for (m in active_modules) {
+				m.update(dt);
 			}
 
 			// update sprites
@@ -316,23 +391,19 @@ class ParticleEmitter {
 
 		if(particles.length < particles.capacity) {
 			var p:Particle = particles.ensure();
-			for (m in modules) {
-				if(m.enabled) {
-					m.onspawn(p);
-				}
+			for (m in active_modules) {
+				_reset_lifetime(p);
+				m.onspawn(p);
 			}
 		} else if(cache_wrap) {
 
 			var p:Particle = particles.wrap();
-			for (m in modules) {
-				if(m.enabled) {
-					m.onunspawn(p);
-				}
+			for (m in active_modules) {
+				m.onunspawn(p);
 			}
-			for (m in modules) {
-				if(m.enabled) {
-					m.onspawn(p);
-				}
+			for (m in active_modules) {
+				_reset_lifetime(p);
+				m.onspawn(p);
 			}
 
 		}
@@ -343,12 +414,20 @@ class ParticleEmitter {
 
 		particles.remove(p);
 		
-		for (m in modules) {
-			if(m.enabled) {
-				m.onunspawn(p);
-			}
+		for (m in active_modules) {
+			m.onunspawn(p);
 		}
 		
+	}
+
+	inline function _reset_lifetime(p:Particle) {
+		
+		if(lifetime_max > 0) {
+			particles_data[p.id].lifetime = random_float(lifetime, lifetime_max);
+		} else {
+			particles_data[p.id].lifetime = lifetime;
+		}
+
 	}
 
 	@:allow(sparkler.core.ParticleModule)
@@ -425,8 +504,10 @@ class ParticleEmitter {
 		}
 
 		for (m in modules) {
-			m._init(this);
+			m._init();
 		}
+
+		inited = true;
 
 	}
 
@@ -439,6 +520,8 @@ class ParticleEmitter {
 		} else {
 			_count = count;
 		}
+
+		_count = _count > cache_size ? cache_size : _count;
 
 		for (_ in 0..._count) {
 			spawn();
@@ -463,7 +546,11 @@ class ParticleEmitter {
 		}
 
 		for (m in modules) {
-			m._init(this);
+			m._onadded(this);
+		}
+
+		for (m in modules) {
+			m._init();
 		}
 		
 	}
@@ -530,7 +617,7 @@ class ParticleEmitter {
 		
 		if(cache_size != value) {
 			cache_size = value;
-			if(modules.length > 0) {
+			if(Lambda.count(modules) > 0) {
 
 				_need_reset = false;
 				for (m in modules) {
@@ -545,6 +632,10 @@ class ParticleEmitter {
 
 				particles = new ParticleVector(cache_size);
 				components = new ComponentManager(cache_size);
+
+				for (m in modules) {
+					m._onadded(this);
+				}
 
 				init(system);
 
@@ -574,6 +665,8 @@ class ParticleEmitter {
 			cache_size : particles.capacity, 
 			count : count, 
 			count_max : count_max, 
+			lifetime : lifetime, 
+			lifetime_max : lifetime_max, 
 			rate : rate, 
 			rate_max : rate_max, 
 			duration : duration, 
@@ -596,6 +689,8 @@ typedef ParticleEmitterOptions = {
 	@:optional var cache_size : Int;
 	@:optional var count : Int;
 	@:optional var count_max : Int;
+	@:optional var lifetime : Float;
+	@:optional var lifetime_max : Float;
 	@:optional var rate : Float;
 	@:optional var rate_max : Float;
 	@:optional var duration : Float;

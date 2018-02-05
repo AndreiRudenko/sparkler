@@ -4,7 +4,6 @@ import sparkler.core.Particle;
 import sparkler.core.ParticleModule;
 import sparkler.core.ParticleData;
 import sparkler.core.Components;
-import sparkler.components.Life;
 
 
 class ScaleLifeModule extends ParticleModule {
@@ -16,7 +15,6 @@ class ScaleLifeModule extends ParticleModule {
 	public var end_scale_max:Float;
 
 	var scale_delta:Array<Float>;
-	var life:Components<Life>;
 	var particles_data:Array<ParticleData>;
 
 
@@ -36,11 +34,6 @@ class ScaleLifeModule extends ParticleModule {
 	override function init() {
 
 		particles_data = emitter.particles_data;
-
-		life = emitter.components.get(Life);
-		if(life == null) {
-			throw('LifeTimeModule is required for ScaleModule');
-		}
 
 		for (i in 0...particles.capacity) {
 			scale_delta[i] = 0;
@@ -65,7 +58,7 @@ class ScaleLifeModule extends ParticleModule {
 		}
 
 		if(scale_delta[p.id] != 0) {
-			scale_delta[p.id] /= life.get(p).amount;
+			scale_delta[p.id] /= pd.lifetime;
 		}
 
 	}

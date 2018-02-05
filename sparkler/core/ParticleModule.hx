@@ -5,12 +5,12 @@ import sparkler.core.Particle;
 import sparkler.containers.ParticleVector;
 import sparkler.ParticleEmitter;
 
-
+@:access(sparkler.ParticleEmitter)
 class ParticleModule {
 
 
        /** if the module is enabled it will update */
-	public var enabled:Bool = true;
+	public var enabled(default, set):Bool = true;
        /** the name */
 	public var name (default, null):String;
        /** the module priority */
@@ -83,21 +83,24 @@ class ParticleModule {
 	}
 
 	@:allow(sparkler.ParticleEmitter)
-	inline function _init(_emitter:ParticleEmitter) {
+	inline function _init() {
 
-		// trace('called _init on: $name');
+		init();
+		onreset();
+
+	}
+
+	@:allow(sparkler.ParticleEmitter)
+	inline function _onadded(_emitter:ParticleEmitter) {
 
 		emitter = _emitter;
 		particles = emitter.particles;
-		init();
-		onreset();
+		onadded();
 
 	}
 	
 	@:allow(sparkler.ParticleEmitter)
 	inline function _onremoved() {
-
-		// trace('called _onremoved on: $name');
 
 		onremoved();
 		emitter = null;
@@ -107,13 +110,29 @@ class ParticleModule {
 
 	function set_priority(value:Int):Int {
 
-		priority = value;
-
-		if(emitter != null) {
-			emitter.modules.update(this);
+		if(priority != value && emitter != null) {
+			emitter._disable_m(this);
+			priority = value;
+			emitter._enable_m(this);
 		}
 
 		return priority;
+
+	}
+
+	function set_enabled(value:Bool):Bool {
+
+		if(enabled != value && emitter != null) {
+			if(value) {
+				emitter._enable_m(this);
+			} else {
+				emitter._disable_m(this);
+			}
+		}
+
+		enabled = value;
+
+		return enabled;
 
 	}
 

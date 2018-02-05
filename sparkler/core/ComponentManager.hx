@@ -10,58 +10,41 @@ import sparkler.containers.ParticleVector;
 class ComponentManager {
 
 
-	var id:Int = 0;
 	var capacity:Int;
-	var components:Array<Components<Dynamic>>;
-	var types:Map<String, Int>;
+	var components:Map<String, Components<Dynamic>>;
 
 
 	public function new(_capacity:Int) {
 
 		capacity = _capacity;
-		components = [];
-		types = new Map();
+		components = new Map();
 
 	}
 
 	public function get<T>(_component_class:Class<T>):Components<T> {
 
-		var ct:Int = -1;
-		var tname:String = Type.getClassName(_component_class);
-		if(types.exists(tname)) {
-			ct = types.get(tname);
-			return cast components[ct];
-		}
-
-		return null;
+		return cast components.get(Type.getClassName(_component_class));
 
 	}
 
 	public function has(_component_class:Class<Dynamic>):Bool {
 		
-		var tname:String = Type.getClassName(_component_class);
-		return types.exists(tname);
+		return components.exists(Type.getClassName(_component_class));
 
 	}
 
 	@:access(sparkler.core.Particle)
 	public function set<T>(_particles:ParticleVector, _component_class:Class<T>, _f:Void->T):Components<T> {
-		
-		var tname:String = Type.getClassName(_component_class);
 
-		var cp:Components<T> = null;
-
-		if(!types.exists(tname)) { // create component type
-			var ct:Int = id++;
-			types.set(tname, ct);
-			cp = new Components<T>(capacity);
-			components[ct] = cp;
-		}
+		var cname:String = Type.getClassName(_component_class);
+		var cp:Components<T> = cast components.get(cname);
 
 		if(cp == null) {
-			cp = cast components[types.get(tname)];
+			cp = new Components<T>(capacity);
+			components.set(cname, cp);
+		} else {
 			if(cp.length > 0) {
-				throw('type: $tname components is not empty');
+				throw('type: $cname components is not empty');
 			}
 		}
 
@@ -75,10 +58,10 @@ class ComponentManager {
 
 	public function remove<T>(_component_class:Class<T>):Bool {
 
-		var tname:String = Type.getClassName(_component_class);
-		if(types.exists(tname)) {
-			var ct:Int = types.get(tname);
-			components[ct].clear();
+		var cp = components.get(Type.getClassName(_component_class));
+
+		if(cp != null) {
+			cp.clear();
 			return true;
 		}
 

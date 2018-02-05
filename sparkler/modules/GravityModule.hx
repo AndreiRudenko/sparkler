@@ -7,9 +7,6 @@ import sparkler.components.Velocity;
 import sparkler.modules.VelocityUpdateModule;
 
 import luxe.Vector;
-import luxe.Color;
-import phoenix.Texture;
-import phoenix.Batcher;
 
 using sparkler.utils.VectorTools;
 

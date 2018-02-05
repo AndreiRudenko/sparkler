@@ -2,8 +2,8 @@ package sparkler.modules;
 
 import sparkler.core.Particle;
 import sparkler.core.ParticleModule;
+import sparkler.core.ParticleData;
 import sparkler.core.Components;
-import sparkler.components.Life;
 import sparkler.components.Velocity;
 import sparkler.modules.VelocityModule;
 
@@ -19,7 +19,7 @@ class VelocityLifeModule extends VelocityModule {
 	public var end_velocity_max:Vector;
 
 	var velocity_delta:Array<Vector>;
-	var life:Components<Life>;
+	var particles_data:Array<ParticleData>;
 
 
 	public function new(_options:VelocityLifeModuleOptions) {
@@ -37,10 +37,7 @@ class VelocityLifeModule extends VelocityModule {
 
 		super.init();
 
-		life = emitter.components.get(Life);
-		if(life == null) {
-			throw('LifeTimeModule is required for VelocityLifeModule');
-		}
+		particles_data = emitter.particles_data;
 
 		for (i in 0...particles.capacity) {
 			velocity_delta[i] = new Vector();
@@ -68,7 +65,7 @@ class VelocityLifeModule extends VelocityModule {
 		}
 
 		if(velocity_delta[p.id].lengthsq != 0) {
-			velocity_delta[p.id].divideScalar(life.get(p).amount);
+			velocity_delta[p.id].divideScalar(particles_data[p.id].lifetime);
 		}
 
 	}

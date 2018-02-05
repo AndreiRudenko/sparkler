@@ -5,11 +5,7 @@ import sparkler.core.ParticleData;
 import sparkler.core.ParticleModule;
 import sparkler.core.Components;
 
-import luxe.Sprite;
 import luxe.Vector;
-import luxe.Color;
-import phoenix.Texture;
-import phoenix.Batcher;
 
 using sparkler.utils.VectorTools;
 

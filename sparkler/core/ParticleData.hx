@@ -13,6 +13,7 @@ class ParticleData {
 	public var w:Float = 32;
 	public var h:Float = 32;
 	public var s:Float = 1;
+	public var lifetime:Float = 1;
 
 	public var sprite:Sprite;
 

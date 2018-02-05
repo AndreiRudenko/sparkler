@@ -4,7 +4,6 @@ import sparkler.core.Particle;
 import sparkler.core.ParticleModule;
 import sparkler.core.ParticleData;
 import sparkler.core.Components;
-import sparkler.components.Life;
 
 
 class RotationModule extends ParticleModule {
@@ -17,7 +16,6 @@ class RotationModule extends ParticleModule {
 	public var rotation_random:Float;
 
 	var rotation_delta:Array<Float>;
-	var life:Components<Life>;
 	var particles_data:Array<ParticleData>;
 		/** if this enabled, particle will rotate with end_rotation*360 during lifetime */
 	var use_life:Bool;
@@ -42,13 +40,6 @@ class RotationModule extends ParticleModule {
 
 		particles_data = emitter.particles_data;
 
-		if(use_life) {
-			life = emitter.components.get(Life);
-			// if(life == null) {
-			// 	throw('LifeModule is required for using life in RotationModule');
-			// }
-		}
-
 		for (i in 0...particles.capacity) {
 			rotation_delta[i] = 0;
 		}
@@ -71,9 +62,9 @@ class RotationModule extends ParticleModule {
 			rotation_delta[p.id] = end_rotation * 360 - pd.r;
 		}
 
-		if(life != null) {
+		if(use_life) {
 			if(rotation_delta[p.id] != 0) {
-				rotation_delta[p.id] /= life.get(p).amount;
+				rotation_delta[p.id] /= particles_data[p.id].lifetime;
 			}
 		}
 

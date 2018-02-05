@@ -9,8 +9,6 @@ import sparkler.components.StartPos;
 import sparkler.modules.VelocityUpdateModule;
 import sparkler.modules.StartPosModule;
 
-import luxe.Vector;
-
 
 class RadialAccelModule extends ParticleModule {
 

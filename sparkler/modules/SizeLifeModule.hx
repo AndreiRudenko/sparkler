@@ -4,7 +4,6 @@ import sparkler.core.Particle;
 import sparkler.core.ParticleModule;
 import sparkler.core.ParticleData;
 import sparkler.core.Components;
-import sparkler.components.Life;
 
 import luxe.Vector;
 using sparkler.utils.VectorTools;
@@ -20,7 +19,6 @@ class SizeLifeModule extends ParticleModule {
 
 	var size_delta:Array<Vector>;
 	var particles_data:Array<ParticleData>;
-	var life:Components<Life>;
 
 
 	public function new(_options:SizeModuleOptions) {
@@ -40,11 +38,6 @@ class SizeLifeModule extends ParticleModule {
 
 		particles_data = emitter.particles_data;
 
-		life = emitter.components.get(Life);
-		if(life == null) {
-			throw('LifeTimeModule is required for ScaleModule');
-		}
-
 		for (i in 0...particles.capacity) {
 			size_delta[i] = new Vector();
 		}
@@ -55,7 +48,7 @@ class SizeLifeModule extends ParticleModule {
 
 		var szd:Vector = size_delta[p.id];
 		var pd:ParticleData = particles_data[p.id];
-		var lf:Float = life.get(p).amount;
+		var lf:Float = pd.lifetime;
 
 		if(initial_size_max != null) {
 			pd.w = emitter.random_float(initial_size.x, initial_size_max.x);
