@@ -44,7 +44,7 @@ Modular Particle System for [luxe](https://github.com/underscorediscovery/luxe)
 	* `random: Void -> Float` — emitter random function.
 	* `image_path:String` — emitter particles image path.
 	* `depth: Float` — emitter particles depth.
-	* `add_module(): ParticleEmitter` — add module.
+	* `add_module(m:ParticleModule): ParticleEmitter` — add module.
 	* `get_module(mclass:Class<ParticleModule>): ParticleModule` — get module.
 	* `remove_module(mclass:Class<ParticleModule>): ParticleModule` — remove module.
 	* `enable_module(mclass:Class<ParticleModule>): Void` — enable module.
@@ -100,7 +100,7 @@ Modular Particle System for [luxe](https://github.com/underscorediscovery/luxe)
 	* `onspawn_callback: Particle->ParticleEmitter->Void` — called when particle spawn.
 	* `onunspawn_callback: Particle->ParticleEmitter->Void` — called when particle unspawn.
 
-*Some modules is added automaticaly like `VelocityUpdateModule` and `StartPosModule`, you don't need add them manually*
+*Some modules is added automaticaly like `VelocityUpdateModule`, you don't need add them manually*
 
 
 ##### Components
