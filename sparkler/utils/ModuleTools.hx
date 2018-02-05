@@ -7,12 +7,10 @@ import sparkler.modules.ColorLifeModule;
 import sparkler.modules.DirectionModule;
 import sparkler.modules.ForceModule;
 import sparkler.modules.GravityModule;
-import sparkler.modules.RadialAccelModule;
 import sparkler.modules.RadialSpawnModule;
 import sparkler.modules.RotationModule;
 import sparkler.modules.ScaleLifeModule;
 import sparkler.modules.SizeLifeModule;
-import sparkler.modules.TangentalAccelModule;
 import sparkler.modules.VelocityLifeModule;
 import sparkler.modules.VelocityModule;
 
@@ -30,12 +28,10 @@ class ModuleTools {
 		modules.set(Type.getClassName(DirectionModule),       function() { return new DirectionModule({});});
 		modules.set(Type.getClassName(ForceModule),           function() { return new ForceModule({});});
 		modules.set(Type.getClassName(GravityModule),         function() { return new GravityModule({});});
-		modules.set(Type.getClassName(RadialAccelModule),     function() { return new RadialAccelModule({});});
 		modules.set(Type.getClassName(RadialSpawnModule),     function() { return new RadialSpawnModule({});});
 		modules.set(Type.getClassName(RotationModule),        function() { return new RotationModule({});});
 		modules.set(Type.getClassName(ScaleLifeModule),       function() { return new ScaleLifeModule({});});
 		modules.set(Type.getClassName(SizeLifeModule),        function() { return new SizeLifeModule({});});
-		modules.set(Type.getClassName(TangentalAccelModule),  function() { return new TangentalAccelModule({});});
 		modules.set(Type.getClassName(VelocityLifeModule),    function() { return new VelocityLifeModule({});});
 		modules.set(Type.getClassName(VelocityModule),        function() { return new VelocityModule({});});
 	    

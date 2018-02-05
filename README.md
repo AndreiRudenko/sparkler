@@ -2,9 +2,58 @@
 Modular Particle System for [luxe](https://github.com/underscorediscovery/luxe)  
 
 ##### Overview  
-* Create a `ParticleSystem` and `ParticleEmitter` with modules that you like.
+* Create a `ParticleSystem` and add `ParticleEmitter` with modules that you like.
 * You can create custom `ParticleModule` to extend functionality.
-* Some modules need to have access to same data, you can create components and add them to `ParticleEmitter`.  
+* Some modules need to have access to custom data, you can create components and add them to `ParticleEmitter`.  
+
+##### Core
+* `ParticleSystem` — particle system.
+	* `active: Bool` — if the system is active, it will update.
+	* `enabled: Bool` — whether or not this system is enabled.
+	* `paused: Bool` — whether or not this system is paused.
+	* `position: Vector` — the system position.
+	* `emitters: Array<ParticleEmitter>` — the system emitters.
+	* `add(e:ParticleEmitter): ParticleSystem` — add emitter to the system.
+	* `remove(e:ParticleEmitter): Void` — remove a emitter from the system.
+	* `emit(): Void` — emit particles.
+	* `start(): Void` — start update emitters.
+	* `stop(?kill:Bool): Void` — stop update emitters.
+	* `pause(): Void` — pause.
+	* `unpause(): Void` — unpause.
+	* `empty(): Void` — destroy all emitters in this system.
+* `ParticleEmitter` — particle emitter.
+	* `active:Bool` — if the emitter is active, it will update.
+	* `enabled: Bool` — if the emitter is enabled, it's spawn and update modules.
+	* `name: String` — emitter name.
+	* `position: Vector` — offset from system position.
+	* `particles: ParticleVector` — emitter particles.
+	* `components: ComponentManager` — particles components.
+	* `modules: Map<String, ParticleModule>` — emitter modules.
+	* `active_modules: Array<ParticleModule>` — active emitter modules.
+	* `system: ParticleSystem` — reference to system.
+	* `count:Int` — number of particles per emit.
+	* `count_max:Int` — number of particles per emit max.
+	* `lifetime:Float` — lifetime for particles.
+	* `lifetime_max:Float` — max lifetime for particles.
+	* `rate: Float` — emitter rate, particles per sec.
+	* `rate_max: Float` — emitter rate, max particles per sec.
+	* `duration: Float` — emitter duration.
+	* `duration_max: Float` — emitter duration max.
+	* `cache_size: Int` — emitter cache size.
+	* `cache_wrap:Bool` — emitter cache wrap.
+	* `random: Void -> Float` — emitter random function.
+	* `image_path:String` — emitter particles image path.
+	* `depth: Float` — emitter particles depth.
+	* `add_module(): ParticleEmitter` — add module.
+	* `get_module(mclass:Class<ParticleModule>): ParticleModule` — get module.
+	* `remove_module(mclass:Class<ParticleModule>): ParticleModule` — remove module.
+	* `enable_module(mclass:Class<ParticleModule>): Void` — enable module.
+	* `disable_module(mclass:Class<ParticleModule>): Void` — disable module.
+	* `emit(): Void` — emit particles.
+	* `start(?duration:Float): Void` — start update modules.
+	* `stop(?kill:Bool): Void` — stop update modules.
+	* `pause(): Void` — pause.
+	* `unpause(): Void` — unpause.
 
 ##### Modules
 * `SpawnModule` — simple spawn module.
@@ -52,13 +101,11 @@ Modular Particle System for [luxe](https://github.com/underscorediscovery/luxe)
 	* `onunspawn_callback: Particle->ParticleEmitter->Void` — called when particle unspawn.
 
 *Some modules is added automaticaly like `VelocityUpdateModule` and `StartPosModule`, you don't need add them manually*
-*There is more modules here, i will update next time.*
 
 
 ##### Components
 *Components is added to `ParticleEmitter` from modules automaticaly.*
 * `Velocity` — used by: `VelocityModule`, `VelocityLifeModule`, `ForceModule`, `GravityModule`, `DirectionModule`.
-* `StartPos` — used by: `RadialAccelModule`, `TangentalAccelModule`.
 
 ##### Example  
 See sample/src/Main.hx

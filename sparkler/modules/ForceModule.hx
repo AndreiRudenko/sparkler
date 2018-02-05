@@ -4,7 +4,7 @@ import sparkler.core.Particle;
 import sparkler.core.ParticleModule;
 import sparkler.core.Components;
 import sparkler.components.Velocity;
-import sparkler.modules.VelocityUpdateModule;
+import sparkler.modules.helpers.VelocityUpdateModule;
 
 import luxe.Vector;
 

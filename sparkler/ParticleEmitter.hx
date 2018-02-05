@@ -33,6 +33,7 @@ class ParticleEmitter {
 	public var components	(default, null):ComponentManager;
 		/** emitter modules */
 	public var modules   	(default, null):Map<String, ParticleModule>;
+		/** active emitter modules */
 	public var active_modules   	(default, null):Array<ParticleModule>;
 		/** reference to system */
 	public var system    	(default, null):ParticleSystem;
@@ -175,7 +176,7 @@ class ParticleEmitter {
 
 	}
 
-	public function add_module(_module:ParticleModule) {
+	public function add_module(_module:ParticleModule):ParticleEmitter {
 
 		var cname:String = Type.getClassName(Type.getClass(_module));
 		if(modules.exists(cname)) {
@@ -192,6 +193,8 @@ class ParticleEmitter {
 		if(inited) {
 			_module._init();
 		}
+
+		return this;
 
 	}
 
@@ -248,31 +251,6 @@ class ParticleEmitter {
 			_disable_m(m);
 		}
 
-	}
-
-	inline function _enable_m(m:ParticleModule) {
-		
-		var added:Bool = false;
-		var am:ParticleModule = null;
-		for (i in 0...active_modules.length) {
-			am = active_modules[i];
-			if (m.priority <= am.priority) {
-				active_modules.insert(i,m);
-				added = true;
-				break;
-			}
-		}
-		
-		if(!added) {
-			active_modules.push(m);
-		}
-
-	}
-
-	inline function _disable_m(m:ParticleModule) {
-
-		active_modules.remove(m);
-		
 	}
 
 	public function update(dt:Float) {
@@ -349,12 +327,17 @@ class ParticleEmitter {
 
 	}
 	
-	public function start() {
+	public function start(?_dur:Float) {
 
 		enabled = true;
 		time = 0;
 		frame_time = 0;
-		calc_duration();
+		
+		if(_dur == null) {
+			calc_duration();
+		} else {
+			_duration = _dur;
+		}
 
 	}
 
@@ -387,25 +370,39 @@ class ParticleEmitter {
 		
 	}
 
+	inline function _enable_m(m:ParticleModule) {
+		
+		var added:Bool = false;
+		var am:ParticleModule = null;
+		for (i in 0...active_modules.length) {
+			am = active_modules[i];
+			if (m.priority <= am.priority) {
+				active_modules.insert(i,m);
+				added = true;
+				break;
+			}
+		}
+		
+		if(!added) {
+			active_modules.push(m);
+		}
+
+	}
+
+	inline function _disable_m(m:ParticleModule) {
+
+		active_modules.remove(m);
+		
+	}
+
 	inline function spawn() {
 
 		if(particles.length < particles.capacity) {
-			var p:Particle = particles.ensure();
-			for (m in active_modules) {
-				_reset_lifetime(p);
-				m.onspawn(p);
-			}
+			_spawn_particle(particles.ensure());
 		} else if(cache_wrap) {
-
 			var p:Particle = particles.wrap();
-			for (m in active_modules) {
-				m.onunspawn(p);
-			}
-			for (m in active_modules) {
-				_reset_lifetime(p);
-				m.onspawn(p);
-			}
-
+			_unspawn_particle(p);
+			_spawn_particle(p);
 		}
 
 	}
@@ -413,19 +410,27 @@ class ParticleEmitter {
 	public function unspawn(p:Particle) {
 
 		particles.remove(p);
+		_unspawn_particle(p);
 		
+	}
+
+	inline function _spawn_particle(p:Particle) {
+
 		for (m in active_modules) {
-			m.onunspawn(p);
+			if(lifetime_max > 0) {
+				particles_data[p.id].lifetime = random_float(lifetime, lifetime_max);
+			} else {
+				particles_data[p.id].lifetime = lifetime;
+			}
+			m.onspawn(p);
 		}
 		
 	}
 
-	inline function _reset_lifetime(p:Particle) {
+	inline function _unspawn_particle(p:Particle) {
 		
-		if(lifetime_max > 0) {
-			particles_data[p.id].lifetime = random_float(lifetime, lifetime_max);
-		} else {
-			particles_data[p.id].lifetime = lifetime;
+		for (m in active_modules) {
+			m.onunspawn(p);
 		}
 
 	}

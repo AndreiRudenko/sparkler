@@ -1,4 +1,4 @@
-package sparkler.modules;
+package sparkler.modules.helpers;
 
 import sparkler.core.ParticleModule;
 import sparkler.core.ParticleData;
