@@ -67,7 +67,7 @@ class ParticleEmitter {
 	public var random : Void -> Float;
 
 		/** emitter particles image path */
-	public var image_path:String;
+	public var image_path(default, set):String;
 		/** emitter particles depth */
 	public var depth (default, set):Float;
 
@@ -104,7 +104,6 @@ class ParticleEmitter {
 		particles_data = [];
 
 		active = _options.active != null ? _options.active : true;
-		// enabled = _options.enabled != null ? _options.enabled : true;
 
 		duration = _options.duration != null ? _options.duration : -1;
 		duration_max = _options.duration_max != null ? _options.duration_max : -1;
@@ -332,7 +331,7 @@ class ParticleEmitter {
 		enabled = true;
 		time = 0;
 		frame_time = 0;
-		
+
 		if(_dur == null) {
 			calc_duration();
 		} else {
@@ -618,6 +617,21 @@ class ParticleEmitter {
 
 	}
 
+	function set_image_path(value:String):String {
+
+		image_path = value;
+
+		if(inited) {
+			var tex = Luxe.resources.texture(image_path);
+			for (pd in particles_data) {
+				pd.sprite.texture = tex;
+			}
+		}
+
+		return image_path;
+
+	}
+
 	function set_cache_size(value:Int):Int {
 		
 		if(cache_size != value) {
@@ -689,7 +703,6 @@ typedef ParticleEmitterOptions = {
 
 	@:optional var name : String;
 	@:optional var active : Bool;
-	// @:optional var enabled : Bool;
 	@:optional var cache_wrap : Bool;
 	@:optional var cache_size : Int;
 	@:optional var count : Int;
