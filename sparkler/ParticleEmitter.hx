@@ -12,7 +12,7 @@ import sparkler.core.ParticleData;
 import sparkler.core.ParticleModule;
 import sparkler.containers.ParticleVector;
 import sparkler.ParticleSystem;
-import sparkler.utils.ModuleTools;
+import sparkler.utils.ModulesFactory;
 
 class ParticleEmitter {
 
@@ -104,6 +104,7 @@ class ParticleEmitter {
 		particles_data = [];
 
 		active = _options.active != null ? _options.active : true;
+		enabled = _options.enabled != null ? _options.enabled : true;
 
 		duration = _options.duration != null ? _options.duration : -1;
 		duration_max = _options.duration_max != null ? _options.duration_max : -1;
@@ -136,7 +137,7 @@ class ParticleEmitter {
 			var _classname:String;
 			for (md in _options.modules_data) {
 				_classname = md.name;
-				var m = ModuleTools.create_from_string(_classname);
+				var m = ModulesFactory.create(_classname, md);
 				if(m != null) {
 					add_module(m.from_json(md));
 				}
@@ -175,12 +176,17 @@ class ParticleEmitter {
 
 	}
 
-	public function add_module(_module:ParticleModule):ParticleEmitter {
+	public function add_module(_module:ParticleModule, ?_priority:Int):ParticleEmitter {
 
 		var cname:String = Type.getClassName(Type.getClass(_module));
+
 		if(modules.exists(cname)) {
-			throw('particle module already exists');
+			throw('particle module: $cname already exists');
 		}
+
+		// if(_priority != null) {
+		// 	_module.priority = _priority;
+		// }
 
 		modules.set(cname, _module);
 		_module._onadded(this);
@@ -210,11 +216,13 @@ class ParticleEmitter {
 		var _module:T = cast modules.get(cname);
 
 		if(_module != null) {
-			_module._onremoved();
-			modules.remove(cname);
 			if(_module.enabled) {
 				_disable_m(_module);
 			}
+
+			modules.remove(cname);
+			_module._onremoved();
+
 			if(_need_reset) {
 				reset_modules();
 			}
@@ -274,7 +282,7 @@ class ParticleEmitter {
 			}
 
 			if(enabled && rate > 0) {
-					
+
 				frame_time += dt;
 
 				var _inv_rate:Float;
@@ -347,13 +355,19 @@ class ParticleEmitter {
 		frame_time = 0;
 
 		if(_kill) {
-			for (p in particles) {
-				for (m in modules) {
-					m.onunspawn(p);
-				}
-			}
-			particles.reset();
+			unspawn_all();
 		}
+
+	}
+
+	public function unspawn_all() {
+		
+		for (p in particles) {
+			for (m in modules) {
+				m.onunspawn(p);
+			}
+		}
+		particles.reset();
 
 	}
 
@@ -386,11 +400,30 @@ class ParticleEmitter {
 			active_modules.push(m);
 		}
 
+		m.onenabled();
+
 	}
 
 	inline function _disable_m(m:ParticleModule) {
 
+		m.ondisabled();
 		active_modules.remove(m);
+		
+	}
+
+	inline function _sort_active() {
+
+		haxe.ds.ArraySort.sort(
+			active_modules,
+			function(a,b) {
+				if (a.priority < b.priority) {
+					return -1;
+				} else if (a.priority > b.priority) {
+					return 1;
+				}
+				return 0;
+			}
+		);
 		
 	}
 
@@ -545,6 +578,12 @@ class ParticleEmitter {
 
 	function reset_modules() {
 
+		_need_reset = false;
+
+		for (m in active_modules) {
+			m.ondisabled();
+		}
+
 		for (m in modules) {
 			m._onremoved();
 		}
@@ -553,10 +592,16 @@ class ParticleEmitter {
 			m._onadded(this);
 		}
 
+		for (m in active_modules) {
+			m.onenabled();
+		}
+
 		for (m in modules) {
 			m._init();
 		}
 		
+		_need_reset = true;
+
 	}
 
 	function set_rate(value:Float):Float {
@@ -679,7 +724,7 @@ class ParticleEmitter {
 		return { 
 			name : name, 
 			active : active, 
-			// enabled : enabled, 
+			enabled : enabled, 
 			cache_wrap : cache_wrap, 
 			cache_size : particles.capacity, 
 			count : count, 
@@ -703,6 +748,7 @@ typedef ParticleEmitterOptions = {
 
 	@:optional var name : String;
 	@:optional var active : Bool;
+	@:optional var enabled : Bool;
 	@:optional var cache_wrap : Bool;
 	@:optional var cache_size : Int;
 	@:optional var count : Int;

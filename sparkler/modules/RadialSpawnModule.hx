@@ -11,9 +11,6 @@ class RadialSpawnModule  extends ParticleModule {
 
 
 	public var radius:Float;
-	public var radius_max:Float;
-	public var inside:Bool;
-
 	var rnd_point:Vector;
 
 
@@ -22,9 +19,7 @@ class RadialSpawnModule  extends ParticleModule {
 		super(_options);
 
 		radius = _options.radius != null ? _options.radius : 128;
-		radius_max = _options.radius_max != null ? _options.radius_max : 0;
-		inside = _options.inside != null ? _options.inside : true;
-
+		
 		rnd_point = new Vector();
 
 		priority = -999;
@@ -37,18 +32,8 @@ class RadialSpawnModule  extends ParticleModule {
 
 		random_point_in_unit_circle();
 
-		if(!inside) {
-			rnd_point.normalize();
-		}
-
-		var r:Float = radius;
-
-		if(radius_max != 0) {
-			r = emitter.random_float(radius, radius_max);
-		}
-
-		pd.x = emitter.system.position.x + emitter.position.x + rnd_point.x * r;
-		pd.y = emitter.system.position.y + emitter.position.y + rnd_point.y * r;
+		pd.x = emitter.system.position.x + emitter.position.x + rnd_point.x * radius;
+		pd.y = emitter.system.position.y + emitter.position.y + rnd_point.y * radius;
 
 	}
 
@@ -77,8 +62,6 @@ class RadialSpawnModule  extends ParticleModule {
 		super.from_json(d);
 
 		radius = d.radius;
-		radius_max = d.radius_max;
-		inside = d.inside;
 		
 		return this;
 	    
@@ -89,8 +72,6 @@ class RadialSpawnModule  extends ParticleModule {
 		var d = super.to_json();
 
 		d.radius = radius;
-		d.radius_max = radius_max;
-		d.inside = inside;
 
 		return d;
 	    
@@ -105,8 +86,6 @@ typedef RadialSpawnModuleOptions = {
 	>ParticleModuleOptions,
 
 	@:optional var radius:Float;
-	@:optional var radius_max:Float;
-	@:optional var inside:Bool;
 
 }
 

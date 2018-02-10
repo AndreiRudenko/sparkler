@@ -8,9 +8,9 @@ import sparkler.core.ParticleModule;
 class SpawnModule extends ParticleModule {
 
 
-	public function new() {
+	public function new(_options:ParticleModuleOptions) {
 
-		super();
+		super(_options);
 
 		priority = -999;
 

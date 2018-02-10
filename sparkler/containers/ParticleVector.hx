@@ -83,6 +83,15 @@ class ParticleVector {
 
 	}
 
+	@:access(sparkler.ParticleVector)
+	public function for_each(f:Particle->Void) {
+		
+		for (i in buffer) {
+			f(new Particle(i));
+		}
+
+	}
+
 	inline function swap_from_buffer(a:Int, b:Int) {
 
 		var idx_a:Int = buffer[a];

@@ -39,6 +39,16 @@ class ForceModule extends ParticleModule {
 
 	}
 
+	override function ondisabled() {
+		
+		particles.for_each(
+			function(p) {
+				vel_comps.get(p).set_xy(0,0);
+			}
+		);
+		
+	}
+	
 	override function onremoved() {
 
 		emitter.remove_module(VelocityUpdateModule);

@@ -16,7 +16,6 @@ class DirectionModule extends ParticleModule {
 	public var direction_variance:Float;
 	public var speed:Float;
 	public var speed_variance:Float;
-	public var from_angle:Bool;
 
 	var vel_comps:Components<Velocity>;
 	var particles_data:Array<ParticleData>;
@@ -30,7 +29,6 @@ class DirectionModule extends ParticleModule {
 		direction_variance = _options.direction_variance != null ? _options.direction_variance : 0;
 		speed = _options.speed != null ? _options.speed : 60;
 		speed_variance = _options.speed_variance != null ? _options.speed_variance : 0;
-		from_angle = _options.from_angle != null ? _options.from_angle : false;
 
 	}
 
@@ -46,6 +44,16 @@ class DirectionModule extends ParticleModule {
 
 	}
 
+	override function ondisabled() {
+
+		particles.for_each(
+			function(p) {
+				vel_comps.get(p).set_xy(0,0);
+			}
+		);
+		
+	}
+	
 	override function onremoved() {
 
 		emitter.remove_module(VelocityUpdateModule);
@@ -56,24 +64,13 @@ class DirectionModule extends ParticleModule {
 
 	override function onspawn(p:Particle) {
 
-		var angle:Float = 0;
+		var angle:Float = (direction + direction_variance * emitter.random_1_to_1()) * 0.017453292519943295; // Math.PI / 180
 
-		if(from_angle) {
-			var pd:ParticleData = particles_data[p.id];
-			angle = angle_between_points(
-					emitter.system.position.x + emitter.position.x, 
-					emitter.system.position.y + emitter.position.y, 
-					pd.x,
-					pd.y
-				);
-			if(direction_variance != 0) {
-				angle += (direction_variance * emitter.random_1_to_1()) * 0.017453292519943295;
-			}
-		} else {
-			angle = (direction + direction_variance * emitter.random_1_to_1()) * 0.017453292519943295; // Math.PI / 180
+		var spd:Float = speed;
+
+		if(speed_variance != 0) {
+			spd += speed_variance * emitter.random_1_to_1();
 		}
-
-		var spd:Float = speed + speed_variance * emitter.random_1_to_1();
 
 		var v:Velocity = vel_comps.get(p);
 		v.x = spd * Math.cos(angle);
@@ -101,7 +98,6 @@ class DirectionModule extends ParticleModule {
 		direction_variance = d.direction_variance;
 		speed = d.speed;
 		speed_variance = d.speed_variance;
-		from_angle = d.from_angle;
 
 		return this;
 	    
@@ -115,7 +111,6 @@ class DirectionModule extends ParticleModule {
 		d.direction_variance = direction_variance;
 		d.speed = speed;
 		d.speed_variance = speed_variance;
-		d.from_angle = from_angle;
 
 		return d;
 	    
@@ -133,7 +128,6 @@ typedef DirectionModuleOptions = {
 	@:optional var direction_variance : Float;
 	@:optional var speed : Float;
 	@:optional var speed_variance : Float;
-	@:optional var from_angle : Bool;
 
 }
 

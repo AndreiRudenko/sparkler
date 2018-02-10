@@ -44,6 +44,16 @@ class GravityModule extends ParticleModule {
 		
 	}
 
+	override function ondisabled() {
+
+		particles.for_each(
+			function(p) {
+				vel_comps.get(p).set_xy(0,0);
+			}
+		);
+		
+	}
+
 	override function onunspawn(p:Particle) {
 
 		var v:Velocity = vel_comps.get(p);

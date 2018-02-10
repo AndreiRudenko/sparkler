@@ -100,24 +100,14 @@ class ParticleSystem {
 		/** pause update emitters */
 	public function pause() {
 
-		if(!paused) {
-			for (i in 0...active_emitters) {
-				emitters[i].pause();
-			}
-			paused = true;
-		}
+		active = false;
 		
 	}
 
 		/** unpause update emitters */
 	public function unpause() {
 
-		if(paused) {
-			for (i in 0...active_emitters) {
-				emitters[i].unpause();
-			}	
-			paused = false;	
-		}
+		active = true;
 
 	}
 

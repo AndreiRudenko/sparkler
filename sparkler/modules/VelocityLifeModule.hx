@@ -73,17 +73,18 @@ class VelocityLifeModule extends VelocityModule {
 	override function update(dt:Float) {
 
 		var v:Vector;
-		for (p in particles) {
-			v = vel_comps.get(p);
-
-			v.x += velocity_delta[p.id].x * dt;
-			v.y += velocity_delta[p.id].y * dt;
-
-			if(velocity_random != null) {
-				v.x += velocity_random.x * emitter.random_1_to_1();
-				v.y += velocity_random.y * emitter.random_1_to_1();
+		if(velocity_random != null) {
+			for (p in particles) {
+				v = vel_comps.get(p);
+				v.x += velocity_delta[p.id].x * dt + velocity_random.x * emitter.random_1_to_1();
+				v.y += velocity_delta[p.id].y * dt + velocity_random.x * emitter.random_1_to_1();
 			}
-
+		} else {
+			for (p in particles) {
+				v = vel_comps.get(p);
+				v.x += velocity_delta[p.id].x * dt;
+				v.y += velocity_delta[p.id].y * dt;
+			}
 		}
 
 	}

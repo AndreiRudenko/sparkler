@@ -40,6 +40,23 @@ class VelocityModule extends ParticleModule {
 
 	}
 
+	override function onremoved() {
+
+		emitter.remove_module(VelocityUpdateModule);
+		vel_comps = null;
+		
+	}
+
+	override function ondisabled() {
+
+		particles.for_each(
+			function(p) {
+				vel_comps.get(p).set_xy(0,0);
+			}
+		);
+		
+	}
+	
 	override function onspawn(p:Particle) {
 
 		var v:Velocity = vel_comps.get(p);
@@ -55,11 +72,10 @@ class VelocityModule extends ParticleModule {
 
 	override function update(dt:Float) {
 
-		var v:Velocity;
-		for (p in particles) {
-			v = vel_comps.get(p);
-
-			if(velocity_random != null) {
+		if(velocity_random != null) {
+			var v:Velocity;
+			for (p in particles) {
+				v = vel_comps.get(p);
 				v.x += velocity_random.x * emitter.random_1_to_1();
 				v.y += velocity_random.y * emitter.random_1_to_1();
 			}

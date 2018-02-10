@@ -14,10 +14,11 @@ class ParticleModule {
        /** the name */
 	public var name (default, null):String;
        /** the module priority */
-	public var priority (default, set) : Int = 0;
+	public var priority (get, set) : Int;
+	@:noCompletion public var _priority : Int = 0;
 
         /** if the module is in a emitter, this is not null */
-	var emitter:ParticleEmitter;
+	@:noCompletion public var emitter:ParticleEmitter;
         /** reference to emitter particles */
 	var particles:ParticleVector;
 
@@ -49,6 +50,11 @@ class ParticleModule {
 	public function onadded() {}
         /** called when the module is removed from an emitter */
 	public function onremoved() {}
+
+        /** called when the module is enabled */
+	public function onenabled() {}
+        /** called when the module is disabled */
+	public function ondisabled() {}
 
         /** called when the emitter spawn particle */
 	public function onspawn(p:Particle) {}
@@ -108,15 +114,23 @@ class ParticleModule {
 
 	}
 
+	function get_priority():Int {
+		
+		return _priority;
+
+	}
+
 	function set_priority(value:Int):Int {
 
-		if(priority != value && emitter != null) {
-			emitter._disable_m(this);
-			priority = value;
-			emitter._enable_m(this);
+		_priority = value;
+
+		if(emitter != null && enabled) {
+			emitter._sort_active();
+			// emitter._disable_m(this);
+			// emitter._enable_m(this);
 		}
 
-		return priority;
+		return _priority;
 
 	}
 
