@@ -5,6 +5,7 @@ Modular Particle System for [luxe](https://github.com/underscorediscovery/luxe)
 * Create a `ParticleSystem` and add `ParticleEmitter` with modules that you like.  
 * You can create custom `ParticleModule` to extend functionality.  
 * Some modules need to have access to custom data, you can create components and add them to `ParticleEmitter`.  
+* Additional modules: [sparkler_modules](https://github.com/RudenkoArts/sparkler_modules).  
 
 ##### Example  
 See sample/src/Main.hx  
