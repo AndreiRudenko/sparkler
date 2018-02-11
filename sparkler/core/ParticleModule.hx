@@ -126,8 +126,6 @@ class ParticleModule {
 
 		if(emitter != null && enabled) {
 			emitter._sort_active();
-			// emitter._disable_m(this);
-			// emitter._enable_m(this);
 		}
 
 		return _priority;

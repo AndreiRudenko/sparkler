@@ -176,17 +176,13 @@ class ParticleEmitter {
 
 	}
 
-	public function add_module(_module:ParticleModule, ?_priority:Int):ParticleEmitter {
+	public function add_module(_module:ParticleModule):ParticleEmitter {
 
 		var cname:String = Type.getClassName(Type.getClass(_module));
 
 		if(modules.exists(cname)) {
 			throw('particle module: $cname already exists');
 		}
-
-		// if(_priority != null) {
-		// 	_module.priority = _priority;
-		// }
 
 		modules.set(cname, _module);
 		_module._onadded(this);

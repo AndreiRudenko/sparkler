@@ -25,13 +25,3 @@ class VectorTools {
 	}
 
 }
-
-// typedef VectorData = {
-
-// 	var x : Float;
-// 	var y : Float;
-// 	var z : Float;
-// 	var w : Float;
-
-// }
-

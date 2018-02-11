@@ -78,15 +78,6 @@ class DirectionModule extends ParticleModule {
 
 	}
 
-	inline function angle_between_points(ax:Float, ay:Float, bx:Float, by:Float):Float {
-
-		var dy:Float = by - ay;
-		var dx:Float = bx - ax;
-
-		return Math.atan2(dy, dx);
-
-	}
-
 
 // import/export
 
