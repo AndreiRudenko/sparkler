@@ -8,7 +8,9 @@ import sparkler.core.ParticleModule;
 import sparkler.containers.ParticleVector;
 import sparkler.ParticleSystem;
 import sparkler.data.Vector;
+import sparkler.data.BlendMode;
 import sparkler.utils.ModulesFactory;
+import sparkler.render.EmitterRenderer;
 
 
 class ParticleEmitter {
@@ -68,7 +70,15 @@ class ParticleEmitter {
 		/** emitter particles depth */
 	public var depth (default, set):Float;
 
+		/** blending src */
+	public var blend_src  (default, set) : BlendMode;
+		/** blending dest */
+	public var blend_dest (default, set) : BlendMode;
+
 	@:noCompletion public var particles_data:Array<ParticleData>;
+	@:noCompletion public var options:ParticleEmitterOptions;
+
+	var render:EmitterRenderer;
 
 	var time:Float;
 	var frame_time:Float;
@@ -80,7 +90,9 @@ class ParticleEmitter {
 
 	public function new(_options:ParticleEmitterOptions) {
 
-		name = _options.name != null ? _options.name : 'emitter.${Luxe.utils.uniqueid()}';
+		options = _options;
+
+		name = options.name != null ? options.name : 'emitter.${Math.random()}';
 
 		position = new Vector();
 		modules = new Map();
@@ -89,7 +101,7 @@ class ParticleEmitter {
 		time = 0;
 		frame_time = 0;
 
-		cache_size = _options.cache_size != null ? _options.cache_size : 128;
+		cache_size = options.cache_size != null ? options.cache_size : 128;
 		if(cache_size <= 0) {
 			cache_size = 1;
 		}
@@ -98,38 +110,38 @@ class ParticleEmitter {
 		components = new ComponentManager(cache_size);
 		particles_data = [];
 
-		active = _options.active != null ? _options.active : true;
-		enabled = _options.enabled != null ? _options.enabled : true;
+		active = options.active != null ? options.active : true;
+		enabled = options.enabled != null ? options.enabled : true;
 
-		duration = _options.duration != null ? _options.duration : -1;
-		duration_max = _options.duration_max != null ? _options.duration_max : -1;
+		duration = options.duration != null ? options.duration : -1;
+		duration_max = options.duration_max != null ? options.duration_max : -1;
 
-		count = _options.count != null ? _options.count : 1;
-		count_max = _options.count_max != null ? _options.count_max : 0;
+		count = options.count != null ? options.count : 1;
+		count_max = options.count_max != null ? options.count_max : 0;
 
-		lifetime = _options.lifetime != null ? _options.lifetime : 1;
-		lifetime_max = _options.lifetime_max != null ? _options.lifetime_max : 0;
+		lifetime = options.lifetime != null ? options.lifetime : 1;
+		lifetime_max = options.lifetime_max != null ? options.lifetime_max : 0;
 
-		rate = _options.rate != null ? _options.rate : 10;
-		rate_max = _options.rate_max != null ? _options.rate_max : 0;
+		rate = options.rate != null ? options.rate : 10;
+		rate_max = options.rate_max != null ? options.rate_max : 0;
 
-		random = _options.random != null ? _options.random : Math.random;
+		random = options.random != null ? options.random : Math.random;
 
-		image_path = _options.image_path;
-		depth = _options.depth != null ? _options.depth : 100;
+		image_path = options.image_path;
+		depth = options.depth != null ? options.depth : 100;
+		
+		cache_wrap = options.cache_wrap != null ? options.cache_wrap : false;
 
-		cache_wrap = _options.cache_wrap != null ? _options.cache_wrap : false;
-
-		if(_options.modules != null) {
-			for (m in _options.modules) {
+		if(options.modules != null) {
+			for (m in options.modules) {
 				add_module(m);
 			}
 		}
 
 		// create modules from data
-		if(_options.modules_data != null) {
+		if(options.modules_data != null) {
 			var _classname:String;
-			for (md in _options.modules_data) {
+			for (md in options.modules_data) {
 				_classname = md.name;
 				var m = ModulesFactory.create(_classname, md);
 				if(m != null) {
@@ -147,8 +159,11 @@ class ParticleEmitter {
 		}
 
 		for (pd in particles_data) {
-			ParticleSystem.backend.sprite_destroy(pd);
+			render.onspritedestroy(pd);
 		}
+
+		render.destroy();
+		render = null;
 
 		components.clear();
 
@@ -311,7 +326,7 @@ class ParticleEmitter {
 
 			// update particle changes to sprite 
 			for (p in particles) {
-				ParticleSystem.backend.sprite_update(particles_data[p.id]);
+				render.onspriteupdate(particles_data[p.id]);
 			}
 
 		}
@@ -461,8 +476,7 @@ class ParticleEmitter {
 	inline function show_particle(p:Particle):ParticleData { 
 
 		var pd:ParticleData = particles_data[p.id];
-		ParticleSystem.backend.sprite_show(pd);
-
+		render.onspriteshow(pd);
 		return pd;
 
 	}
@@ -471,7 +485,7 @@ class ParticleEmitter {
 	inline function hide_particle(p:Particle):ParticleData { 
 
 		var pd:ParticleData = particles_data[p.id];
-		ParticleSystem.backend.sprite_hide(pd);
+		render.onspritehide(pd);
 
 		return pd;
 
@@ -508,16 +522,29 @@ class ParticleEmitter {
 
 		system = _ps;
 
+		if(ParticleSystem.renderer == null) {
+			throw('you need to specify ParticleSystem renderer');
+		}
+
+		render = ParticleSystem.renderer.get(this);
+		render.init();
+
 		var pd:ParticleData;
 		for (i in 0...particles.capacity) {
-			pd = ParticleSystem.backend.sprite_create(new Particle(i));
-			ParticleSystem.backend.sprite_set_depth(pd,depth);
-			ParticleSystem.backend.sprite_set_texture(pd,image_path);
+			pd = render.onspritecreate(new Particle(i));
 			particles_data.push(pd);
 		}
 
 		for (m in modules) {
 			m._init();
+		}
+
+		if(options.blend_src != null) {
+			blend_src = options.blend_src;
+		}
+
+		if(options.blend_dest != null) {
+			blend_dest = options.blend_dest;
 		}
 
 		inited = true;
@@ -610,7 +637,7 @@ class ParticleEmitter {
 
 		if(depth != value) {
 			for (pd in particles_data) {
-				ParticleSystem.backend.sprite_set_depth(pd,value);
+				render.onspritedepth(pd,value);
 			}
 		}
 
@@ -644,7 +671,7 @@ class ParticleEmitter {
 
 		if(inited) {
 			for (pd in particles_data) {
-				ParticleSystem.backend.sprite_set_texture(pd, image_path);
+				render.onspritetexture(pd,image_path);
 			}
 		}
 
@@ -665,7 +692,7 @@ class ParticleEmitter {
 				_need_reset = true;
 
 				for (pd in particles_data) {
-					ParticleSystem.backend.sprite_destroy(pd);
+					render.onspritedestroy(pd);
 				}
 				particles_data.splice(0, particles_data.length);
 
@@ -685,6 +712,20 @@ class ParticleEmitter {
 		}
 
 		return cache_size;
+
+	}
+	
+	function set_blend_src(val:BlendMode)  {
+
+		render.onblendsrc(val);
+		return blend_src = val;
+
+	}
+
+	function set_blend_dest(val:BlendMode) {
+
+		render.onblenddest(val);
+		return blend_dest = val;
 
 	}
 
@@ -712,9 +753,11 @@ class ParticleEmitter {
 			duration_max : duration_max, 
 			image_path : image_path, 
 			depth : depth, 
+			blend_src : blend_src, 
+			blend_dest : blend_dest, 
 			modules_data : _modules
 		};
-	    
+		
 	}
 
 }
@@ -736,9 +779,12 @@ typedef ParticleEmitterOptions = {
 	@:optional var duration_max : Float;
 	@:optional var image_path : String;
 	@:optional var depth : Float;
+	@:optional var blend_src : BlendMode;
+	@:optional var blend_dest : BlendMode;
 	@:optional var modules : Array<ParticleModule>;
 	@:optional var modules_data : Array<Dynamic>; // used for json import
 	@:optional var random : Void -> Float;
+	@:optional var options: Dynamic;
 
 }
 

@@ -6,7 +6,7 @@ Modular Particle System
 * You can create custom `ParticleModule` to extend functionality.  
 * Some modules need to have access to custom data, you can create components and add them to `ParticleEmitter`.  
 * Additional modules: [sparkler_modules](https://github.com/RudenkoArts/sparkler_modules).  
-* Can support multiple engines, now only supports [luxe](https://github.com/underscorediscovery/luxe), but you can add another [backend](https://github.com/RudenkoArts/sparkler/tree/master/sparkler/backend) too, or create pull request, i will add it.  
+* Can support multiple engines, now only supports [luxe](https://github.com/underscorediscovery/luxe), but you can add another [renderer](https://github.com/RudenkoArts/sparkler/tree/master/sparkler/renderer) too, or create pull request, i will add it.  
 
 ##### Example  
 See sample/src/Main.hx  
@@ -22,10 +22,13 @@ var ps:ParticleSystem;
 
 override function ready() {
 
-	sparkler.ParticleSystem.backend = new sparkler.backend.LuxeBackend();
+	// setup renderer
+	sparkler.ParticleSystem.renderer = new sparkler.render.luxe.LuxeRenderer();
 
+	// create particle system
 	ps = new ParticleSystem();
 
+	// create emitter with modules, and add to particle system
 	ps.add( 
 		new ParticleEmitter({
 			name : 'test_emitter', 
@@ -54,6 +57,7 @@ override function ready() {
 
 override function update(dt:Float) {
 
+	// update particle system
 	ps.update(dt);
 
 }

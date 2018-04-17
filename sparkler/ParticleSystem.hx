@@ -1,7 +1,7 @@
 package sparkler;
 
 
-import sparkler.backend.Backend;
+import sparkler.render.Renderer;
 
 import sparkler.ParticleEmitter;
 import sparkler.core.ParticleModule;
@@ -13,7 +13,7 @@ import sparkler.data.Vector;
 class ParticleSystem {
 
 
-	public static var backend:Backend;
+	public static var renderer:Renderer;
 
 		/** if the system is active, it will update */
 	public var active:Bool = true;

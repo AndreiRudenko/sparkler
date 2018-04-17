@@ -29,7 +29,7 @@ class Main extends luxe.Game {
 
 	override function ready() {
 
-		sparkler.ParticleSystem.backend = new sparkler.backend.LuxeBackend();
+		sparkler.ParticleSystem.renderer = new sparkler.render.luxe.LuxeRenderer();
 		sparkler.utils.ModulesFactory.init();
 
 		ps = new ParticleSystem();
