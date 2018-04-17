@@ -20,7 +20,7 @@ class VelocityUpdateModule extends ParticleModule {
 
 		super({});
 
-		priority = 999;
+		_priority = 999;
 
 	}
 

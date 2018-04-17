@@ -1,11 +1,11 @@
 package sparkler.components;
 
 
-import luxe.Vector;
+import sparkler.data.Vector;
 
 
 class Velocity extends Vector {
-
+	
 
 	public function new() {
 

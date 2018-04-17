@@ -4,10 +4,8 @@
 	"license": "MIT",
 	"tags": ["modular", "particles", "system", "cross"],
 	"description": "modular particle system",
-	"version": "0.0.2",
+	"version": "0.0.3",
 	"releasenote": "",
 	"contributors": ["RudenkoArts"],
-	"dependencies": {
-		"luxe": ""
-	}
+	"dependencies": {}
 }

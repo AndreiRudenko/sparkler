@@ -4,10 +4,7 @@ import sparkler.core.Particle;
 import sparkler.core.ParticleModule;
 import sparkler.core.ParticleData;
 import sparkler.core.Components;
-
-import luxe.Color;
-
-using sparkler.utils.ColorTools;
+import sparkler.data.Color;
 
 
 class ColorModule extends ParticleModule {
@@ -42,7 +39,7 @@ class ColorModule extends ParticleModule {
 
 	override function onspawn(p:Particle) {
 
-		var pcolor:Color = particles_data[p.id].sprite.color;
+		var pcolor:Color = particles_data[p.id].color;
 
 		if(initial_color_max != null) {
 			pcolor.r = initial_color_max.r > initial_color.r ? emitter.random_float(initial_color.r, initial_color_max.r) : initial_color.r;

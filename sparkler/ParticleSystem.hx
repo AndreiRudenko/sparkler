@@ -1,12 +1,19 @@
 package sparkler;
 
-import sparkler.ParticleEmitter;
 
-import luxe.Vector;
+import sparkler.backend.Backend;
+
+import sparkler.ParticleEmitter;
+import sparkler.core.ParticleModule;
+import sparkler.core.ParticleData;
+import sparkler.core.Particle;
+import sparkler.data.Vector;
 
 
 class ParticleSystem {
 
+
+	public static var backend:Backend;
 
 		/** if the system is active, it will update */
 	public var active:Bool = true;
@@ -168,4 +175,15 @@ class ParticleSystem {
 	
 
 }
+
+
+typedef ParticleSystemSettings = {
+
+	var particle_show:ParticleData->Void;
+	var particle_hide:ParticleData->Void;
+	var particle_sync_transform:ParticleData->Void;
+	var particle_create:Particle->ParticleData;
+
+}
+
 

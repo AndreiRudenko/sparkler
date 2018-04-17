@@ -12,13 +12,13 @@ class SpawnModule extends ParticleModule {
 
 		super(_options);
 
-		priority = -999;
+		_priority = -999;
 
 	}
 
 	override function onspawn(p:Particle) {
 
-		var pd:ParticleData = emitter.add_to_bacher(p);
+		var pd:ParticleData = emitter.show_particle(p);
 
 		pd.x = emitter.system.position.x + emitter.position.x;
 		pd.y = emitter.system.position.y + emitter.position.y;
@@ -27,7 +27,7 @@ class SpawnModule extends ParticleModule {
 
 	override function onunspawn(p:Particle) {
 
-		emitter.remove_from_bacher(p);
+		emitter.hide_particle(p);
 
 	}
 

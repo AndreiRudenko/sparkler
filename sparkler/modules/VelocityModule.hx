@@ -5,9 +5,7 @@ import sparkler.core.ParticleModule;
 import sparkler.core.Components;
 import sparkler.components.Velocity;
 import sparkler.modules.helpers.VelocityUpdateModule;
-
-import luxe.Vector;
-using sparkler.utils.VectorTools;
+import sparkler.data.Vector;
 
 
 class VelocityModule extends ParticleModule {

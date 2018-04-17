@@ -1,11 +1,12 @@
 ## Sparkler  
-Modular Particle System for [luxe](https://github.com/underscorediscovery/luxe)  
+Modular Particle System 
 
 ##### Overview  
 * Create a `ParticleSystem` and add `ParticleEmitter` with modules that you like.  
 * You can create custom `ParticleModule` to extend functionality.  
 * Some modules need to have access to custom data, you can create components and add them to `ParticleEmitter`.  
 * Additional modules: [sparkler_modules](https://github.com/RudenkoArts/sparkler_modules).  
+* Can support multiple engines, now only supports [luxe](https://github.com/underscorediscovery/luxe), but you can add another [backend](https://github.com/RudenkoArts/sparkler/tree/master/sparkler/backend) too, or create pull request, i will add it.  
 
 ##### Example  
 See sample/src/Main.hx  
@@ -20,6 +21,8 @@ import sparkler.modules.*;
 var ps:ParticleSystem;
 
 override function ready() {
+
+	sparkler.ParticleSystem.backend = new sparkler.backend.LuxeBackend();
 
 	ps = new ParticleSystem();
 

@@ -4,9 +4,7 @@ import sparkler.core.Particle;
 import sparkler.core.ParticleModule;
 import sparkler.core.ParticleData;
 import sparkler.core.Components;
-
-import luxe.Vector;
-using sparkler.utils.VectorTools;
+import sparkler.data.Vector;
 
 
 class SizeModule extends ParticleModule {

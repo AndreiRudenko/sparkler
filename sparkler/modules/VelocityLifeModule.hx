@@ -6,10 +6,7 @@ import sparkler.core.ParticleData;
 import sparkler.core.Components;
 import sparkler.components.Velocity;
 import sparkler.modules.VelocityModule;
-
-import luxe.Vector;
-
-using sparkler.utils.VectorTools;
+import sparkler.data.Vector;
 
 
 class VelocityLifeModule extends VelocityModule {
@@ -64,8 +61,8 @@ class VelocityLifeModule extends VelocityModule {
 			velocity_delta[p.id].y = end_velocity.y - v.y;
 		}
 
-		if(velocity_delta[p.id].lengthsq != 0) {
-			velocity_delta[p.id].divideScalar(particles_data[p.id].lifetime);
+		if(velocity_delta[p.id].lengthsq() != 0) {
+			velocity_delta[p.id].divide_scalar(particles_data[p.id].lifetime);
 		}
 
 	}

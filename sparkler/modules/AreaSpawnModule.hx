@@ -4,10 +4,7 @@ import sparkler.core.Particle;
 import sparkler.core.ParticleData;
 import sparkler.core.ParticleModule;
 import sparkler.core.Components;
-
-import luxe.Vector;
-
-using sparkler.utils.VectorTools;
+import sparkler.data.Vector;
 
 
 class AreaSpawnModule  extends ParticleModule {
@@ -22,13 +19,13 @@ class AreaSpawnModule  extends ParticleModule {
 
 		size = _options.size != null ? _options.size : new Vector(128, 128);
 
-		priority = -999;
+		_priority = -999;
 		
 	}
 
 	override function onspawn(p:Particle) {
 
-		var pd:ParticleData = emitter.add_to_bacher(p);
+		var pd:ParticleData = emitter.show_particle(p);
 
 		pd.x = emitter.system.position.x + emitter.position.x + (size.x * 0.5 * emitter.random_1_to_1());
 		pd.y = emitter.system.position.y + emitter.position.y + (size.y * 0.5 * emitter.random_1_to_1());
@@ -37,7 +34,7 @@ class AreaSpawnModule  extends ParticleModule {
 
 	override function onunspawn(p:Particle) {
 
-		emitter.remove_from_bacher(p);
+		emitter.hide_particle(p);
 
 	}
 

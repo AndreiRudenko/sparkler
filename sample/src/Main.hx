@@ -17,7 +17,7 @@ class Main extends luxe.Game {
 
 	override function config(config:GameConfig) {
 
-		config.window.title = 'luxe game';
+		config.window.title = 'sparkler luxe';
 		config.window.width = 960;
 		config.window.height = 640;
 		config.window.fullscreen = false;
@@ -29,6 +29,7 @@ class Main extends luxe.Game {
 
 	override function ready() {
 
+		sparkler.ParticleSystem.backend = new sparkler.backend.LuxeBackend();
 		sparkler.utils.ModulesFactory.init();
 
 		ps = new ParticleSystem();
@@ -85,9 +86,7 @@ class Main extends luxe.Game {
 
 	override function update(dt:Float) {
 
-		Luxe.debug.start('particles');
 		ps.update(dt);
-		Luxe.debug.end('particles');
 
 	} //update
 

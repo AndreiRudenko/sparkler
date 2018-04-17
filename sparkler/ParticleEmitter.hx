@@ -1,18 +1,15 @@
 package sparkler;
 
 
-import luxe.Vector;
-import luxe.Sprite;
-import phoenix.Texture;
-import phoenix.Batcher;
-
 import sparkler.core.ComponentManager;
 import sparkler.core.Particle;
 import sparkler.core.ParticleData;
 import sparkler.core.ParticleModule;
 import sparkler.containers.ParticleVector;
 import sparkler.ParticleSystem;
+import sparkler.data.Vector;
 import sparkler.utils.ModulesFactory;
+
 
 class ParticleEmitter {
 
@@ -73,8 +70,6 @@ class ParticleEmitter {
 
 	@:noCompletion public var particles_data:Array<ParticleData>;
 
-	var batcher:Batcher;
-
 	var time:Float;
 	var frame_time:Float;
 	var inv_rate:Float;
@@ -121,7 +116,6 @@ class ParticleEmitter {
 		random = _options.random != null ? _options.random : Math.random;
 
 		image_path = _options.image_path;
-		batcher = _options.batcher != null ? _options.batcher : Luxe.renderer.batcher;
 		depth = _options.depth != null ? _options.depth : 100;
 
 		cache_wrap = _options.cache_wrap != null ? _options.cache_wrap : false;
@@ -152,8 +146,8 @@ class ParticleEmitter {
 			m.ondestroy();
 		}
 
-		for (p in particles_data) {
-			p.sprite.destroy();
+		for (pd in particles_data) {
+			ParticleSystem.backend.sprite_destroy(pd);
 		}
 
 		components.clear();
@@ -315,9 +309,9 @@ class ParticleEmitter {
 				m.update(dt);
 			}
 
-			// update sprites
+			// update particle changes to sprite 
 			for (p in particles) {
-				particles_data[p.id].sync_transform();
+				ParticleSystem.backend.sprite_update(particles_data[p.id]);
 			}
 
 		}
@@ -464,26 +458,20 @@ class ParticleEmitter {
 	}
 
 	@:allow(sparkler.core.ParticleModule)
-	inline function add_to_bacher(p:Particle):ParticleData { 
+	inline function show_particle(p:Particle):ParticleData { 
 
 		var pd:ParticleData = particles_data[p.id];
-		var geom = pd.sprite.geometry;
-		if(geom != null && !geom.added) {
-			batcher.add(geom);
-		}
+		ParticleSystem.backend.sprite_show(pd);
 
 		return pd;
 
 	}
 
 	@:allow(sparkler.core.ParticleModule)
-	inline function remove_from_bacher(p:Particle):ParticleData { 
+	inline function hide_particle(p:Particle):ParticleData { 
 
 		var pd:ParticleData = particles_data[p.id];
-		var geom = pd.sprite.geometry;
-		if(geom != null && geom.added) {
-			batcher.remove(geom);
-		}
+		ParticleSystem.backend.sprite_hide(pd);
 
 		return pd;
 
@@ -520,19 +508,11 @@ class ParticleEmitter {
 
 		system = _ps;
 
-		var tex = Luxe.resources.texture(image_path);
 		var pd:ParticleData;
 		for (i in 0...particles.capacity) {
-			pd = new ParticleData();
-
-			pd.sprite = new Sprite({
-				name: '_particle_'+i,
-				depth: depth,
-				texture: tex,
-				no_scene: true,
-				no_batcher_add: true
-			});
-
+			pd = ParticleSystem.backend.sprite_create(new Particle(i));
+			ParticleSystem.backend.sprite_set_depth(pd,depth);
+			ParticleSystem.backend.sprite_set_texture(pd,image_path);
 			particles_data.push(pd);
 		}
 
@@ -630,7 +610,7 @@ class ParticleEmitter {
 
 		if(depth != value) {
 			for (pd in particles_data) {
-				pd.sprite.depth = value;
+				ParticleSystem.backend.sprite_set_depth(pd,value);
 			}
 		}
 
@@ -663,9 +643,8 @@ class ParticleEmitter {
 		image_path = value;
 
 		if(inited) {
-			var tex = Luxe.resources.texture(image_path);
 			for (pd in particles_data) {
-				pd.sprite.texture = tex;
+				ParticleSystem.backend.sprite_set_texture(pd, image_path);
 			}
 		}
 
@@ -686,7 +665,7 @@ class ParticleEmitter {
 				_need_reset = true;
 
 				for (pd in particles_data) {
-					pd.sprite.destroy();
+					ParticleSystem.backend.sprite_destroy(pd);
 				}
 				particles_data.splice(0, particles_data.length);
 
@@ -755,7 +734,6 @@ typedef ParticleEmitterOptions = {
 	@:optional var rate_max : Float;
 	@:optional var duration : Float;
 	@:optional var duration_max : Float;
-	@:optional var batcher : Batcher;
 	@:optional var image_path : String;
 	@:optional var depth : Float;
 	@:optional var modules : Array<ParticleModule>;

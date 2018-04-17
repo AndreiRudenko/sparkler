@@ -4,10 +4,8 @@ import sparkler.core.Particle;
 import sparkler.core.ParticleModule;
 import sparkler.core.ParticleData;
 import sparkler.core.Components;
+import sparkler.data.Color;
 
-import luxe.Color;
-
-using sparkler.utils.ColorTools;
 
 
 class ColorLifeModule extends ParticleModule {
@@ -57,7 +55,7 @@ class ColorLifeModule extends ParticleModule {
 		var pd:ParticleData = particles_data[p.id];
 		var cd:Color = color_delta[p.id];
 		var lf:Float = pd.lifetime;
-		var pcolor:Color = pd.sprite.color;
+		var pcolor:Color = pd.color;
 
 		if(initial_color_max != null) {
 			pcolor.r = emitter.random_float(initial_color.r, initial_color_max.r);
@@ -96,7 +94,7 @@ class ColorLifeModule extends ParticleModule {
 		var pcolor:Color;
 		for (p in particles) {
 			cd = color_delta[p.id];
-			pcolor = particles_data[p.id].sprite.color;
+			pcolor = particles_data[p.id].color;
 			pcolor.r += cd.r * dt;
 			pcolor.g += cd.g * dt;
 			pcolor.b += cd.b * dt;
