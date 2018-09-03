@@ -535,6 +535,8 @@ class ParticleEmitter {
 			particles_data.push(pd);
 		}
 
+		inited = true;
+
 		for (m in modules) {
 			m._init();
 		}
@@ -546,8 +548,6 @@ class ParticleEmitter {
 		if(options.blend_dest != null) {
 			blend_dest = options.blend_dest;
 		}
-
-		inited = true;
 
 	}
 
