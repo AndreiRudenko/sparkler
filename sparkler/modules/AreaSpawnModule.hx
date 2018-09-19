@@ -7,7 +7,7 @@ import sparkler.core.Components;
 import sparkler.data.Vector;
 
 
-class AreaSpawnModule  extends ParticleModule {
+class AreaSpawnModule extends ParticleModule {
 
 
 	public var size(default, null):Vector;

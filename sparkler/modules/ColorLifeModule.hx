@@ -95,14 +95,19 @@ class ColorLifeModule extends ParticleModule {
 		for (p in particles) {
 			cd = color_delta[p.id];
 			pcolor = particles_data[p.id].color;
-			pcolor.r += cd.r * dt;
-			pcolor.g += cd.g * dt;
-			pcolor.b += cd.b * dt;
-			pcolor.a += cd.a * dt;
+			pcolor.r = clamp(pcolor.r + cd.r * dt, 0, 1);
+			pcolor.g = clamp(pcolor.g + cd.g * dt, 0, 1);
+			pcolor.b = clamp(pcolor.b + cd.b * dt, 0, 1);
+			pcolor.a = clamp(pcolor.a + cd.a * dt, 0, 1);
 		}
 
 	}
 
+	inline function clamp(value:Float, a:Float, b:Float):Float {
+
+		return ( value < a ) ? a : ( ( value > b ) ? b : value );
+
+	}
 
 // import/export
 
