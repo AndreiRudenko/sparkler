@@ -6,6 +6,8 @@ import sparkler.core.ParticleData;
 import sparkler.core.Components;
 import sparkler.data.Vector;
 
+using sparkler.utils.VectorExtender;
+
 
 class SizeModule extends ParticleModule {
 

@@ -5,6 +5,9 @@ import sparkler.core.ParticleModule;
 import sparkler.core.ParticleData;
 import sparkler.core.Components;
 import sparkler.data.Vector;
+import sparkler.utils.Mathf;
+
+using sparkler.utils.VectorExtender;
 
 
 class SizeLifeModule extends ParticleModule {
@@ -81,8 +84,8 @@ class SizeLifeModule extends ParticleModule {
 		for (p in particles) {
 			szd = size_delta[p.id];
 			pd = particles_data[p.id];
-			pd.w += szd.x * dt;
-			pd.h += szd.y * dt;
+			pd.w = Mathf.clamp_bottom(pd.w + szd.x * dt, 0);
+			pd.h = Mathf.clamp_bottom(pd.h + szd.y * dt, 0);
 		}
 
 	}

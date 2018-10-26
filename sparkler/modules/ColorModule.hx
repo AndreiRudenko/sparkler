@@ -4,6 +4,7 @@ import sparkler.core.Particle;
 import sparkler.core.ParticleModule;
 import sparkler.core.ParticleData;
 import sparkler.core.Components;
+import sparkler.data.Vector;
 import sparkler.data.Color;
 
 

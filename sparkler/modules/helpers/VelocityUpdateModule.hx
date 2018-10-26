@@ -25,7 +25,7 @@ class VelocityUpdateModule extends ParticleModule {
 	}
 
 	override function init() {
-
+		
 		vel_comps = emitter.components.get(Velocity);
 
 		if(vel_comps == null) {

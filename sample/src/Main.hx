@@ -6,18 +6,19 @@ import luxe.Vector;
 
 import sparkler.ParticleSystem;
 import sparkler.ParticleEmitter;
-import sparkler.modules.AreaSpawnModule;
+import sparkler.core.ParticleModule;
+import sparkler.modules.*;
 
 
 class Main extends luxe.Game {
 
 	var ps:ParticleSystem;
-	var pe:ParticleEmitter;
 
 
 	override function config(config:GameConfig) {
 
-		config.window.title = 'sparkler luxe';
+        config.preload.textures.push({ id:'assets/particle.png' });
+		config.window.title = 'luxe game';
 		config.window.width = 960;
 		config.window.height = 640;
 		config.window.fullscreen = false;
@@ -29,34 +30,42 @@ class Main extends luxe.Game {
 
 	override function ready() {
 
-		sparkler.ParticleSystem.renderer = new sparkler.render.luxe.LuxeRenderer();
 		sparkler.utils.ModulesFactory.init();
+
+		ParticleSystem.renderer = new sparkler.render.luxe.LuxeRenderer();
 
 		ps = new ParticleSystem();
 
-		pe = new ParticleEmitter({
-			name : 'test_emitter', 
-			// duration : -1,
-			rate : 128,
-			cache_size : 512,
-			cache_wrap : true,
-			modules : [
-				new sparkler.modules.AreaSpawnModule({
-					size : new Vector(64,64),
-					size_max : new Vector(128,128)
-				}),
-				new sparkler.modules.ColorLifeModule({
-					initial_color : new Color(1,0,1,1),
-					end_color : new Color(0,0,1,1),
-					end_color_max : new Color(1,0,0,1)
-				}),
-				new sparkler.modules.SizeLifeModule({
-					initial_size : new Vector(16,16),
-					end_size : new Vector(8,8)
-				})
-			]
-		});
-		ps.add(pe);
+		ps.add(new ParticleEmitter({
+				name : 'test_emitter', 
+				rate : 400,
+				cache_size : 2048,
+				lifetime : 2,
+				lifetime_max : 4,
+				cache_wrap : true,
+				image_path: 'assets/particle.png',
+				modules : [
+					new SpawnModule(),
+					new DirectionModule({
+						direction_variance: 180,
+						speed: 90
+					}),
+					new GravityModule({
+						gravity : new sparkler.data.Vector(0, 90)
+					}),
+					new ScaleLifeModule({
+						initial_scale : 1,
+						end_scale : 0
+					}),
+					new ColorLifeModule({
+						initial_color : new sparkler.data.Color(1,0,0),
+						end_color : new sparkler.data.Color(0,0,1)
+					}),
+				]
+
+			})
+		);
+
 
 	} //ready
 
@@ -67,8 +76,7 @@ class Main extends luxe.Game {
 		}
 
 		if(event.keycode == Key.space) {
-			// ps.emit();
-			if(pe.enabled) {
+			if(ps.emitters[0].enabled) {
 				ps.stop(true);
 			} else {
 				ps.start();
@@ -79,14 +87,16 @@ class Main extends luxe.Game {
 
 	override function onmousemove(event:MouseEvent) {
 
-		ps.position.copy_from(event.pos);
+		ps.pos.set(event.pos.x, event.pos.y);
 
 
 	} //onmousemove
 
 	override function update(dt:Float) {
 
+		Luxe.debug.start('particles');
 		ps.update(dt);
+		Luxe.debug.end('particles');
 
 	} //update
 

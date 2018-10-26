@@ -14,30 +14,8 @@ class Vector {
 		y = _y;
 		
 	}
-
-	@:arrayAccess
-	public inline function get(_k:Int):Float {
-
-		return switch(_k) {
-			case 0: x;
-			case 1: y;
-			case _: throw 'Index ${_k} out of bounds (0-1)!';
-		};
-
-	}
 	
-	@:arrayAccess
-	public inline function set( _k:Int, _v:Float ):Float {
-
-		return switch(_k) {
-			case 0: x = _v;
-			case 1: y = _v;
-			case _: throw 'Index ${_k} out of bounds (0-1)!';
-		};
-
-	}
-	
-	public inline function set_xy( _x:Float, _y:Float ) {
+	public inline function set( _x:Float, _y:Float ) {
 
 		x = _x;
 		y = _y;
@@ -87,7 +65,7 @@ class Vector {
 
 	public inline function add( _other:Vector ) {
 
-		set_xy(x + _other.x, y + _other.y);
+		set(x + _other.x, y + _other.y);
 
 		return this;
 		
@@ -95,7 +73,7 @@ class Vector {
 
 	public inline function add_xy( _x:Float, _y:Float ) {
 
-		set_xy(x + _x, y + _y);
+		set(x + _x, y + _y);
 
 		return this;
 		
@@ -103,7 +81,7 @@ class Vector {
 
 	public inline function add_scalar( _v:Float ) {
 
-		set_xy(x + _v, y + _v);
+		set(x + _v, y + _v);
 
 		return this;
 		
@@ -111,7 +89,7 @@ class Vector {
 
 	public inline function subtract( _other:Vector ) {
 
-		set_xy(x - _other.x, y - _other.y);
+		set(x - _other.x, y - _other.y);
 
 		return this;
 		
@@ -119,7 +97,7 @@ class Vector {
 
 	public inline function subtract_xy( _x:Float, _y:Float ) {
 
-		set_xy(x - _x, y - _y);
+		set(x - _x, y - _y);
 
 		return this;
 		
@@ -127,7 +105,7 @@ class Vector {
 
 	public inline function subtract_scalar( _v:Float ) {
 
-		set_xy(x - _v, y - _v);
+		set(x - _v, y - _v);
 
 		return this;
 		
@@ -135,7 +113,7 @@ class Vector {
 
 	public inline function multiply( _other:Vector ) {
 
-		set_xy(x * _other.x, y * _other.y);
+		set(x * _other.x, y * _other.y);
 
 		return this;
 		
@@ -143,7 +121,7 @@ class Vector {
 
 	public inline function multiply_xy( _x:Float, _y:Float ) {
 
-		set_xy(x * _x, y * _y);
+		set(x * _x, y * _y);
 
 		return this;
 		
@@ -151,7 +129,7 @@ class Vector {
 
 	public inline function multiply_scalar( _v:Float ) {
 
-		set_xy(x * _v, y * _v);
+		set(x * _v, y * _v);
 
 		return this;
 		
@@ -159,7 +137,7 @@ class Vector {
 
 	public inline function divide( _other:Vector ) {
 
-		set_xy(x / _other.x, y / _other.y);
+		set(x / _other.x, y / _other.y);
 
 		return this;
 		
@@ -167,7 +145,7 @@ class Vector {
 
 	public inline function divide_xy( _x:Float, _y:Float ) {
 
-		set_xy(x / _x, y / _y);
+		set(x / _x, y / _y);
 
 		return this;
 		
@@ -175,7 +153,7 @@ class Vector {
 
 	public inline function divide_scalar( _v:Float ) {
 
-		set_xy(x / _v, y / _v);
+		set(x / _v, y / _v);
 
 		return this;
 		

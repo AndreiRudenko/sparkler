@@ -1,4 +1,4 @@
-package sparkler.containers;
+package sparkler.core;
 
 
 import sparkler.core.Particle;
@@ -150,7 +150,7 @@ class ParticleVectorIterator {
 
 	}
 
-	@:access(clay.Particle)
+	@:access(sparkler.core.Particle)
 	public inline function next():Particle {
 
 		return new Particle(data[index++]);

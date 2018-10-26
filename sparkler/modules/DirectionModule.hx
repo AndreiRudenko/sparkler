@@ -48,7 +48,7 @@ class DirectionModule extends ParticleModule {
 
 		particles.for_each(
 			function(p) {
-				vel_comps.get(p).set_xy(0,0);
+				vel_comps.get(p).set(0,0);
 			}
 		);
 		

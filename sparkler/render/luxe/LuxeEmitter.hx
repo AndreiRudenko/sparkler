@@ -15,6 +15,7 @@ class LuxeEmitter extends EmitterRenderer {
 
 	var texture:Texture;
 	var batcher:Batcher;
+	var sprites:Array<Sprite>;
 
 
 	public function new(_renderer:LuxeRenderer, _emitter:ParticleEmitter) {
@@ -22,6 +23,7 @@ class LuxeEmitter extends EmitterRenderer {
 		super(_emitter);
 
 		batcher = _renderer.batcher;
+		sprites = [];
 
 	}
 
@@ -29,39 +31,34 @@ class LuxeEmitter extends EmitterRenderer {
 
 		texture = Luxe.resources.texture(emitter.image_path);
 
+		for (i in 0...emitter.particles.capacity) {
+			var sprite = new Sprite({
+				name: 'particle_$i',
+				depth: emitter.system.depth + emitter.index * 0.001,
+				texture: texture,
+				no_scene: true,
+				no_batcher_add: true
+			});
+			sprites.push(sprite);
+		}
+
 	}
 
 	override function destroy() {
 
+		for (s in sprites) {
+			s.destroy();
+		}
+
+		sprites = null;
 		texture = null;
 		batcher = null;
 
 	}
 	
-	override function onspritecreate(p:Particle):ParticleData {
+	override function onparticleshow(p:Particle) {
 
-		var sprite = new Sprite({
-			name: 'particle_'+p.id,
-			depth: emitter.depth,
-			texture: texture,
-			no_scene: true,
-			no_batcher_add: true
-		});
-
-		return new ParticleData(sprite);
-
-	}
-
-	override function onspritedestroy(pd:ParticleData) {
-
-		var sprite:Sprite = pd.sprite;
-		sprite.destroy();
-
-	}
-
-	override function onspriteshow(pd:ParticleData) {
-
-		var sprite:Sprite = pd.sprite;
+		var sprite:Sprite = sprites[p.id];
 
 		var geom = sprite.geometry;
 		if(geom != null && !geom.added) {
@@ -70,9 +67,9 @@ class LuxeEmitter extends EmitterRenderer {
 
 	}
 
-	override function onspritehide(pd:ParticleData) {
+	override function onparticlehide(p:Particle) {
 
-		var sprite:Sprite = pd.sprite;
+		var sprite:Sprite = sprites[p.id];
 
 		var geom = sprite.geometry;
 		if(geom != null && geom.added) {
@@ -81,89 +78,78 @@ class LuxeEmitter extends EmitterRenderer {
 
 	}
 
-	override function onspriteupdate(pd:ParticleData) {
+	override function update(dt:Float) {
 
-		var sprite:Sprite = pd.sprite;
-		var color:Color = pd.color;
+		var pd:ParticleData;
+		var sprite:Sprite;
+		for (p in emitter.particles) {
+			sprite = sprites[p.id];
+			pd = emitter.particles_data[p.id];
 
-		// position
-		if(pd.x != sprite.pos.x) {
-			sprite.pos.x = pd.x;
-		}
-		
-		if(pd.y != sprite.pos.y) {
-			sprite.pos.y = pd.y;
-		}
+			// position
+			if(pd.x != sprite.pos.x) {
+				sprite.pos.x = pd.x;
+			}
+			
+			if(pd.y != sprite.pos.y) {
+				sprite.pos.y = pd.y;
+			}
 
-		// size
-		if(pd.w != sprite.size.x) {
-			sprite.size.x = pd.w;
-		}
-		
-		if(pd.h != sprite.size.y) {
-			sprite.size.y = pd.h;
-		}
+			// size
+			if(pd.w != sprite.size.x) {
+				sprite.size.x = pd.w;
+			}
+			
+			if(pd.h != sprite.size.y) {
+				sprite.size.y = pd.h;
+			}
 
-		// rotation
-		if(pd.r != sprite.rotation_z) {
-			sprite.rotation_z = pd.r;
-		}
+			// rotation
+			if(pd.r != sprite.rotation_z) {
+				sprite.rotation_z = pd.r;
+			}
 
-		// scale
-		if(pd.s != sprite.scale.x) {
-			sprite.scale.set_xy(pd.s,pd.s);
-		}
+			// scale
+			if(pd.s != sprite.scale.x) {
+				sprite.scale.set_xy(pd.s, pd.s);
+			}
 
-		// color
-		if(color.r != sprite.color.r) {
-			sprite.color.r = color.r;
-		}
+			sprite.color.set(pd.color.r, pd.color.g, pd.color.b, pd.color.a);
 
-		if(color.g != sprite.color.g) {
-			sprite.color.g = color.g;
-		}
-
-		if(color.b != sprite.color.b) {
-			sprite.color.b = color.b;
-		}
-
-		if(color.a != sprite.color.a) {
-			sprite.color.a = color.a;
 		}
 
 	}
 
-	override function onspritedepth(pd:ParticleData, depth:Float) {
+	override function ondepth(depth:Float) {
 
-		var sprite:Sprite = pd.sprite;
-		sprite.depth = depth;
+		for (s in sprites) {
+			s.depth = depth + emitter.index * 0.001;
+		}
 
 	}
 
-	override function onspritetexture(pd:ParticleData, path:String) {
+	override function ontexture(path:String) {
 
-		var sprite:Sprite = pd.sprite;
 		var tex = Luxe.resources.texture(path);
-		sprite.texture = tex;
+		for (s in sprites) {
+			s.texture = tex;
+		}
 
 	}
 
 	override function onblendsrc(v:sparkler.data.BlendMode) {
 
 		var sprite:Sprite;
-		for (pd in emitter.particles_data) {
-			sprite = pd.sprite;
-			sprite.blend_src = blend_convert(v);
+		for (s in sprites) {
+			s.blend_src = blend_convert(v);
 		}
 
 	}
 
 	override function onblenddest(v:sparkler.data.BlendMode) {
 
-		var sprite:Sprite;
-		for (pd in emitter.particles_data) {
-			sprite = pd.sprite;
-			sprite.blend_dest = blend_convert(v);
+		for (s in sprites) {
+			s.blend_dest = blend_convert(v);
 		}
 
 	}

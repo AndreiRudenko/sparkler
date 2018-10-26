@@ -4,6 +4,7 @@ import sparkler.core.Particle;
 import sparkler.core.ParticleModule;
 import sparkler.core.ParticleData;
 import sparkler.core.Components;
+import sparkler.utils.Mathf;
 
 
 class ScaleLifeModule extends ParticleModule {
@@ -73,9 +74,11 @@ class ScaleLifeModule extends ParticleModule {
 
 	override function update(dt:Float) {
 
+		var pd:ParticleData;
 		for (p in particles) {
 			if(scale_delta[p.id] != 0) {
-				particles_data[p.id].s += scale_delta[p.id] * dt;
+				pd = particles_data[p.id];
+				pd.s = Mathf.clamp_bottom(pd.s + scale_delta[p.id] * dt, 0);
 			}
 		}
 

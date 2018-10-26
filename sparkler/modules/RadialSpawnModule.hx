@@ -27,12 +27,14 @@ class RadialSpawnModule  extends ParticleModule {
 
 	override function onspawn(p:Particle) {
 
-		var pd:ParticleData = emitter.show_particle(p);
+		emitter.show_particle(p);
+		
+		var pd:ParticleData = emitter.get_particle_data(p);
 
 		random_point_in_unit_circle();
 
-		pd.x = emitter.system.position.x + emitter.position.x + rnd_point.x * radius;
-		pd.y = emitter.system.position.y + emitter.position.y + rnd_point.y * radius;
+		pd.x = emitter.system.pos.x + emitter.pos.x + rnd_point.x * radius;
+		pd.y = emitter.system.pos.y + emitter.pos.y + rnd_point.y * radius;
 
 	}
 
@@ -47,7 +49,7 @@ class RadialSpawnModule  extends ParticleModule {
 		var _r:Float = Math.sqrt( emitter.random() );
 		var _t:Float = (-1 + (2 * emitter.random())) * 6.283185307179586; // two PI
 
-		rnd_point.set_xy( (_r * Math.cos(_t)), (_r * Math.sin(_t)) );
+		rnd_point.set( (_r * Math.cos(_t)), (_r * Math.sin(_t)) );
 
 		return rnd_point;
 

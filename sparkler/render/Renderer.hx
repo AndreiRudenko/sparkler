@@ -1,14 +1,21 @@
 package sparkler.render;
 
 
+import sparkler.ParticleEmitter;
+import sparkler.ParticleSystem;
+
+
 class Renderer {
+
 
 	public function new() {}
 
-	public function get( emitter:sparkler.ParticleEmitter ) : EmitterRenderer {
+
+	public function get(em:ParticleEmitter):EmitterRenderer {
 
 		return null;
 
 	}
+
 
 }

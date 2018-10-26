@@ -4,7 +4,9 @@ import sparkler.core.Particle;
 import sparkler.core.ParticleModule;
 import sparkler.core.ParticleData;
 import sparkler.core.Components;
+import sparkler.data.Vector;
 import sparkler.data.Color;
+import sparkler.utils.Mathf;
 
 
 
@@ -95,19 +97,14 @@ class ColorLifeModule extends ParticleModule {
 		for (p in particles) {
 			cd = color_delta[p.id];
 			pcolor = particles_data[p.id].color;
-			pcolor.r = clamp(pcolor.r + cd.r * dt, 0, 1);
-			pcolor.g = clamp(pcolor.g + cd.g * dt, 0, 1);
-			pcolor.b = clamp(pcolor.b + cd.b * dt, 0, 1);
-			pcolor.a = clamp(pcolor.a + cd.a * dt, 0, 1);
+			pcolor.r = Mathf.clamp(pcolor.r + cd.r * dt, 0, 1);
+			pcolor.g = Mathf.clamp(pcolor.g + cd.g * dt, 0, 1);
+			pcolor.b = Mathf.clamp(pcolor.b + cd.b * dt, 0, 1);
+			pcolor.a = Mathf.clamp(pcolor.a + cd.a * dt, 0, 1);
 		}
 
 	}
 
-	inline function clamp(value:Float, a:Float, b:Float):Float {
-
-		return ( value < a ) ? a : ( ( value > b ) ? b : value );
-
-	}
 
 // import/export
 

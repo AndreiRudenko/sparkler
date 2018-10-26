@@ -6,6 +6,8 @@ import sparkler.core.ParticleModule;
 import sparkler.core.Components;
 import sparkler.data.Vector;
 
+using sparkler.utils.VectorExtender;
+
 
 class AreaSpawnModule extends ParticleModule {
 
@@ -25,10 +27,12 @@ class AreaSpawnModule extends ParticleModule {
 
 	override function onspawn(p:Particle) {
 
-		var pd:ParticleData = emitter.show_particle(p);
+		emitter.show_particle(p);
+		
+		var pd:ParticleData = emitter.get_particle_data(p);
 
-		pd.x = emitter.system.position.x + emitter.position.x + (size.x * 0.5 * emitter.random_1_to_1());
-		pd.y = emitter.system.position.y + emitter.position.y + (size.y * 0.5 * emitter.random_1_to_1());
+		pd.x = emitter.system.pos.x + emitter.pos.x + (size.x * 0.5 * emitter.random_1_to_1());
+		pd.y = emitter.system.pos.y + emitter.pos.y + (size.y * 0.5 * emitter.random_1_to_1());
 
 	}
 

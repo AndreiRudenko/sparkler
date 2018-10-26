@@ -4,7 +4,7 @@ package sparkler.core;
 import sparkler.core.Particle;
 import sparkler.core.Components;
 import sparkler.ParticleEmitter;
-import sparkler.containers.ParticleVector;
+import sparkler.core.ParticleVector;
 
 
 class ComponentManager {

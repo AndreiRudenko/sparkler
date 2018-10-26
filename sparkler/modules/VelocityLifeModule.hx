@@ -8,6 +8,8 @@ import sparkler.components.Velocity;
 import sparkler.modules.VelocityModule;
 import sparkler.data.Vector;
 
+using sparkler.utils.VectorExtender;
+
 
 class VelocityLifeModule extends VelocityModule {
 

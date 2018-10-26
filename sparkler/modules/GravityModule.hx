@@ -7,6 +7,8 @@ import sparkler.components.Velocity;
 import sparkler.modules.helpers.VelocityUpdateModule;
 import sparkler.data.Vector;
 
+using sparkler.utils.VectorExtender;
+
 
 class GravityModule extends ParticleModule {
 
@@ -45,7 +47,7 @@ class GravityModule extends ParticleModule {
 
 		particles.for_each(
 			function(p) {
-				vel_comps.get(p).set_xy(0,0);
+				vel_comps.get(p).set(0,0);
 			}
 		);
 		
@@ -54,7 +56,7 @@ class GravityModule extends ParticleModule {
 	override function onunspawn(p:Particle) {
 
 		var v:Velocity = vel_comps.get(p);
-		v.set_xy(0,0);
+		v.set(0,0);
 		
 	}
 

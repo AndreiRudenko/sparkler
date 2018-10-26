@@ -7,6 +7,8 @@ import sparkler.components.Velocity;
 import sparkler.modules.helpers.VelocityUpdateModule;
 import sparkler.data.Vector;
 
+using sparkler.utils.VectorExtender;
+
 
 class VelocityModule extends ParticleModule {
 
@@ -49,7 +51,7 @@ class VelocityModule extends ParticleModule {
 
 		particles.for_each(
 			function(p) {
-				vel_comps.get(p).set_xy(0,0);
+				vel_comps.get(p).set(0,0);
 			}
 		);
 		
