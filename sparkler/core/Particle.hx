@@ -1,23 +1,24 @@
 package sparkler.core;
 
+import sparkler.data.Color;
 
+class Particle {
 
-abstract Particle(Int) {
+	@:allow(sparkler.core.ParticleVector)
+	public var id(default, null):Int;
 
-
-	public var id(get, never):Int;
-
-
-	public inline function new(id:Int):Void {
-
-		this = id;
-
-	}
+	public var x:Float = 0;
+	public var y:Float = 0;
 	
-	inline function get_id():Int {
+	public var lifetime:Float = 1;
+	public var age:Float = 0;
 
-		return this;
+
+	public function new(id:Int) {
+		
+		this.id = id;
 
 	}
+
 
 }

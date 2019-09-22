@@ -1,21 +1,24 @@
 package sparkler.modules;
 
+
 import sparkler.core.Particle;
 import sparkler.core.ParticleModule;
 import sparkler.data.Vector;
 
 
-class RadialSpawnModule  extends ParticleModule {
+class RadialEdgeSpawnModule  extends ParticleModule {
 
 
 	public var radius:Float;
+	public var radiusMax:Float;
 
 
-	public function new(_options:RadialSpawnModuleOptions) {
+	public function new(_options:RadialEdgeSpawnModuleModuleOptions) {
 
 		super(_options);
 
-		radius = _options.radius != null ? _options.radius : 128;
+		radius = _options.radius != null ? _options.radius : 64;
+		radiusMax = _options.radiusMax != null ? _options.radiusMax : 128;
 
 		_priority = -999;
 		
@@ -24,12 +27,13 @@ class RadialSpawnModule  extends ParticleModule {
 	override function onSpawn(p:Particle) {
 
 		var a = emitter.random() * Math.PI * 2;
-		var r = emitter.random() * radius;
+		var r = emitter.randomFloat(radius, radiusMax);
 
 		p.x = emitter.system.pos.x + emitter.pos.x + Math.cos(a) * r;
 		p.y = emitter.system.pos.y + emitter.pos.y + Math.sin(a) * r;
 
 	}
+
 
 // import/export
 
@@ -38,6 +42,7 @@ class RadialSpawnModule  extends ParticleModule {
 		super.fromJson(d);
 
 		radius = d.radius;
+		radiusMax = d.radiusMax;
 		
 		return this;
 	    
@@ -48,6 +53,7 @@ class RadialSpawnModule  extends ParticleModule {
 		var d = super.toJson();
 
 		d.radius = radius;
+		d.radiusMax = radiusMax;
 
 		return d;
 	    
@@ -57,11 +63,12 @@ class RadialSpawnModule  extends ParticleModule {
 }
 
 
-typedef RadialSpawnModuleOptions = {
+typedef RadialEdgeSpawnModuleModuleOptions = {
 
 	>ParticleModuleOptions,
 
 	@:optional var radius:Float;
+	@:optional var radiusMax:Float;
 
 }
 

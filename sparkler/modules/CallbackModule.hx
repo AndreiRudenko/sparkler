@@ -1,38 +1,49 @@
 package sparkler.modules;
 
+
 import sparkler.core.Particle;
 import sparkler.core.ParticleModule;
-import particles.ParticleEmitter;
+import sparkler.ParticleEmitter;
 
 
 class CallbackModule extends ParticleModule {
 
 
-	public var onspawn_callback:Particle->ParticleEmitter->Void;
-	public var onunspawn_callback:Particle->ParticleEmitter->Void;
+	public var onSpawnCallback:(p:Particle, pe:ParticleEmitter)->Void;
+	public var onUnSpawnCallback:(p:Particle, pe:ParticleEmitter)->Void;
+	public var onUpdateCallback:(dt:Float, pe:ParticleEmitter)->Void;
 
 
-	public function new(_options:ForceModuleOptions) {
+	public function new(options:CallbackModuleOptions) {
 
 		super();
 
-		onspawn_callback = _options.onspawn_callback;
-		onunspawn_callback = _options.onunspawn_callback;
+		onSpawnCallback = options.onSpawn;
+		onUnSpawnCallback = options.onUnSpawn;
+		onUpdateCallback = options.onUpdate;
 
 	}
 
-	override function onspawn(p:Particle) {
+	override function onSpawn(p:Particle) {
 
-		if(onspawn_callback != null) {
-			onspawn_callback(p, emitter);
+		if(onSpawnCallback != null) {
+			onSpawnCallback(p, emitter);
 		}
 
 	}
 
-	override function onunspawn(p:Particle) {
+	override function update(dt:Float) {
 		
-		if(onunspawn_callback != null) {
-			onunspawn_callback(p, emitter);
+		if(onUpdateCallback != null) {
+			onUpdateCallback(dt, emitter);
+		}
+	    
+	}
+
+	override function onUnSpawn(p:Particle) {
+		
+		if(onUnSpawnCallback != null) {
+			onUnSpawnCallback(p, emitter);
 		}
 		
 	}
@@ -41,10 +52,11 @@ class CallbackModule extends ParticleModule {
 }
 
 
-typedef ForceModuleOptions = {
+typedef CallbackModuleOptions = {
 
-	@:optional var onspawn_callback : Particle->ParticleEmitter->Void;
-	@:optional var onunspawn_callback : Particle->ParticleEmitter->Void;
+	@:optional var onSpawn:(p:Particle, pe:ParticleEmitter)->Void;
+	@:optional var onUnSpawn:(p:Particle, pe:ParticleEmitter)->Void;
+	@:optional var onUpdate:(dt:Float, pe:ParticleEmitter)->Void;
 
 }
 

@@ -1,84 +1,86 @@
 package sparkler.modules;
 
-import sparkler.core.Particle;
 import sparkler.core.ParticleModule;
-import sparkler.core.ParticleData;
+import sparkler.core.Particle;
 import sparkler.core.Components;
+import sparkler.components.Scale;
+import sparkler.components.ScaleDelta;
 import sparkler.utils.Mathf;
 
 
 class ScaleLifeModule extends ParticleModule {
 
 
-	public var initial_scale:Float;
-	public var initial_scale_max:Float;
-	public var end_scale:Float;
-	public var end_scale_max:Float;
+	public var initialScale:Float;
+	public var initialScaleMax:Float;
+	public var endScale:Float;
+	public var endScaleMax:Float;
 
-	var scale_delta:Array<Float>;
-	var particles_data:Array<ParticleData>;
+	var _scale:Components<Scale>;
+	var _scaleDelta:Components<ScaleDelta>;
 
 
 	public function new(_options:ScaleLifeModuleOptions) {
 
 		super(_options);
 
-		scale_delta = [];
-
-		initial_scale = _options.initial_scale != null ? _options.initial_scale : 1;
-		initial_scale_max = _options.initial_scale_max != null ? _options.initial_scale_max : 0;
-		end_scale = _options.end_scale != null ? _options.end_scale : 1;
-		end_scale_max = _options.end_scale_max != null ? _options.end_scale_max : 0;
+		initialScale = _options.initialScale != null ? _options.initialScale : 1;
+		initialScaleMax = _options.initialScaleMax != null ? _options.initialScaleMax : 0;
+		endScale = _options.endScale != null ? _options.endScale : 1;
+		endScaleMax = _options.endScaleMax != null ? _options.endScaleMax : 0;
 
 	}
 
 	override function init() {
 
-		particles_data = emitter.particles_data;
+		_scale = emitter.components.get(Scale);
+		_scaleDelta = emitter.components.get(ScaleDelta);
 
-		for (i in 0...particles.capacity) {
-			scale_delta[i] = 0;
-		}
-	    
 	}
 
-	override function ondisabled() {
+	override function onDisabled() {
 
-		for (pd in particles_data) {
-			pd.s = 1;
+		for (p in particles) {
+			_scale.set(p.id, 1);
 		}
 		
 	}
 
-	override function onspawn(p:Particle) {
+	override function onSpawn(p:Particle) {
 
-		var pd:ParticleData = particles_data[p.id];
+		var s = _scale.get(p.id);
+		var sd = _scaleDelta.get(p.id);
 
-		if(initial_scale_max > initial_scale) {
-			pd.s = emitter.random_float(initial_scale, initial_scale_max);
+		if(initialScaleMax > initialScale) {
+			s = emitter.randomFloat(initialScale, initialScaleMax);
 		} else {
-			pd.s = initial_scale;
+			s = initialScale;
 		}
 
-		if(end_scale_max > end_scale) {
-			scale_delta[p.id] = emitter.random_float(end_scale, end_scale_max) - pd.s;
+		if(endScaleMax > endScale) {
+			sd = emitter.randomFloat(endScale, endScaleMax) - s;
 		} else {
-			scale_delta[p.id] = end_scale - pd.s;
+			sd = endScale - s;
 		}
 
-		if(scale_delta[p.id] != 0) {
-			scale_delta[p.id] /= pd.lifetime;
+		if(sd != 0) {
+			sd /= p.lifetime;
 		}
 
+		_scale.set(p.id, s);
+		_scaleDelta.set(p.id, sd);
 	}
 
 	override function update(dt:Float) {
 
-		var pd:ParticleData;
+		var s:Float;
+		var sd:Float;
 		for (p in particles) {
-			if(scale_delta[p.id] != 0) {
-				pd = particles_data[p.id];
-				pd.s = Mathf.clamp_bottom(pd.s + scale_delta[p.id] * dt, 0);
+			sd = _scaleDelta.get(p.id);
+			if(sd != 0) {
+				s = _scale.get(p.id);
+				s = Mathf.clampBottom(s + sd * dt, 0);
+				_scale.set(p.id, s);
 			}
 		}
 
@@ -87,27 +89,27 @@ class ScaleLifeModule extends ParticleModule {
 
 // import/export
 
-	override function from_json(d:Dynamic) {
+	override function fromJson(d:Dynamic) {
 
-		super.from_json(d);
+		super.fromJson(d);
 
-		initial_scale = d.initial_scale;
-		initial_scale_max = d.initial_scale_max;
-		end_scale = d.end_scale;
-		end_scale_max = d.end_scale_max;
+		initialScale = d.initialScale;
+		initialScaleMax = d.initialScaleMax;
+		endScale = d.endScale;
+		endScaleMax = d.endScaleMax;
 		
 		return this;
 	    
 	}
 
-	override function to_json():Dynamic {
+	override function toJson():Dynamic {
 
-		var d = super.to_json();
+		var d = super.toJson();
 
-		d.initial_scale = initial_scale;
-		d.initial_scale_max = initial_scale_max;
-		d.end_scale = end_scale;
-		d.end_scale_max = end_scale_max;
+		d.initialScale = initialScale;
+		d.initialScaleMax = initialScaleMax;
+		d.endScale = endScale;
+		d.endScaleMax = endScaleMax;
 
 		return d;
 	    
@@ -121,10 +123,10 @@ typedef ScaleLifeModuleOptions = {
 
 	>ParticleModuleOptions,
 	
-	@:optional var initial_scale : Float;
-	@:optional var initial_scale_max : Float;
-	@:optional var end_scale : Float;
-	@:optional var end_scale_max : Float;
+	@:optional var initialScale : Float;
+	@:optional var initialScaleMax : Float;
+	@:optional var endScale : Float;
+	@:optional var endScaleMax : Float;
 
 }
 

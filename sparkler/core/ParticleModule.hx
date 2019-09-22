@@ -22,10 +22,6 @@ class ParticleModule {
         /** reference to emitter particles */
 	var particles:ParticleVector;
 
-        /** linked list stuff */
-	@:noCompletion public var prev : ParticleModule;
-	@:noCompletion public var next : ParticleModule;
-
 
 	public function new(?_options:ParticleModuleOptions) {
 
@@ -46,31 +42,33 @@ class ParticleModule {
        /** called when the emitter initiated */
 	public function init() {}
        /** called when the emitter starts or is reset */
-	public function onreset() {}
+	public function onReset() {}
+        /** called when the module is destroyed */
+	public function onDestroy() {}
 
         /** called when the module is attached to an emitter */
-	public function onadded() {}
+	public function onAdded() {}
         /** called when the module is removed from an emitter */
-	public function onremoved() {}
+	public function onRemoved() {}
 
         /** called when the module is enabled */
-	public function onenabled() {}
+	public function onEnabled() {}
         /** called when the module is disabled */
-	public function ondisabled() {}
+	public function onDisabled() {}
 
         /** called when the emitter spawn particle */
-	public function onspawn(p:Particle) {}
+	public function onSpawn(p:Particle) {}
         /** called when the emitter unspawn particle */
-	public function onunspawn(p:Particle) {}
+	public function onUnSpawn(p:Particle) {}
 
         /** called once per frame, passing the delta time */
 	public function update(dt:Float) {}
 
-        /** called when the module is destroyed */
-	public function ondestroy() {}
+        /** called once per frame */
+	public function render<T>(g:T) {}
 
         /** save settings to json */
-	public function to_json():Dynamic {
+	public function toJson():Dynamic {
 
 		return {
 			name : name,
@@ -81,7 +79,7 @@ class ParticleModule {
 	}
 
         /** load settings from json */
-	public function from_json(d:Dynamic):ParticleModule {
+	public function fromJson(d:Dynamic):ParticleModule {
 		
 		enabled = d.enabled;
 		priority = d.priority;
@@ -94,23 +92,23 @@ class ParticleModule {
 	inline function _init() {
 
 		init();
-		onreset();
+		onReset();
 
 	}
 
 	@:allow(sparkler.ParticleEmitter)
-	inline function _onadded(_emitter:ParticleEmitter) {
+	inline function _onAdded(_emitter:ParticleEmitter) {
 
 		emitter = _emitter;
 		particles = emitter.particles;
-		onadded();
+		onAdded();
 
 	}
 	
 	@:allow(sparkler.ParticleEmitter)
-	inline function _onremoved() {
+	inline function _onRemoved() {
 
-		onremoved();
+		onRemoved();
 		emitter = null;
 		particles = null;
 
@@ -127,7 +125,7 @@ class ParticleModule {
 		_priority = value;
 
 		if(emitter != null && enabled) {
-			emitter._sort_active();
+			emitter._sortActive();
 		}
 
 		return _priority;
@@ -138,9 +136,9 @@ class ParticleModule {
 
 		if(enabled != value && emitter != null) {
 			if(value) {
-				emitter._enable_m(this);
+				emitter._enableModule(this);
 			} else {
-				emitter._disable_m(this);
+				emitter._disableModule(this);
 			}
 		}
 

@@ -1,7 +1,6 @@
 package sparkler.modules;
 
 import sparkler.core.Particle;
-import sparkler.core.ParticleData;
 import sparkler.core.ParticleModule;
 
 
@@ -16,20 +15,10 @@ class SpawnModule extends ParticleModule {
 
 	}
 
-	override function onspawn(p:Particle) {
-
-		emitter.show_particle(p);
-		
-		var pd:ParticleData = emitter.get_particle_data(p);
+	override function onSpawn(pd:Particle) {
 
 		pd.x = emitter.system.pos.x + emitter.pos.x;
 		pd.y = emitter.system.pos.y + emitter.pos.y;
-
-	}
-
-	override function onunspawn(p:Particle) {
-
-		emitter.hide_particle(p);
 
 	}
 

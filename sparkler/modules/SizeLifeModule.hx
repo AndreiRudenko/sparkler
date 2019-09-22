@@ -1,9 +1,10 @@
 package sparkler.modules;
 
-import sparkler.core.Particle;
 import sparkler.core.ParticleModule;
-import sparkler.core.ParticleData;
+import sparkler.core.Particle;
 import sparkler.core.Components;
+import sparkler.components.Size;
+import sparkler.components.SizeDelta;
 import sparkler.data.Vector;
 import sparkler.utils.Mathf;
 
@@ -13,58 +14,53 @@ using sparkler.utils.VectorExtender;
 class SizeLifeModule extends ParticleModule {
 
 
-	public var initial_size	(default, null):Vector;
-	public var end_size    	(default, null):Vector;
-	public var initial_size_max:Vector;
-	public var end_size_max:Vector;
+	public var initialSize(default, null):Vector;
+	public var endSize(default, null):Vector;
+	public var initialSizeMax:Vector;
+	public var endSizeMax:Vector;
 
-	var size_delta:Array<Vector>;
-	var particles_data:Array<ParticleData>;
+	var _size:Components<Size>;
+	var _sizeDelta:Components<SizeDelta>;
 
 
 	public function new(_options:SizeLifeModuleOptions) {
 
 		super(_options);
 
-		size_delta = [];
-
-		initial_size = _options.initial_size != null ? _options.initial_size : new Vector(32, 32);
-		initial_size_max = _options.initial_size_max;
-		end_size = _options.end_size != null ? _options.end_size : new Vector(8, 8);
-		end_size_max = _options.end_size_max;
+		initialSize = _options.initialSize != null ? _options.initialSize : new Vector(32, 32);
+		initialSizeMax = _options.initialSizeMax;
+		endSize = _options.endSize != null ? _options.endSize : new Vector(8, 8);
+		endSizeMax = _options.endSizeMax;
 
 	}
 
 	override function init() {
 
-		particles_data = emitter.particles_data;
-
-		for (i in 0...particles.capacity) {
-			size_delta[i] = new Vector();
-		}
-	    
+		_size = emitter.components.get(Size);
+		_sizeDelta = emitter.components.get(SizeDelta);
+		
 	}
 
-	override function onspawn(p:Particle) {
+	override function onSpawn(pd:Particle) {
 
-		var szd:Vector = size_delta[p.id];
-		var pd:ParticleData = particles_data[p.id];
+		var szd:Vector = _sizeDelta.get(pd.id);
+		var sz:Vector = _size.get(pd.id);
 		var lf:Float = pd.lifetime;
 
-		if(initial_size_max != null) {
-			pd.w = emitter.random_float(initial_size.x, initial_size_max.x);
-			pd.h = emitter.random_float(initial_size.y, initial_size_max.y);
+		if(initialSizeMax != null) {
+			sz.x = emitter.randomFloat(initialSize.x, initialSizeMax.x);
+			sz.y = emitter.randomFloat(initialSize.y, initialSizeMax.y);
 		} else {
-			pd.w = initial_size.x;
-			pd.h = initial_size.y;
+			sz.x = initialSize.x;
+			sz.y = initialSize.y;
 		}
 		
-		if(end_size_max != null) {
-			szd.x = emitter.random_float(end_size.x, end_size_max.x) - pd.w;
-			szd.y = emitter.random_float(end_size.y, end_size_max.y) - pd.h;
+		if(endSizeMax != null) {
+			szd.x = emitter.randomFloat(endSize.x, endSizeMax.x) - sz.x;
+			szd.y = emitter.randomFloat(endSize.y, endSizeMax.y) - sz.y;
 		} else {
-			szd.x = end_size.x - pd.w;
-			szd.y = end_size.y - pd.h;
+			szd.x = endSize.x - sz.x;
+			szd.y = endSize.y - sz.y;
 		}
 
 		if(szd.x != 0) {
@@ -80,12 +76,11 @@ class SizeLifeModule extends ParticleModule {
 	override function update(dt:Float) {
 
 		var szd:Vector;
-		var pd:ParticleData;
+		var sz:Vector;
 		for (p in particles) {
-			szd = size_delta[p.id];
-			pd = particles_data[p.id];
-			pd.w = Mathf.clamp_bottom(pd.w + szd.x * dt, 0);
-			pd.h = Mathf.clamp_bottom(pd.h + szd.y * dt, 0);
+			szd = _sizeDelta.get(p.id);
+			sz = _size.get(p.id);
+			sz.set(Mathf.clampBottom(sz.x + szd.x * dt, 0), Mathf.clampBottom(sz.y + szd.y * dt, 0));
 		}
 
 	}
@@ -93,43 +88,43 @@ class SizeLifeModule extends ParticleModule {
 
 // import/export
 
-	override function from_json(d:Dynamic) {
+	override function fromJson(d:Dynamic) {
 
-		super.from_json(d);
+		super.fromJson(d);
 
-		initial_size.from_json(d.initial_size);
-		end_size.from_json(d.end_size);
+		initialSize.fromJson(d.initialSize);
+		endSize.fromJson(d.endSize);
 
-		if(d.initial_size_max != null) {
-			if(initial_size_max == null) {
-				initial_size_max = new Vector();
+		if(d.initialSizeMax != null) {
+			if(initialSizeMax == null) {
+				initialSizeMax = new Vector();
 			}
-			initial_size_max.from_json(d.initial_size_max);
+			initialSizeMax.fromJson(d.initialSizeMax);
 		}
 		
-		if(d.end_size_max != null) {
-			if(end_size_max == null) {
-				end_size_max = new Vector();
+		if(d.endSizeMax != null) {
+			if(endSizeMax == null) {
+				endSizeMax = new Vector();
 			}
-			end_size_max.from_json(d.end_size_max);
+			endSizeMax.fromJson(d.endSizeMax);
 		}
 
 		return this;
 	    
 	}
 
-	override function to_json():Dynamic {
+	override function toJson():Dynamic {
 
-		var d = super.to_json();
+		var d = super.toJson();
 
-		d.initial_size = initial_size.to_json();
-		d.end_size = end_size.to_json();
+		d.initialSize = initialSize.toJson();
+		d.endSize = endSize.toJson();
 
-		if(initial_size_max != null) {
-			d.initial_size_max = initial_size_max.to_json();
+		if(initialSizeMax != null) {
+			d.initialSizeMax = initialSizeMax.toJson();
 		}
-		if(end_size_max != null) {
-			d.end_size_max = end_size_max.to_json();
+		if(endSizeMax != null) {
+			d.endSizeMax = endSizeMax.toJson();
 		}
 
 		return d;
@@ -143,10 +138,10 @@ class SizeLifeModule extends ParticleModule {
 typedef SizeLifeModuleOptions = {
 	
 	>ParticleModuleOptions,
-	@:optional var initial_size : Vector;
-	@:optional var initial_size_max : Vector;
-	@:optional var end_size : Vector;
-	@:optional var end_size_max : Vector;
+	@:optional var initialSize : Vector;
+	@:optional var initialSizeMax : Vector;
+	@:optional var endSize : Vector;
+	@:optional var endSizeMax : Vector;
 
 }
 

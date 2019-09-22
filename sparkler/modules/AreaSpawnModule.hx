@@ -1,9 +1,8 @@
 package sparkler.modules;
 
+
 import sparkler.core.Particle;
-import sparkler.core.ParticleData;
 import sparkler.core.ParticleModule;
-import sparkler.core.Components;
 import sparkler.data.Vector;
 
 using sparkler.utils.VectorExtender;
@@ -25,40 +24,30 @@ class AreaSpawnModule extends ParticleModule {
 		
 	}
 
-	override function onspawn(p:Particle) {
+	override function onSpawn(p:Particle) {
 
-		emitter.show_particle(p);
-		
-		var pd:ParticleData = emitter.get_particle_data(p);
-
-		pd.x = emitter.system.pos.x + emitter.pos.x + (size.x * 0.5 * emitter.random_1_to_1());
-		pd.y = emitter.system.pos.y + emitter.pos.y + (size.y * 0.5 * emitter.random_1_to_1());
-
-	}
-
-	override function onunspawn(p:Particle) {
-
-		emitter.hide_particle(p);
+		p.x = emitter.system.pos.x + emitter.pos.x + (size.x * 0.5 * emitter.random1To1());
+		p.y = emitter.system.pos.y + emitter.pos.y + (size.y * 0.5 * emitter.random1To1());
 
 	}
 
 // import/export
 
-	override function from_json(d:Dynamic) {
+	override function fromJson(d:Dynamic) {
 
-		super.from_json(d);
+		super.fromJson(d);
 
-		size.from_json(d.size);
+		size.fromJson(d.size);
 
 		return this;
 	    
 	}
 
-	override function to_json():Dynamic {
+	override function toJson():Dynamic {
 
-		var d = super.to_json();
+		var d = super.toJson();
 
-		d.size = size.to_json();
+		d.size = size.toJson();
 
 		return d;
 	    
