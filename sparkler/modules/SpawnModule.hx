@@ -1,39 +1,19 @@
 package sparkler.modules;
 
-import sparkler.core.Particle;
-import sparkler.core.ParticleData;
-import sparkler.core.ParticleModule;
+import sparkler.ParticleModule;
+import sparkler.Particle;
 
+@group('spawn')
+class SpawnModule extends ParticleModule<Particle> {
 
-class SpawnModule extends ParticleModule {
-
-
-	public function new(?_options:ParticleModuleOptions) {
-
-		super(_options);
-
-		_priority = -999;
-
+	override function onPreParticleSpawn(p:Particle) {
+		if(localSpace) {
+			p.x = 0;
+			p.y = 0;
+		} else {
+			p.x = getTransformX(_x, _y);
+			p.y = getTransformY(_x, _y);
+		}
 	}
-
-	override function onspawn(p:Particle) {
-
-		emitter.show_particle(p);
-		
-		var pd:ParticleData = emitter.get_particle_data(p);
-
-		pd.x = emitter.system.pos.x + emitter.pos.x;
-		pd.y = emitter.system.pos.y + emitter.pos.y;
-
-	}
-
-	override function onunspawn(p:Particle) {
-
-		emitter.hide_particle(p);
-
-	}
-
-
+	
 }
-
-

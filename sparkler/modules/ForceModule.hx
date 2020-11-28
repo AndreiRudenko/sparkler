@@ -1,127 +1,29 @@
 package sparkler.modules;
 
-import sparkler.core.Particle;
-import sparkler.core.ParticleModule;
-import sparkler.core.Components;
+import sparkler.utils.Vector2;
 import sparkler.components.Velocity;
-import sparkler.modules.helpers.VelocityUpdateModule;
-import sparkler.data.Vector;
+import sparkler.ParticleModule;
+import sparkler.Particle;
 
-using sparkler.utils.VectorExtender;
+@priority(11)
+@group('force')
+class ForceModule extends ParticleModule<Particle<Velocity>> {
 
+	public var force:Vector2;
 
-class ForceModule extends ParticleModule {
-
-
-	public var force(default, null):Vector;
-	public var force_random:Vector;
-
-	var vel_comps:Components<Velocity>;
-
-
-	public function new(_options:ForceModuleOptions) {
-
-		super(_options);
-
-		force = _options.force != null ? _options.force : new Vector();
-		force_random = _options.force_random;
-
+	function new(options:{?force:{x:Float, y:Float}}) {
+		force = options.force != null ? new Vector2(options.force.x, options.force.y) : new Vector2(0, 0);
 	}
 
-	override function init() {
-
-	    if(emitter.get_module(VelocityUpdateModule) == null) {
-			emitter.add_module(new VelocityUpdateModule());
-		}
-
-		vel_comps = emitter.components.get(Velocity);
-
+	override function onParticleUpdate(p:Particle<Velocity>, elapsed:Float) {
+		p.velocity.x += this.force.x * elapsed;
+		p.velocity.y += this.force.y * elapsed;
 	}
 
-	override function ondisabled() {
-		
-		particles.for_each(
-			function(p) {
-				vel_comps.get(p).set(0,0);
-			}
-		);
-		
+	@filter('velocity')
+	override function onPostParticleUpdate(p:Particle<Velocity>, elapsed:Float) {
+		p.x += p.velocity.x * elapsed;
+		p.y += p.velocity.y * elapsed;
 	}
-	
-	override function onremoved() {
-
-		emitter.remove_module(VelocityUpdateModule);
-		vel_comps = null;
-		
-	}
-
-	override function onunspawn(p:Particle) {
-
-		var v:Velocity = vel_comps.get(p);
-		v.set(0,0);
-		
-	}
-
-	override function update(dt:Float) {
-
-		var vel:Vector;
-		for (p in particles) {
-			vel = vel_comps.get(p);
-			vel.x += force.x * dt;
-			vel.y += force.y * dt;
-			if(force_random != null) {
-				vel.x += force_random.x * emitter.random_1_to_1() * dt;
-				vel.y += force_random.y * emitter.random_1_to_1() * dt;
-			}
-		}
-
-	}
-
-
-// import/export
-
-	override function from_json(d:Dynamic) {
-
-		super.from_json(d);
-
-		force.from_json(d.force);
-
-		if(d.force_random != null) {
-			if(force_random == null) {
-				force_random = new Vector();
-			}
-			force_random.from_json(d.force_random);
-		}
-
-		return this;
-	    
-	}
-
-	override function to_json():Dynamic {
-
-		var d = super.to_json();
-
-		d.force = force.to_json();
-
-		if(force_random != null) {
-			d.force_random = force_random.to_json();
-		}
-
-		return d;
-	    
-	}
-
 
 }
-
-
-typedef ForceModuleOptions = {
-
-	>ParticleModuleOptions,
-	
-	@:optional var force : Vector;
-	@:optional var force_random : Vector;
-
-}
-
-

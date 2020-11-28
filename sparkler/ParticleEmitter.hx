@@ -1,744 +1,408 @@
 package sparkler;
 
+// import sparkler.Particle;
+// import sparkler.ParticleData;
+// import sparkler.ParticleModule;
+// import sparkler.core.ParticleVector;
+import sparkler.utils.Vector2;
+import sparkler.utils.Color;
+import sparkler.utils.EitherType3;
+import sparkler.utils.EitherType4;
+import sparkler.Particle;
+// import sparkler.IParticleEmitter;
 
-import sparkler.core.ComponentManager;
-import sparkler.core.Particle;
-import sparkler.core.ParticleData;
-import sparkler.core.ParticleModule;
-import sparkler.core.ParticleVector;
-import sparkler.ParticleSystem;
-import sparkler.data.Vector;
-import sparkler.data.BlendMode;
-import sparkler.utils.ModulesFactory;
-import sparkler.render.EmitterRenderer;
+#if !macro
+@:genericBuild(sparkler.utils.ParticleEmitterMacro.build())
+#end
 
+class ParticleEmitter<Rest> {}
 
-class ParticleEmitter {
+class ParticleEmitterBase<T:ParticleBase> implements IParticleEmitter<T>{
 
+	public var x(get, set):Float;
+	var _x:Float = 0;
+	inline function get_x() return _x;
+	function set_x(v:Float):Float {
+		_lastX = _x;
+		return _x = v;
+	}
 
+	public var y(get, set):Float;
+	var _y:Float = 0;
+	inline function get_y() return _y;
+	function set_y(v:Float):Float {
+		_lastY = _y;
+		return _y = v;
+	}
 
-	public var inited      (default, null):Bool = false;
-		/** if the emitter is active, it will update */
-	public var active:Bool;
-		/** if the emitter is enabled, it's spawn and update modules */
-	public var enabled      (default, null):Bool = false;
-		/** emitter name */
+	var _lastX:Float = 0;
+	var _lastY:Float = 0;
+
+	// emitter name 
 	public var name:String;
-		/** offset from system position */
-	public var pos          (default, null):Vector;
+	// if the emitter is active, it will update
+	public var active:Bool = true;
+	// if the emitter is enabled, it's spawn and update modules
+	public var enabled:Bool = false;
 
-		/** emitter particles */
-	public var particles 	(default, null):ParticleVector;
-		/** particles components */
-	public var components	(default, null):ComponentManager;
-		/** emitter modules */
-	public var modules   	(default, null):Map<String, ParticleModule>;
-		/** active emitter modules */
-	public var active_modules   	(default, null):Array<ParticleModule>;
-		/** reference to system */
-	public var system    	(default, null):ParticleSystem;
+	public var cacheSize(default, null):Int = 512;
+	public var progress(default, null):Float = 0;
+	public var cacheWrap:Bool = false;
+	public var localSpace:Bool = false;
+	public var preprocess:Float = 0;
+	public var loops:Int = 0;
 
-		/** number of particles per emit */
-	public var count:Int; // todo: if cache_size < count
-		/** number of particles per emit max */
-	public var count_max:Int;
+	public var particlesCount(default, null):Int = 0;
+	public var particles:haxe.ds.Vector<T>;
 
-		/** lifetime for particles */
-	public var lifetime:Float;
-		/** max lifetime for particles, if > 0, 
-			particle lifetime is random between lifetime and lifetime_max */
-	public var lifetime_max:Float;
+	public var random:()->Float;
+	public var sortFunc:(a:T, b:T)->Int;
 
-		/** emitter rate, particles per sec */
-	public var rate    	(default, set):Float;
-		/** emitter rate, max particles per sec */
-	public var rate_max	(default, set):Float;
+	var _loopsCounter:Int = 0;
+	var _wrapIdx:Int = 0;
+	var _frameTime:Float = 0;
 
-		/** emitter duration */
-	public var duration    	(default, set):Float;
-		/** emitter duration max*/
-	public var duration_max	(default, set):Float;
-		/** emitter cache size */
-	public var cache_size   (default, null):Int;
-		/** emitter cache wrap */
-	public var cache_wrap:Bool;
+	var _particlesSorted:haxe.ds.Vector<T>;
+	var _particlesSortTmp:haxe.ds.Vector<T>;
 
-		/** emitter random function */
-	public var random:Void->Float;
+	public function new(options:ParticleEmitterOptions) {
+		if(options.x != null) _x = options.x;
+		if(options.y != null) _y = options.y;
 
-		/** emitter particles image path */
-	public var image_path(default, set):String;
+		_lastX = _x;
+		_lastY = _y;
 
-		/** blending src */
-	public var blend_src  (default, set):BlendMode;
-		/** blending dest */
-	public var blend_dest (default, set):BlendMode;
-
-		/** emitter index in particle system */
-	public var index       (default, null):Int = 0;
-
-	@:noCompletion public var particles_data:Array<ParticleData>;
-	@:noCompletion public var options:ParticleEmitterOptions;
-
-	@:noCompletion public var renderer:EmitterRenderer;
-
-	var time:Float;
-	var frame_time:Float;
-	var inv_rate:Float;
-	var inv_rate_max:Float;
-	var _duration:Float;
-	var _need_reset:Bool = true;
-
-
-	public function new(_options:ParticleEmitterOptions) {
-
-		options = _options;
-
-		name = options.name != null ? options.name : 'emitter.${Math.random()}';
-
-		pos = new Vector();
-		modules = new Map();
-		active_modules = [];
-
-		time = 0;
-		frame_time = 0;
-
-		cache_size = options.cache_size != null ? options.cache_size : 128;
-		if(cache_size <= 0) {
-			cache_size = 1;
-		}
-
-		particles = new ParticleVector(cache_size);
-		components = new ComponentManager(cache_size);
-		particles_data = [];
-
-		active = options.active != null ? options.active : true;
-		enabled = options.enabled != null ? options.enabled : true;
-
-		duration = options.duration != null ? options.duration : -1;
-		duration_max = options.duration_max != null ? options.duration_max : -1;
-
-		count = options.count != null ? options.count : 1;
-		count_max = options.count_max != null ? options.count_max : 0;
-
-		lifetime = options.lifetime != null ? options.lifetime : 1;
-		lifetime_max = options.lifetime_max != null ? options.lifetime_max : 0;
-
-		rate = options.rate != null ? options.rate : 10;
-		rate_max = options.rate_max != null ? options.rate_max : 0;
+		if(options.active != null) active = options.active;
+		if(options.enabled != null) enabled = options.enabled;
+		if(options.cacheSize != null) cacheSize = options.cacheSize;
+		if(options.cacheWrap != null) cacheWrap = options.cacheWrap;
+		if(options.localSpace != null) localSpace = options.localSpace;
+		if(options.preprocess != null) preprocess = options.preprocess;
+		if(options.loops != null) loops = options.loops;
 
 		random = options.random != null ? options.random : Math.random;
-
-		image_path = options.image_path;
-		
-		cache_wrap = options.cache_wrap != null ? options.cache_wrap : false;
-
-		if(options.modules != null) {
-			for (m in options.modules) {
-				add_module(m);
-			}
-		}
-		
-		// create modules from data
-		if(options.modules_data != null) {
-			var _classname:String;
-			for (md in options.modules_data) {
-				_classname = md.name;
-				var m = ModulesFactory.create(_classname, md);
-				if(m != null) {
-					add_module(m.from_json(md));
-				}
-			}
-		}
-
+		particles = new haxe.ds.Vector(cacheSize);
+		_particlesSorted = new haxe.ds.Vector(cacheSize);
+		_particlesSortTmp = new haxe.ds.Vector(cacheSize);
 	}
 
-	public function destroy() {
-		
-		for (m in modules) {
-			m.ondestroy();
+	public final function start() {
+		_loopsCounter = 0;
+		startInternal();
+		if(preprocess > 0) {
+			update(preprocess);
 		}
-
-		renderer.destroy();
-		renderer = null;
-
-		components.clear();
-
-		name = null;
-		particles = null;
-		particles_data = null;
-		components = null;
-		modules = null;
-		active_modules = null;
-		system = null;
-
 	}
 
-	public function reset() {
-
-		for (m in modules) {
-			m.onreset();
-		}
-
+	public final function stop() {
+		stopInternal();
 	}
 
-	public function add_module(_module:ParticleModule):ParticleEmitter {
+	public final function update(elapsed:Float) {
+		if(!active) return;
 
-		var cname:String = Type.getClassName(Type.getClass(_module));
+		_frameTime = elapsed;
 
-		if(modules.exists(cname)) {
-			throw('particle module: $cname already exists');
-		}
+		onUpdate(elapsed);
 
-		modules.set(cname, _module);
-		_module._onadded(this);
-
-		if(_module.enabled) {
-			_enable_m(_module);
-		}
-
-		if(inited) {
-			_module._init();
-		}
-
-		return this;
-
+		_lastX = _x;
+		_lastY = _y;
 	}
 
-	public function get_module<T:ParticleModule>(_module_class:Class<T>):T {
-
-		return cast modules.get(Type.getClassName(_module_class));
-		
-	}
-
-	public function remove_module<T:ParticleModule>(_module_class:Class<T>):T {
-
-		var cname:String = Type.getClassName(_module_class);
-
-		var _module:T = cast modules.get(cname);
-
-		if(_module != null) {
-			if(_module.enabled) {
-				_disable_m(_module);
-			}
-
-			modules.remove(cname);
-			_module._onremoved();
-
-			if(_need_reset) {
-				reset_modules();
-			}
-		}
-
-		return _module;
-		
-	}
-
-	public function enable_module(_module_class:Class<Dynamic>) {
-		
-		var cname:String = Type.getClassName(_module_class);
-		var m = modules.get(cname);
-		if(m == null) {
-			throw('module: $cname doesnt exists');
-		}
-
-		if(!m.enabled) {
-			_enable_m(m);
-		}
-
-	}
-
-	public function disable_module(_module_class:Class<Dynamic>) {
-		
-		var cname:String = Type.getClassName(_module_class);
-		var m = modules.get(cname);
-		if(m == null) {
-			throw('module: $cname doesnt exists');
-		}
-
-		if(m.enabled) {
-			_disable_m(m);
-		}
-
-	}
-
-	public function update(dt:Float) {
-
-		if(active) {
-
-			// check lifetime
-			var p:Particle;
-			var pd:ParticleData;
-			var i:Int = 0;
-			var len:Int = particles.length;
-			while(i < len) {
-				p = particles.get(i);
-				pd = particles_data[p.id];
-				pd.lifetime -=dt;
-				if(pd.lifetime <= 0) {
-					unspawn(p);
-					len = particles.length;
-				} else {
-					i++;
-				}
-			}
-
-			if(enabled && rate > 0) {
-
-				frame_time += dt;
-
-				var _inv_rate:Float;
-
-				while(frame_time > 0) {
-
-					_emit();
-
-					if(rate_max > 0) {
-						_inv_rate = random_float(inv_rate, inv_rate_max);
-					} else {
-						_inv_rate = inv_rate;
-					}
-
-					if(_inv_rate == 0) {
-						frame_time = 0;
-						break;
-					}
-
-					frame_time -= _inv_rate;
-
-				}
-
-				time += dt;
-
-				if(_duration >= 0 && time >= _duration) {
-					stop();
-				}
-
-			}
-
-			// update modules
-			for (m in active_modules) {
-				m.update(dt);
-			}
-
-			// update particle changes to sprite 
-			renderer.update(dt);
-
-		}
-		
-	}
-
-	public function emit() {
-
-		_emit();
-
-	}
+	public function emit() {}
 	
-	public function start(?_dur:Float) {
-
+	function startInternal() {
+		progress = 0;
+		_wrapIdx = 0;
 		enabled = true;
-		time = 0;
-		frame_time = 0;
-
-		if(_dur == null) {
-			calc_duration();
-		} else {
-			_duration = _dur;
-		}
-
+		_lastX = _x;
+		_lastY = _y;
+		onStart();
 	}
 
-	public function stop(_kill:Bool = false) {
-
+	function stopInternal() {
 		enabled = false;
-		time = 0;
-		frame_time = 0;
-
-		if(_kill) {
-			unspawn_all();
-		}
-
+		onStop();
 	}
 
-	public function unspawn_all() {
-		
-		for (p in particles) {
-			for (m in modules) {
-				m.onunspawn(p);
-			}
-		}
-		particles.reset();
-
+	function restart() {
+		stopInternal();
+		startInternal();
 	}
 
-	public function pause() {
-		
-		active = false;
-
+	function step(elapsed:Float) {
+		onStepStart(elapsed);
+		onStep(elapsed);
+		onStepEnd(elapsed);
 	}
 
-	public function unpause() {
-
-		active = true;
-		
-	}
-
-	public function unspawn(p:Particle) {
-
-		particles.remove(p);
-		_unspawn_particle(p);
-		
-	}
-
-	@:allow(sparkler.ParticleSystem)
-	function init(_ps:ParticleSystem) {
-
-		system = _ps;
-
-		if(ParticleSystem.renderer == null) {
-			throw('you need to specify ParticleSystem renderer');
-		}
-
-		renderer = ParticleSystem.renderer.get(this);
-		renderer.init();
-
-		for (i in 0...particles.capacity) {
-			particles_data.push(new ParticleData());
-		}
-
-		inited = true;
-
-		for (m in modules) {
-			m._init();
-		}
-
-		if(options.blend_src != null) {
-			blend_src = options.blend_src;
-		}
-
-		if(options.blend_dest != null) {
-			blend_dest = options.blend_dest;
-		}
-
-	}
-
-	function _emit() {
-
-		var _count:Int;
-
-		if(count_max > 0) {
-			_count = random_int(count, count_max);
-		} else {
-			_count = count;
-		}
-
-		_count = _count > cache_size ? cache_size : _count;
-
-		for (_ in 0..._count) {
-			spawn();
-		}
-
-	}
-
-	function reset_modules() { // todo: remove this?
-
-		_need_reset = false;
-
-		for (m in active_modules) {
-			m.ondisabled();
-		}
-
-		for (m in modules) {
-			m._onremoved();
-		}
-
-		for (m in modules) {
-			m._onadded(this);
-		}
-
-		for (m in active_modules) {
-			m.onenabled();
-		}
-
-		for (m in modules) {
-			m._init();
-		}
-		
-		_need_reset = true;
-
-	}
-
-	inline function _enable_m(m:ParticleModule) {
-		
-		var added:Bool = false;
-		var am:ParticleModule = null;
-		for (i in 0...active_modules.length) {
-			am = active_modules[i];
-			if (m.priority <= am.priority) {
-				active_modules.insert(i,m);
-				added = true;
-				break;
-			}
-		}
-		
-		if(!added) {
-			active_modules.push(m);
-		}
-
-		m.onenabled();
-
-	}
-
-	inline function _disable_m(m:ParticleModule) {
-
-		m.ondisabled();
-		active_modules.remove(m);
-		
-	}
-
-	inline function _sort_active() {
-
-		haxe.ds.ArraySort.sort(
-			active_modules,
-			function(a,b) {
-				if (a.priority < b.priority) {
-					return -1;
-				} else if (a.priority > b.priority) {
-					return 1;
-				}
-				return 0;
-			}
-		);
-		
-	}
-
-	inline function spawn() {
-
-		if(particles.length < particles.capacity) {
-			_spawn_particle(particles.ensure());
-		} else if(cache_wrap) {
-			var p:Particle = particles.wrap();
-			_unspawn_particle(p);
-			_spawn_particle(p);
-		}
-
-	}
-
-	inline function _spawn_particle(p:Particle) {
-
-		for (m in active_modules) {
-			if(lifetime_max > 0) {
-				particles_data[p.id].lifetime = random_float(lifetime, lifetime_max);
+	function updateParticles(elapsed:Float) {
+		var p:T;
+		var i:Int = 0;
+		var len:Int = particlesCount;
+		var timeLeft:Float = 0;
+		while(i < len) {
+			p = particles[i];
+			if(p.age + elapsed >= p.lifetime) {
+				timeLeft = (p.age + elapsed) - p.lifetime;
+				if(timeLeft > 0) onParticleUpdate(p, timeLeft);
+				p.age += timeLeft;
+				unspawn(p);
+				len = particlesCount;
 			} else {
-				particles_data[p.id].lifetime = lifetime;
+				p.age += elapsed;
+				onParticleUpdate(p, elapsed);
+				i++;
 			}
-			m.onspawn(p);
 		}
-		
 	}
 
-	inline function _unspawn_particle(p:Particle) {
-		
-		for (m in active_modules) {
-			m.onunspawn(p);
+	function getSorted():haxe.ds.Vector<T> {
+		if(sortFunc != null) {
+			var i:Int = 0;
+			while(i < particlesCount) {
+				_particlesSorted[i] = particles[i];
+				i++;
+			}
+			sort(_particlesSorted, _particlesSortTmp, 0, particlesCount-1, sortFunc);
+			return _particlesSorted;
+		} else {
+			return particles;
 		}
-
 	}
 
-	@:allow(sparkler.core.ParticleModule)
-	inline function show_particle(p:Particle) { 
-
-		renderer.onparticleshow(p);
-
+	final function spawn() {
+		if(particlesCount < cacheSize) {
+			var p = particles[particlesCount];
+			particlesCount++;
+			spawnParticle(p);
+		} else if(cacheWrap) {
+			var lastIdx = particlesCount-1;
+			swapParticles(_wrapIdx % lastIdx, lastIdx);
+			_wrapIdx++;
+			var p = particles[lastIdx];
+			unspawnParticle(p);
+			spawnParticle(p);
+		}
 	}
 
-	@:allow(sparkler.core.ParticleModule)
-	inline function hide_particle(p:Particle) { 
-
-		renderer.onparticlehide(p);
-
+	final function unspawn(p:T) {
+		swapParticles(p.index, particlesCount-1);
+		particlesCount--;
 	}
 
-	@:allow(sparkler.core.ParticleModule)
-	inline function get_particle_data(p:Particle) { 
+	final function swapParticles(a:Int, b:Int) {
+		var pA = particles[a];
+		var pB = particles[b];
 
-		return particles_data[p.id];
+		particles[a] = pB;
+		particles[b] = pA;
 
+		pB.index = a;
+		pA.index = b;
 	}
 
-	@:allow(sparkler.core.ParticleModule)
-	inline function random_1_to_1(){ 
+	// final function swapParticles(a:Int, b:Int) {
+	// 	var pA = particles[a];
+	// 	var pB = particles[b];
 
+	// 	particles[pA.index] = pB;
+	// 	particles[pB.index] = pA;
+
+	// 	var tmp = pB.index;
+	// 	pB.index = pA.index;
+	// 	pA.index = tmp;
+	// }
+
+	inline function spawnParticle(p:T) {
+		p.age = 0;
+		onParticleSpawn(p);
+	}
+
+	inline function unspawnParticle(p:T) {
+		onParticleUnspawn(p);
+	}
+
+	function onStart() {}
+	function onStop() {}
+	function onUpdate(elapsed:Float) {}
+	function onStepStart(elapsed:Float) {}
+	function onStep(elapsed:Float) {}
+	function onStepEnd(elapsed:Float) {}
+	function onParticleUpdate(p:T, elapsed:Float) {}
+	function onParticleSpawn(p:T) {}
+	function onParticleUnspawn(p:T) {}
+
+	final function getTransformX(x:Float, y:Float):Float {
+		// return combined.getTransformX(x, y);
+		return x;
+	}
+
+	final function getTransformY(x:Float, y:Float):Float {
+		// return combined.getTransformY(x, y);
+		return y;
+	}
+
+	final function random1To1(){ 
 		return random() * 2 - 1; 
-
 	}
 
-	@:allow(sparkler.core.ParticleModule)
-	inline function random_int(min:Float, ?max:Null<Float>=null):Int {
-
-		return Math.floor(random_float(min, max));
-
+	final function randomInt(min:Float, ?max:Null<Float>):Int {
+		return Math.floor(randomFloat(min, max));
 	}
 
-	@:allow(sparkler.core.ParticleModule)
-	inline function random_float(min:Float, ?max:Null<Float>=null):Float {
+    final function randomFloat(min:Float, ?max:Null<Float>):Float {
+        if(max == null) { max = min; min = 0; }
+        return random() * (max - min) + min;
+    }
 
-		if(max == null) { 
-			max = min; 
-			min = 0; 
+	// merge sort
+	function sort(a:haxe.ds.Vector<T>, aux:haxe.ds.Vector<T>, l:Int, r:Int, compare:(p1:T, p2:T)->Int) { 
+		if (l < r) {
+			var m = Std.int(l + (r - l) / 2);
+			sort(a, aux, l, m, compare);
+			sort(a, aux, m + 1, r, compare);
+			merge(a, aux, l, m, r, compare);
+		}
+	}
+
+	inline function merge(a:haxe.ds.Vector<T>, aux:haxe.ds.Vector<T>, l:Int, m:Int, r:Int, compare:(p1:T, p2:T)->Int) { 
+		var k = l;
+		while (k <= r) {
+			aux[k] = a[k];
+			k++;
 		}
 
-		return random() * ( max - min ) + min;
-		
-	}
-
-	inline function calc_duration() {
-
-		if(duration >= 0 && duration_max > duration) {
-			_duration = random_float(duration, duration_max);
-		} else {
-			_duration = duration;
+		k = l;
+		var i = l;
+		var j = m + 1;
+		while (k <= r) {
+			if (i > m) a[k] = aux[j++];
+			else if (j > r) a[k] = aux[i++];
+			else if (compare(aux[j], aux[i]) < 0) a[k] = aux[j++];
+			else a[k] = aux[i++];
+			k++;
 		}
-		
 	}
 
-	function set_rate(value:Float):Float {
 
-		if(value > 0) {
-			inv_rate = 1 / value;
-		} else {
-			value = 0;
-			inv_rate = 0;
-		}
-
-		return rate = value;
-
-	}
-
-	function set_rate_max(value:Float):Float {
-
-		if(value > 0) {
-			inv_rate_max = 1 / value;
-		} else {
-			value = 0;
-			inv_rate_max = 0;
-		}
-
-		return rate_max = value;
-
-	}
-
-	function set_duration(value:Float):Float {
-
-		duration = value;
-		
-		calc_duration();
-
-		return duration;
-
-	}
-
-	function set_duration_max(value:Float):Float {
-
-		duration_max = value;
-
-		calc_duration();
-
-		return duration_max;
-
-	}
-
-	function set_image_path(t:String):String {
-
-		image_path = t;
-
-		if(renderer != null) {
-			renderer.ontexture(image_path);
-		}
-
-		return image_path;
-
-	}
-	
-	function set_blend_src(val:BlendMode)  {
-
-		if(renderer != null) {
-			renderer.onblendsrc(val);
-		}
-
-		return blend_src = val;
-
-	}
-
-	function set_blend_dest(val:BlendMode) {
-
-		if(renderer != null) {
-			renderer.onblenddest(val);
-		}
-
-		return blend_dest = val;
-
-	}
-
-	@:access(sparkler.core.ComponentManager)
-	@:noCompletion public function to_json():ParticleEmitterOptions {
-
-		var _modules:Array<Dynamic> = [];
-		for (m in modules) {
-			_modules.push(m.to_json());
-		}
-
-		return { 
-			name : name, 
-			active : active, 
-			enabled : enabled, 
-			cache_wrap : cache_wrap, 
-			cache_size : particles.capacity, 
-			count : count, 
-			count_max : count_max, 
-			lifetime : lifetime, 
-			lifetime_max : lifetime_max, 
-			rate : rate, 
-			rate_max : rate_max, 
-			duration : duration, 
-			duration_max : duration_max, 
-			image_path : image_path, 
-			blend_src : blend_src, 
-			blend_dest : blend_dest, 
-			modules_data : _modules
-		};
-		
-	}
 
 }
+
+interface IParticleEmitter<T:ParticleBase> {
+
+	public var cacheSize(default, null):Int;
+	public var particlesCount(default, null):Int;
+	public var progress(default, null):Float;
+	public var localSpace:Bool;
+	public var enabled:Bool;
+	public var particles:haxe.ds.Vector<T>;
+	public var loops:Int;
+	public var random:()->Float;
+	public var sortFunc:(a:T, b:T)->Int;
+
+	private var _x:Float;
+	private var _y:Float;
+	private var _lastX:Float;
+	private var _lastY:Float;
+	private var _frameTime:Float;
+	private var _loopsCounter:Int;
+
+	public function emit():Void;
+	public function start():Void;
+	public function stop():Void;
+	private function updateParticles(elapsed:Float):Void;
+	private function getSorted():haxe.ds.Vector<T>;
+	private function restart():Void;
+	private function spawn():Void;
+	private function unspawn(p:T):Void;
+	private function step(elapsed:Float):Void;
+
+	private function onUpdate(elapsed:Float):Void;
+	private function onStepStart(elapsed:Float):Void;
+	private function onStep(elapsed:Float):Void;
+	private function onStepEnd(elapsed:Float):Void;
+	private function onStart():Void;
+	private function onStop():Void;
+
+	private function onParticleUpdate(p:T, elapsed:Float):Void;
+	private function onParticleSpawn(p:T):Void;
+	private function onParticleUnspawn(p:T):Void;
+
+	private function getTransformX(x:Float, y:Float):Float;
+	private function getTransformY(x:Float, y:Float):Float;
+
+	private function random1To1():Float;
+	private function randomInt(min:Float, ?max:Null<Float>):Int;
+    private function randomFloat(min:Float, ?max:Null<Float>):Float;
+    
+}
+
+typedef Vec2Type = {x:Float, y:Float};
+typedef RangeType<T> = {min:T, max:T};
+typedef ListType<T> = Array<{time:Float, value:T}>;
 
 typedef ParticleEmitterOptions = {
+	?name:String,
+	?x:Float,
+	?y:Float,
 
-	@:optional var name:String;
+	?active:Bool,
+	?enabled:Bool,
+	?cacheSize:Int,
+	?cacheWrap:Bool,
+	?localSpace:Bool,
+	?preprocess:Float,
 
-	@:optional var active:Bool;
-	@:optional var enabled:Bool;
+	// ?duration:EitherType<Float, RangeType<Float>>,
+	?loops:Int,
 
-	@:optional var cache_wrap:Bool;
-	@:optional var cache_size:Int;
-	@:optional var count:Int;
-	@:optional var count_max:Int;
-	@:optional var lifetime:Float;
-	@:optional var lifetime_max:Float;
-	@:optional var rate:Float;
-	@:optional var rate_max:Float;
-	@:optional var duration:Float;
-	@:optional var duration_max:Float;
+	// ?rateType:RateType,
+	// ?rate:EitherType4<Int, RangeType<Int>, ListType<Int>, ListType<RangeType<Int>>>,
+	// ?particlesPerSpawn:EitherType4<Int, RangeType<Int>, ListType<Int>, ListType<RangeType<Int>>>,
+	// ?lifetime:EitherType4<Float, RangeType<Float>, ListType<Float>, ListType<RangeType<Float>>>,
 
-	@:optional var image_path:String;
+	?random:()->Float,
 
-	@:optional var blend_src:BlendMode;
-	@:optional var blend_dest:BlendMode;
-	@:optional var modules:Array<ParticleModule>;
+	// ?spawn:{type:SpawnType, ?options:Dynamic},
+	// ?renderer:{type:RendererType, ?options:Dynamic},
 
-	@:optional var modules_data:Array<Dynamic>; // used for json import
-	@:optional var random:Void -> Float;
-	@:optional var options: Dynamic;
+	// ?rotateToDirection:Bool,
+	// ?rotate:EitherType4<Float, RangeType<Float>, ListType<Float>, ListType<RangeType<Float>>>,
+	// ?rotateBySpeed:{values:ListType<Float>, minSpeed:Float, maxSpeed:Float},
 
+	// ?scale:EitherType4<Float, RangeType<Float>, ListType<Float>, ListType<RangeType<Float>>>,
+	// ?scaleBySpeed:{values:ListType<Float>, minSpeed:Float, maxSpeed:Float},
+
+	// ?size:EitherType4<Vec2Type, RangeType<Vec2Type>, ListType<Vec2Type>, ListType<RangeType<Vec2Type>>>,
+	// ?sizeBySpeed:{values:ListType<Vec2Type>, minSpeed:Vec2Type, maxSpeed:Vec2Type},
+
+	// ?color:EitherType4<Color, RangeType<Color>, ListType<Color>, ListType<RangeType<Color>>>,
+
+	// ?angularVelocity:EitherType4<Float, RangeType<Float>, ListType<Float>, ListType<RangeType<Float>>>,
+	// ?angularDrag:EitherType4<Float, RangeType<Float>, ListType<Float>, ListType<RangeType<Float>>>,
+
+	// ?velocity:EitherType4<Vec2Type, RangeType<Vec2Type>, ListType<Vec2Type>, ListType<RangeType<Vec2Type>>>,
+	// ?force:EitherType4<Vec2Type, RangeType<Vec2Type>, ListType<Vec2Type>, ListType<RangeType<Vec2Type>>>,
+	// ?drag:EitherType4<Float, RangeType<Float>, ListType<Float>, ListType<RangeType<Float>>>,
 }
+
+// enum abstract SpawnType(String) from String to String {
+// 	var POINT = 'point';
+// 	var AREA = 'area';
+// 	var CIRCLE = 'circle';
+// 	var RING = 'ring';
+// 	var POLYLINE = 'polyline';
+// 	// var POLYGON = 'polygon';
+// }
+
+// enum abstract RendererType(String) from String to String {
+// 	var SPRITE = 'sprite';
+// }
+
+// enum abstract RateType(String) from String to String {
+// 	var TIME = 'time';
+// 	var DISTANCE = 'distance';
+// }
+
 
