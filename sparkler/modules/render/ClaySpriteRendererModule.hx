@@ -38,7 +38,7 @@ class ClaySpriteRendererModule extends ParticleInjectModule {
 		var optFields = options.optFields;
 
 		var textureOptVar = MacroUtils.buildVar(
-			'spriteRenderer', 
+			'claySpriteRenderer', 
 			[Access.APublic], 
 			macro: {
 				?texture:clay.graphics.Texture
@@ -48,13 +48,13 @@ class ClaySpriteRendererModule extends ParticleInjectModule {
 		);
 		optFields.push(textureOptVar);
 
-		var spriteRendererVar = MacroUtils.buildVar('spriteRenderer', [Access.APublic], macro: sparkler.modules.render.ClaySpriteRendererModule.ClaySpriteRenderer);
-		fields.push(spriteRendererVar);
+		var claySpriteRendererVar = MacroUtils.buildVar('claySpriteRenderer', [Access.APublic], macro: sparkler.modules.render.ClaySpriteRendererModule.ClaySpriteRenderer);
+		fields.push(claySpriteRendererVar);
 
 		newExprs.push(macro {
-			spriteRenderer = new sparkler.modules.render.ClaySpriteRendererModule.ClaySpriteRenderer();
-			if(options.spriteRenderer != null) {
-				if(options.spriteRenderer.texture != null) spriteRenderer.texture = options.spriteRenderer.texture;
+			claySpriteRenderer = new sparkler.modules.render.ClaySpriteRendererModule.ClaySpriteRenderer();
+			if(options.claySpriteRenderer != null) {
+				if(options.claySpriteRenderer.texture != null) claySpriteRenderer.texture = options.claySpriteRenderer.texture;
 			}
 		});
 
@@ -137,13 +137,13 @@ class ClaySpriteRendererModule extends ParticleInjectModule {
 			[macro {
 				if(activeCount > 0) {
 					var sortedParticles = getSorted();
-					var texture = spriteRenderer.texture;
-					var drawMatrix = spriteRenderer._drawMatrix;
+					var texture = claySpriteRenderer.texture;
+					var drawMatrix = claySpriteRenderer._drawMatrix;
 
 					if(localSpace) {
-						spriteRenderer._transformPrev.copyFrom(batcher.transform);
-						spriteRenderer._transform.set(_a, _b, _c, _d, _tx, _ty);
-						batcher.transform = spriteRenderer._transform;
+						claySpriteRenderer._transformPrev.copyFrom(batcher.transform);
+						claySpriteRenderer._transform.set(_a, _b, _c, _d, _tx, _ty);
+						batcher.transform = claySpriteRenderer._transform;
 					}
 
 					$b{preExprs}
@@ -171,7 +171,7 @@ class ClaySpriteRendererModule extends ParticleInjectModule {
 					}
 
 					if(localSpace) {
-						batcher.transform = spriteRenderer._transformPrev;
+						batcher.transform = claySpriteRenderer._transformPrev;
 					}
 				}
 			}]

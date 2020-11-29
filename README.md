@@ -38,7 +38,7 @@ var emitter = new ParticleEmitter<
 		]
 	},
 	velocity: {x: 0, y: -200},
-	spriteRenderer: {
+	khaSpriteRenderer: {
 		image: kha.Assets.images.particle
 	},
 	sortFunc: function(a, b) {

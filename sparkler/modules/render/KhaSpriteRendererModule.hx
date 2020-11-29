@@ -42,7 +42,7 @@ class KhaSpriteRendererModule extends ParticleInjectModule {
 		var optFields = options.optFields;
 
 		var imageOptVar = MacroUtils.buildVar(
-			'spriteRenderer', 
+			'khaSpriteRenderer', 
 			[Access.APublic], 
 			macro: {
 				?image:kha.Image
@@ -52,13 +52,13 @@ class KhaSpriteRendererModule extends ParticleInjectModule {
 		);
 		optFields.push(imageOptVar);
 
-		var spriteRendererVar = MacroUtils.buildVar('spriteRenderer', [Access.APublic], macro: sparkler.modules.render.KhaSpriteRendererModule.KhaSpriteRenderer);
-		fields.push(spriteRendererVar);
+		var khaSpriteRendererVar = MacroUtils.buildVar('khaSpriteRenderer', [Access.APublic], macro: sparkler.modules.render.KhaSpriteRendererModule.KhaSpriteRenderer);
+		fields.push(khaSpriteRendererVar);
 
 		newExprs.push(macro {
-			spriteRenderer = new sparkler.modules.render.KhaSpriteRendererModule.KhaSpriteRenderer();
-			if(options.spriteRenderer != null) {
-				if(options.spriteRenderer.image != null) spriteRenderer.image = options.spriteRenderer.image;
+			khaSpriteRenderer = new sparkler.modules.render.KhaSpriteRendererModule.KhaSpriteRenderer();
+			if(options.khaSpriteRenderer != null) {
+				if(options.khaSpriteRenderer.image != null) khaSpriteRenderer.image = options.khaSpriteRenderer.image;
 			}
 		});
 
@@ -141,11 +141,11 @@ class KhaSpriteRendererModule extends ParticleInjectModule {
 			[macro {
 				if(activeCount > 0) {
 					var sortedParticles = getSorted();
-					var image = spriteRenderer.image;
-					if(image == null) image = spriteRenderer._imageDefault;
+					var image = khaSpriteRenderer.image;
+					if(image == null) image = khaSpriteRenderer._imageDefault;
 
 					if(localSpace) {
-						var t = spriteRenderer._transform;
+						var t = khaSpriteRenderer._transform;
 						t._00 = _a;
 						t._01 = _b;
 						t._10 = _c;
