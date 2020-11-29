@@ -6,7 +6,7 @@ import haxe.macro.Context;
 
 class ParticleInjectModuleMacro {
 
-	static public function build():Array<Field> {
+	static public function build() {
 		var fields = Context.getBuildFields();
 		return fields;
 	}
