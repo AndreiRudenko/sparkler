@@ -11,7 +11,7 @@ import sparkler.utils.Color;
 class ParticleModule<T:ParticleBase> implements IParticleEmitter<T> {
 
 	public var cacheSize(default, null):Int;
-	public var particlesCount(default, null):Int;
+	public var activeCount(default, null):Int;
 	public var progress(default, null):Float;
 	public var loops:Int;
 	public var localSpace:Bool;
@@ -30,6 +30,7 @@ class ParticleModule<T:ParticleBase> implements IParticleEmitter<T> {
 	public function emit() {}
 	public function start() {}
 	public function stop() {}
+	
 	function updateParticles(elapsed:Float) {}
 	function getSorted():haxe.ds.Vector<T> return null;
 	function step(elapsed:Float) {}
@@ -49,8 +50,8 @@ class ParticleModule<T:ParticleBase> implements IParticleEmitter<T> {
 	function onParticleSpawn(p:T) {}
 	function onParticleUnspawn(p:T) {}
 
-	function getTransformX(x:Float, y:Float) return 0;
-	function getTransformY(x:Float, y:Float) return 0;
+	function getTransformX(x:Float, y:Float) return 0.0;
+	function getTransformY(x:Float, y:Float) return 0.0;
 
 	function random1To1() return 0;
 	function randomInt(min:Float, ?max:Null<Float>) return 0;

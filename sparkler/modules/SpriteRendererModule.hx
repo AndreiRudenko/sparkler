@@ -51,15 +51,11 @@ class SpriteRendererModule extends ParticleInjectModule {
 		var newExprs = options.newExprs;
 		var optFields = options.optFields;
 
-		// var pct = Context.toComplexType(particleType);
-
 		var imageOptVar = MacroUtils.buildVar(
 			'spriteRenderer', 
 			[Access.APublic], 
 			macro: {
-				image:String, 
-				// ?sortMode:sparkler.utils.SortMode,
-				// ?sortFunc:(a:$pct, b:$pct)->Int
+				image:String
 			}, 
 			null, 
 			[{name: ':optional', pos: pos}]
@@ -139,23 +135,29 @@ class SpriteRendererModule extends ParticleInjectModule {
 			);
 		}
 
+		// if(MacroUtils.hasField(fields, 'transform')) {
+		// 	preExprs.push(
+		// 		macro {
+		// 			if(localSpace) {
+		// 				batcher.transform.copyFrom(transform);
+		// 			}
+		// 		}
+		// 	);
+		// }
+
 		var drawFunc = MacroUtils.buildFunction(
 			'draw', 
 			[Access.APublic], 
 			[{name: 'batcher', type: macro: clay.graphics.batchers.SpriteBatch}], // batcher
 			macro: Void,
 			[macro {
-				if(particlesCount > 0) {
+				if(activeCount > 0) {
 					var sortedParticles = getSorted();
 					var texture = spriteRenderer._texture;
-					// if(localSpace) {
-						// batcher.transform.copyFrom(combined);
-					// }
-
 					$b{preExprs}
 					var p;
 					var i:Int = 0;
-					while(i < particlesCount) {
+					while(i < activeCount) {
 						p = sortedParticles[i];
 						$b{exprs}
 						batcher.drawImage(

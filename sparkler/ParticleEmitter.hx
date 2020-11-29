@@ -52,7 +52,7 @@ class ParticleEmitterBase<T:ParticleBase> implements IParticleEmitter<T>{
 	public var preprocess:Float = 0;
 	public var loops:Int = 0;
 
-	public var particlesCount(default, null):Int = 0;
+	public var activeCount(default, null):Int = 0;
 	public var particles:haxe.ds.Vector<T>;
 
 	public var random:()->Float;
@@ -110,6 +110,13 @@ class ParticleEmitterBase<T:ParticleBase> implements IParticleEmitter<T>{
 	}
 
 	public function emit() {}
+
+	public function unspawnAll() {
+		for (i in 0...activeCount) {
+			onParticleUnspawn(particles[i]);
+		}
+		activeCount = 0;
+	}
 	
 	function startInternal() {
 		progress = 0;
@@ -139,7 +146,7 @@ class ParticleEmitterBase<T:ParticleBase> implements IParticleEmitter<T>{
 	function updateParticles(elapsed:Float) {
 		var p:T;
 		var i:Int = 0;
-		var len:Int = particlesCount;
+		var len:Int = activeCount;
 		var timeLeft:Float = 0;
 		while(i < len) {
 			p = particles[i];
@@ -148,7 +155,7 @@ class ParticleEmitterBase<T:ParticleBase> implements IParticleEmitter<T>{
 				if(timeLeft > 0) onParticleUpdate(p, timeLeft);
 				p.age += timeLeft;
 				unspawn(p);
-				len = particlesCount;
+				len = activeCount;
 			} else {
 				p.age += elapsed;
 				onParticleUpdate(p, elapsed);
@@ -157,27 +164,13 @@ class ParticleEmitterBase<T:ParticleBase> implements IParticleEmitter<T>{
 		}
 	}
 
-	function getSorted():haxe.ds.Vector<T> {
-		if(sortFunc != null) {
-			var i:Int = 0;
-			while(i < particlesCount) {
-				_particlesSorted[i] = particles[i];
-				i++;
-			}
-			sort(_particlesSorted, _particlesSortTmp, 0, particlesCount-1, sortFunc);
-			return _particlesSorted;
-		} else {
-			return particles;
-		}
-	}
-
 	final function spawn() {
-		if(particlesCount < cacheSize) {
-			var p = particles[particlesCount];
-			particlesCount++;
+		if(activeCount < cacheSize) {
+			var p = particles[activeCount];
+			activeCount++;
 			spawnParticle(p);
 		} else if(cacheWrap) {
-			var lastIdx = particlesCount-1;
+			var lastIdx = activeCount-1;
 			swapParticles(_wrapIdx % lastIdx, lastIdx);
 			_wrapIdx++;
 			var p = particles[lastIdx];
@@ -187,8 +180,8 @@ class ParticleEmitterBase<T:ParticleBase> implements IParticleEmitter<T>{
 	}
 
 	final function unspawn(p:T) {
-		swapParticles(p.index, particlesCount-1);
-		particlesCount--;
+		swapParticles(p.index, activeCount-1);
+		activeCount--;
 	}
 
 	final function swapParticles(a:Int, b:Int) {
@@ -202,18 +195,6 @@ class ParticleEmitterBase<T:ParticleBase> implements IParticleEmitter<T>{
 		pA.index = b;
 	}
 
-	// final function swapParticles(a:Int, b:Int) {
-	// 	var pA = particles[a];
-	// 	var pB = particles[b];
-
-	// 	particles[pA.index] = pB;
-	// 	particles[pB.index] = pA;
-
-	// 	var tmp = pB.index;
-	// 	pB.index = pA.index;
-	// 	pA.index = tmp;
-	// }
-
 	inline function spawnParticle(p:T) {
 		p.age = 0;
 		onParticleSpawn(p);
@@ -221,6 +202,20 @@ class ParticleEmitterBase<T:ParticleBase> implements IParticleEmitter<T>{
 
 	inline function unspawnParticle(p:T) {
 		onParticleUnspawn(p);
+	}
+
+	function getSorted():haxe.ds.Vector<T> {
+		if(sortFunc != null) {
+			var i:Int = 0;
+			while(i < activeCount) {
+				_particlesSorted[i] = particles[i];
+				i++;
+			}
+			sort(_particlesSorted, _particlesSortTmp, 0, activeCount-1, sortFunc);
+			return _particlesSorted;
+		} else {
+			return particles;
+		}
 	}
 
 	function onStart() {}
@@ -233,13 +228,11 @@ class ParticleEmitterBase<T:ParticleBase> implements IParticleEmitter<T>{
 	function onParticleSpawn(p:T) {}
 	function onParticleUnspawn(p:T) {}
 
-	final function getTransformX(x:Float, y:Float):Float {
-		// return combined.getTransformX(x, y);
+	function getTransformX(x:Float, y:Float):Float {
 		return x;
 	}
 
-	final function getTransformY(x:Float, y:Float):Float {
-		// return combined.getTransformY(x, y);
+	function getTransformY(x:Float, y:Float):Float {
 		return y;
 	}
 
@@ -251,10 +244,10 @@ class ParticleEmitterBase<T:ParticleBase> implements IParticleEmitter<T>{
 		return Math.floor(randomFloat(min, max));
 	}
 
-    final function randomFloat(min:Float, ?max:Null<Float>):Float {
-        if(max == null) { max = min; min = 0; }
-        return random() * (max - min) + min;
-    }
+	final function randomFloat(min:Float, ?max:Null<Float>):Float {
+		if(max == null) { max = min; min = 0; }
+		return random() * (max - min) + min;
+	}
 
 	// merge sort
 	function sort(a:haxe.ds.Vector<T>, aux:haxe.ds.Vector<T>, l:Int, r:Int, compare:(p1:T, p2:T)->Int) { 
@@ -285,14 +278,12 @@ class ParticleEmitterBase<T:ParticleBase> implements IParticleEmitter<T>{
 		}
 	}
 
-
-
 }
 
 interface IParticleEmitter<T:ParticleBase> {
 
 	public var cacheSize(default, null):Int;
-	public var particlesCount(default, null):Int;
+	public var activeCount(default, null):Int;
 	public var progress(default, null):Float;
 	public var localSpace:Bool;
 	public var enabled:Bool;
@@ -334,8 +325,8 @@ interface IParticleEmitter<T:ParticleBase> {
 
 	private function random1To1():Float;
 	private function randomInt(min:Float, ?max:Null<Float>):Int;
-    private function randomFloat(min:Float, ?max:Null<Float>):Float;
-    
+	private function randomFloat(min:Float, ?max:Null<Float>):Float;
+	
 }
 
 typedef Vec2Type = {x:Float, y:Float};
