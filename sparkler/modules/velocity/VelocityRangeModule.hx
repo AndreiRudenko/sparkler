@@ -1,4 +1,4 @@
-package sparkler.modules;
+package sparkler.modules.velocity;
 
 import sparkler.utils.Vector2;
 import sparkler.components.Velocity;

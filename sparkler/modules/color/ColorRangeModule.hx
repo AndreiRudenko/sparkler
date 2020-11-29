@@ -1,4 +1,4 @@
-package sparkler.modules;
+package sparkler.modules.color;
 
 import sparkler.utils.Color;
 import sparkler.ParticleModule;

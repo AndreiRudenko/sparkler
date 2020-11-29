@@ -1,7 +1,6 @@
-package sparkler.modules;
+package sparkler.modules.scale;
 
 import sparkler.components.ScalePropertyList;
-// import sparkler.utils.FloatPropertyList;
 import sparkler.components.Scale;
 import sparkler.ParticleModule;
 import sparkler.Particle;
@@ -26,7 +25,7 @@ class ScaleOverLifeTimeModule extends ParticleModule<Particle<Scale, ScaleProper
 
 	@filter('_lerp')
 	override function onPreParticleUpdate(p:Particle<Scale, ScalePropertyList>, elapsed:Float) {
-		_lerp = p.age / p.lifetime;
+		_lerp = p.age / p.lifeTime;
 	}
 
 	override function onParticleUpdate(p:Particle<Scale, ScalePropertyList>, elapsed:Float) {

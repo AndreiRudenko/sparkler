@@ -1,4 +1,4 @@
-package sparkler.modules;
+package sparkler.modules.color;
 
 import sparkler.components.ColorPropertyList;
 import sparkler.components.Color;
@@ -25,7 +25,7 @@ class ColorOverLifeTimeModule extends ParticleModule<Particle<Color, ColorProper
 
 	@filter('_lerp')
 	override function onPreParticleUpdate(p:Particle<Color, ColorPropertyList>, elapsed:Float) {
-		_lerp = p.age / p.lifetime;
+		_lerp = p.age / p.lifeTime;
 	}
 
 	override function onParticleUpdate(p:Particle<Color, ColorPropertyList>, elapsed:Float) {

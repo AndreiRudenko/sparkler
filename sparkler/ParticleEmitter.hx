@@ -1,18 +1,10 @@
 package sparkler;
 
-// import sparkler.Particle;
-// import sparkler.ParticleData;
-// import sparkler.ParticleModule;
-// import sparkler.core.ParticleVector;
-import sparkler.utils.Vector2;
 import sparkler.utils.Color;
-import sparkler.utils.EitherType3;
-import sparkler.utils.EitherType4;
 import sparkler.Particle;
-// import sparkler.IParticleEmitter;
 
 #if !macro
-@:genericBuild(sparkler.utils.ParticleEmitterMacro.build())
+@:genericBuild(sparkler.utils.macro.ParticleEmitterMacro.build())
 #end
 
 class ParticleEmitter<Rest> {}
@@ -38,6 +30,14 @@ class ParticleEmitterBase<T:ParticleBase> implements IParticleEmitter<T>{
 	var _lastX:Float = 0;
 	var _lastY:Float = 0;
 
+	public var rotation:Float = 0;
+
+	public var scaleX:Float = 1;
+	public var scaleY:Float = 1;
+
+	public var originX:Float = 0;
+	public var originY:Float = 0;
+
 	// emitter name 
 	public var name:String;
 	// if the emitter is active, it will update
@@ -62,6 +62,18 @@ class ParticleEmitterBase<T:ParticleBase> implements IParticleEmitter<T>{
 	var _wrapIdx:Int = 0;
 	var _frameTime:Float = 0;
 
+	// matrix
+	var _a:Float = 0;
+	var _b:Float = 0;
+	var _c:Float = 0;
+	var _d:Float = 0;
+	var _tx:Float = 0;
+	var _ty:Float = 0;
+
+	var _sin:Float = 0;
+	var _cos:Float = 0;
+
+	// for sorting
 	var _particlesSorted:haxe.ds.Vector<T>;
 	var _particlesSortTmp:haxe.ds.Vector<T>;
 
@@ -100,8 +112,8 @@ class ParticleEmitterBase<T:ParticleBase> implements IParticleEmitter<T>{
 
 	public final function update(elapsed:Float) {
 		if(!active) return;
-
 		_frameTime = elapsed;
+		setTransform(_x, _y, rotation, scaleX, scaleY, originX, originY, 0, 0);
 
 		onUpdate(elapsed);
 
@@ -150,8 +162,8 @@ class ParticleEmitterBase<T:ParticleBase> implements IParticleEmitter<T>{
 		var timeLeft:Float = 0;
 		while(i < len) {
 			p = particles[i];
-			if(p.age + elapsed >= p.lifetime) {
-				timeLeft = (p.age + elapsed) - p.lifetime;
+			if(p.age + elapsed >= p.lifeTime) {
+				timeLeft = (p.age + elapsed) - p.lifeTime;
 				if(timeLeft > 0) onParticleUpdate(p, timeLeft);
 				p.age += timeLeft;
 				unspawn(p);
@@ -228,12 +240,32 @@ class ParticleEmitterBase<T:ParticleBase> implements IParticleEmitter<T>{
 	function onParticleSpawn(p:T) {}
 	function onParticleUnspawn(p:T) {}
 
+	function getRotateX(x:Float, y:Float):Float {
+		return _cos * x - _sin * y;
+	}
+
+	function getRotateY(x:Float, y:Float):Float {
+		return _sin * x + _cos * y;
+	}
+
 	function getTransformX(x:Float, y:Float):Float {
-		return x;
+		return _a * x + _c * y + _tx;
 	}
 
 	function getTransformY(x:Float, y:Float):Float {
-		return y;
+		return _b * x + _d * y + _ty;
+	}
+
+	function setTransform(x:Float, y:Float, angle:Float, sx:Float, sy:Float, ox:Float, oy:Float, kx:Float, ky:Float) {
+		_sin = Math.sin(angle);
+		_cos = Math.cos(angle);
+
+		_a = _cos * sx - ky * _sin * sy;
+		_b = _sin * sx + ky * _cos * sy;
+		_c = kx * _cos * sx - _sin * sy;
+		_d = kx * _sin * sx + _cos * sy;
+		_tx = x - ox * _a - oy * _c;
+		_ty = y - ox * _b - oy * _d;
 	}
 
 	final function random1To1(){ 
@@ -299,6 +331,13 @@ interface IParticleEmitter<T:ParticleBase> {
 	private var _frameTime:Float;
 	private var _loopsCounter:Int;
 
+	private var _a:Float;
+	private var _b:Float;
+	private var _c:Float;
+	private var _d:Float;
+	private var _tx:Float;
+	private var _ty:Float;
+
 	public function emit():Void;
 	public function start():Void;
 	public function stop():Void;
@@ -320,6 +359,9 @@ interface IParticleEmitter<T:ParticleBase> {
 	private function onParticleSpawn(p:T):Void;
 	private function onParticleUnspawn(p:T):Void;
 
+	private function getRotateX(x:Float, y:Float):Float;
+	private function getRotateY(x:Float, y:Float):Float;
+	
 	private function getTransformX(x:Float, y:Float):Float;
 	private function getTransformY(x:Float, y:Float):Float;
 
@@ -328,10 +370,6 @@ interface IParticleEmitter<T:ParticleBase> {
 	private function randomFloat(min:Float, ?max:Null<Float>):Float;
 	
 }
-
-typedef Vec2Type = {x:Float, y:Float};
-typedef RangeType<T> = {min:T, max:T};
-typedef ListType<T> = Array<{time:Float, value:T}>;
 
 typedef ParticleEmitterOptions = {
 	?name:String,
@@ -345,55 +383,7 @@ typedef ParticleEmitterOptions = {
 	?localSpace:Bool,
 	?preprocess:Float,
 
-	// ?duration:EitherType<Float, RangeType<Float>>,
 	?loops:Int,
 
-	// ?rateType:RateType,
-	// ?rate:EitherType4<Int, RangeType<Int>, ListType<Int>, ListType<RangeType<Int>>>,
-	// ?particlesPerSpawn:EitherType4<Int, RangeType<Int>, ListType<Int>, ListType<RangeType<Int>>>,
-	// ?lifetime:EitherType4<Float, RangeType<Float>, ListType<Float>, ListType<RangeType<Float>>>,
-
 	?random:()->Float,
-
-	// ?spawn:{type:SpawnType, ?options:Dynamic},
-	// ?renderer:{type:RendererType, ?options:Dynamic},
-
-	// ?rotateToDirection:Bool,
-	// ?rotate:EitherType4<Float, RangeType<Float>, ListType<Float>, ListType<RangeType<Float>>>,
-	// ?rotateBySpeed:{values:ListType<Float>, minSpeed:Float, maxSpeed:Float},
-
-	// ?scale:EitherType4<Float, RangeType<Float>, ListType<Float>, ListType<RangeType<Float>>>,
-	// ?scaleBySpeed:{values:ListType<Float>, minSpeed:Float, maxSpeed:Float},
-
-	// ?size:EitherType4<Vec2Type, RangeType<Vec2Type>, ListType<Vec2Type>, ListType<RangeType<Vec2Type>>>,
-	// ?sizeBySpeed:{values:ListType<Vec2Type>, minSpeed:Vec2Type, maxSpeed:Vec2Type},
-
-	// ?color:EitherType4<Color, RangeType<Color>, ListType<Color>, ListType<RangeType<Color>>>,
-
-	// ?angularVelocity:EitherType4<Float, RangeType<Float>, ListType<Float>, ListType<RangeType<Float>>>,
-	// ?angularDrag:EitherType4<Float, RangeType<Float>, ListType<Float>, ListType<RangeType<Float>>>,
-
-	// ?velocity:EitherType4<Vec2Type, RangeType<Vec2Type>, ListType<Vec2Type>, ListType<RangeType<Vec2Type>>>,
-	// ?force:EitherType4<Vec2Type, RangeType<Vec2Type>, ListType<Vec2Type>, ListType<RangeType<Vec2Type>>>,
-	// ?drag:EitherType4<Float, RangeType<Float>, ListType<Float>, ListType<RangeType<Float>>>,
 }
-
-// enum abstract SpawnType(String) from String to String {
-// 	var POINT = 'point';
-// 	var AREA = 'area';
-// 	var CIRCLE = 'circle';
-// 	var RING = 'ring';
-// 	var POLYLINE = 'polyline';
-// 	// var POLYGON = 'polygon';
-// }
-
-// enum abstract RendererType(String) from String to String {
-// 	var SPRITE = 'sprite';
-// }
-
-// enum abstract RateType(String) from String to String {
-// 	var TIME = 'time';
-// 	var DISTANCE = 'distance';
-// }
-
-

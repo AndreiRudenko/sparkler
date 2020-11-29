@@ -1,4 +1,4 @@
-package sparkler.modules;
+package sparkler.modules.velocity;
 
 import sparkler.utils.Vector2;
 import sparkler.components.Velocity;
@@ -16,8 +16,13 @@ class ForceModule extends ParticleModule<Particle<Velocity>> {
 	}
 
 	override function onParticleUpdate(p:Particle<Velocity>, elapsed:Float) {
-		p.velocity.x += this.force.x * elapsed;
-		p.velocity.y += this.force.y * elapsed;
+		if(!localSpace) {
+			p.velocity.x += getRotateX(force.x, force.y) * elapsed;
+			p.velocity.y += getRotateY(force.x, force.y) * elapsed;
+		} else {
+			p.velocity.x += force.x * elapsed;
+			p.velocity.y += force.y * elapsed;
+		}
 	}
 
 	@filter('velocity')

@@ -5,7 +5,7 @@ import sparkler.ParticleEmitter.IParticleEmitter;
 import sparkler.utils.Color;
 
 #if !macro
-@:autoBuild(sparkler.utils.ParticleModuleMacro.build())
+@:autoBuild(sparkler.utils.macro.ParticleModuleMacro.build())
 #end
 
 class ParticleModule<T:ParticleBase> implements IParticleEmitter<T> {
@@ -27,10 +27,17 @@ class ParticleModule<T:ParticleBase> implements IParticleEmitter<T> {
 	var _frameTime:Float;
 	var _loopsCounter:Int;
 
+	var _a:Float;
+	var _b:Float;
+	var _c:Float;
+	var _d:Float;
+	var _tx:Float;
+	var _ty:Float;
+
 	public function emit() {}
 	public function start() {}
 	public function stop() {}
-	
+
 	function updateParticles(elapsed:Float) {}
 	function getSorted():haxe.ds.Vector<T> return null;
 	function step(elapsed:Float) {}
@@ -49,6 +56,9 @@ class ParticleModule<T:ParticleBase> implements IParticleEmitter<T> {
 	function onParticleUpdate(p:T, elapsed:Float) {}
 	function onParticleSpawn(p:T) {}
 	function onParticleUnspawn(p:T) {}
+
+	function getRotateX(x:Float, y:Float) return 0.0;
+	function getRotateY(x:Float, y:Float) return 0.0;
 
 	function getTransformX(x:Float, y:Float) return 0.0;
 	function getTransformY(x:Float, y:Float) return 0.0;
@@ -85,6 +95,6 @@ class ParticleModule<T:ParticleBase> implements IParticleEmitter<T> {
 }
 
 #if !macro
-@:autoBuild(sparkler.utils.ParticleInjectModuleMacro.build())
+@:autoBuild(sparkler.utils.macro.ParticleInjectModuleMacro.build())
 #end
 class ParticleInjectModule {}

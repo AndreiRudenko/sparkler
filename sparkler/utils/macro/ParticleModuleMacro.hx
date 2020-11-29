@@ -1,4 +1,4 @@
-package sparkler.utils;
+package sparkler.utils.macro;
 
 #if (macro || display)
 
@@ -6,7 +6,7 @@ import haxe.macro.Context;
 import haxe.macro.Expr;
 import haxe.macro.Type;
 import haxe.macro.ComplexTypeTools;
-import sparkler.utils.MacroUtils;
+import sparkler.utils.macro.MacroUtils;
 
 class ParticleModuleMacro {
 

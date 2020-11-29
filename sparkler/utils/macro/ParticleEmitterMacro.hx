@@ -1,4 +1,4 @@
-package sparkler.utils;
+package sparkler.utils.macro;
 
 #if (macro || display)
 
@@ -8,8 +8,8 @@ import haxe.macro.Type;
 import haxe.macro.TypeTools;
 import haxe.macro.ComplexTypeTools;
 
-import sparkler.utils.MacroUtils;
-import sparkler.utils.ParticleModuleMacro;
+import sparkler.utils.macro.MacroUtils;
+import sparkler.utils.macro.ParticleModuleMacro;
 
 class ParticleEmitterMacro {
 
@@ -23,7 +23,8 @@ class ParticleEmitterMacro {
 	static var emitterTypeNames:Array<String> = ['ParticleEmitterBase'];
 
 	static var iModules:Array<InjectModule> = [
-		{name:'sparkler.modules.SpriteRendererModule', inject:sparkler.modules.SpriteRendererModule.inject}
+		{name:'sparkler.modules.render.ClaySpriteRendererModule', inject:sparkler.modules.render.ClaySpriteRendererModule.inject},
+		{name:'sparkler.modules.render.KhaSpriteRendererModule', inject:sparkler.modules.render.KhaSpriteRendererModule.inject}
 	];
 
 	static var filterMeta:Map<String, Array<String>> = new Map();
@@ -46,13 +47,6 @@ class ParticleEmitterMacro {
 			var groupNames:Array<String> = [];
 
 			filterMeta = new Map();
-
-			// sort modules
-			types.sort(function(a:Type, b:Type) {
-				var aidx = getModulePriority(TypeTools.getClass(a));
-				var bidx = getModulePriority(TypeTools.getClass(b));
-				return Std.int(aidx - bidx);
-			});
 
 			var fields:Array<Field> = [];
 			var particleTypes:Array<Type> = [];
@@ -80,6 +74,21 @@ class ParticleEmitterMacro {
 					}
 				}
 			}
+
+			addDefaultModules(groupNames, defTypes, injectTypes);
+
+			// sort modules
+			defTypes.sort(function(a:Type, b:Type) {
+				var aidx = getModulePriority(TypeTools.getClass(a));
+				var bidx = getModulePriority(TypeTools.getClass(b));
+				return Std.int(aidx - bidx);
+			});
+
+			injectTypes.sort(function(a:Type, b:Type) {
+				var aidx = getModulePriority(TypeTools.getClass(a));
+				var bidx = getModulePriority(TypeTools.getClass(b));
+				return Std.int(aidx - bidx);
+			});
 
 			types = defTypes;
 
@@ -135,6 +144,7 @@ class ParticleEmitterMacro {
 				if(options.sortFunc != null) sortFunc = options.sortFunc;
 			});
 
+			var emitExprs:Array<Expr> = [];
 			var onStartExprs:Array<Expr> = [];
 			var onStopExprs:Array<Expr> = [];
 
@@ -149,12 +159,14 @@ class ParticleEmitterMacro {
 			var emitterImports:Array<ImportExpr> = [];
 
 			var peopt:ParticleEmitterBuildOptions = {
+				groupNames: groupNames,
 				particleType: pType,
 				particleFieldNames: particleFieldNames,
 				fields: fields,
 				optFields: optFields,
 
 				newExprs: newExprs,
+				emitExprs: emitExprs,
 				onStartExprs: onStartExprs,
 				onStopExprs: onStopExprs,
 				onUpdateExprs: onUpdateExprs,
@@ -180,6 +192,9 @@ class ParticleEmitterMacro {
 					}
 				}
 			}
+
+			// add default exprs
+			injectDefaultExprs(peopt);
 
 			// create options type
 			var optPTInfo = {pack: ['sparkler'], name: 'ParticleEmitter', sub: 'ParticleEmitterOptions'};
@@ -228,6 +243,17 @@ class ParticleEmitterMacro {
 					onStartExprs
 				);
 				fields.push(onStart);
+			}
+
+			if(emitExprs.length > 0) {
+				var emit = MacroUtils.buildFunction(
+					'emit', 
+					[AOverride], 
+					[],
+					macro: Void,
+					emitExprs
+				);
+				fields.push(emit);
 			}
 
 			if(onStopExprs.length > 0) {
@@ -341,11 +367,51 @@ class ParticleEmitterMacro {
 		return Context.getType('sparkler.${eName}');
 	}
 
+	static function addDefaultModules(groupNames:Array<String>, defTypes:Array<Type>, injectTypes:Array<Type>) {
+		if(groupNames.indexOf('emit') == -1) {
+			defTypes.push(Context.getType('sparkler.modules.emit.EmitRateModule'));
+		}
+
+		if(groupNames.indexOf('lifeTime') == -1) {
+			defTypes.push(Context.getType('sparkler.modules.life.LifeTimeModule'));
+		}
+
+		if(groupNames.indexOf('emitterLife') == -1) {
+			defTypes.push(Context.getType('sparkler.modules.life.EmitterLifeTimeModule'));
+		}
+	}
+
+	static function injectDefaultExprs(options:ParticleEmitterBuildOptions) {
+		var groupNames = options.groupNames;
+		var onParticleSpawnExprs = options.onParticleSpawnExprs;
+		var emitExprs = options.emitExprs;
+
+		if(groupNames.indexOf('particlesPerEmit') == -1) {
+			emitExprs.insert(0, macro {
+				spawn();
+			}); 
+		}
+
+		if(groupNames.indexOf('spawn') == -1) {
+			onParticleSpawnExprs.insert(0, macro {
+				if(localSpace) {
+					p.x = 0;
+					p.y = 0;
+				} else {
+					p.x = getTransformX(0, 0);
+					p.y = getTransformY(0, 0);
+				}
+			}); 
+		}
+	}
+
+
 	static function injectDefaultModules(options:ParticleEmitterBuildOptions, types:Array<Type>) {
 		var fields = options.fields;
 		var optFields = options.optFields;
 
 		var newExprs = options.newExprs;
+		var emitExprs = options.emitExprs;
 		var onUpdateExprs = options.onUpdateExprs;
 		var onStepStartExprs = options.onStepStartExprs;
 		var onStepExprs = options.onStepExprs;
@@ -402,6 +468,7 @@ class ParticleEmitterMacro {
 								}
 								newExprs.push(f.expr);
 
+							case 'emit': pushFilteredExpr(emitExprs, filterTag, 'emit', f.expr, false);
 							case 'onStepStart': pushFilteredExpr(onStepStartExprs, filterTag, 'onStepStart', f.expr, false);
 							case 'onUpdate': pushFilteredExpr(onUpdateExprs, filterTag, 'onUpdate', f.expr, false);
 							case 'onStep': pushFilteredExpr(onStepExprs, filterTag, 'onStep', f.expr, false);
@@ -604,12 +671,14 @@ typedef InjectModule = {
 }
 
 typedef ParticleEmitterBuildOptions = {
+	groupNames:Array<String>,
 	particleType:Type,
 	particleFieldNames:Array<String>,
 	fields:Array<Field>,
 	optFields:Array<Field>,
 
 	newExprs:Array<Expr>,
+	emitExprs:Array<Expr>,
 	onStartExprs:Array<Expr>,
 	onStopExprs:Array<Expr>,
 	onUpdateExprs:Array<Expr>,

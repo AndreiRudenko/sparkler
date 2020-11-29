@@ -1,6 +1,5 @@
 package sparkler.utils;
 
-import sparkler.ParticleEmitter.Vec2Type;
 import sparkler.utils.Color;
 
 class FloatPropertyList {

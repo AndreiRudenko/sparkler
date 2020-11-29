@@ -1,18 +1,18 @@
-package sparkler.modules;
+package sparkler.modules.emit;
 
 import sparkler.utils.Vector2;
 import sparkler.components.Velocity;
 import sparkler.ParticleModule;
 import sparkler.Particle;
 
-@group('rate')
-class SpawnDistanceModule extends ParticleModule<Particle> {
+@group('emit')
+class EmitDistanceModule extends ParticleModule<Particle> {
 
-	public var spawnDistance:Float = 32;
+	public var emitDistance:Float = 32;
 	var _dOffset:Float = 0;
 
-	function new(options:{?spawnDistance:Float}) {
-		if(options.spawnDistance != null) spawnDistance = options.spawnDistance;
+	function new(options:{?emitDistance:Float}) {
+		if(options.emitDistance != null) emitDistance = options.emitDistance;
 	}
 
 	override function onStart() {
@@ -24,7 +24,7 @@ class SpawnDistanceModule extends ParticleModule<Particle> {
 	}
 
 	override function onStep(elapsed:Float) {
-		if(enabled && !localSpace && spawnDistance > 0 && (_lastX != _x || _lastY != _y)) {
+		if(enabled && !localSpace && emitDistance > 0 && (_lastX != _x || _lastY != _y)) {
 			var px:Float = _x;
 			var py:Float = _y;
 
@@ -43,8 +43,8 @@ class SpawnDistanceModule extends ParticleModule<Particle> {
 			var ld:Float = 0;
 
 			var d:Float = 0;
-			while(_dOffset + distLeft >= spawnDistance) {
-				d = spawnDistance - _dOffset;
+			while(_dOffset + distLeft >= emitDistance) {
+				d = emitDistance - _dOffset;
 
 				ld += d / tickDistance;
 				_x = lerp(_lastX, px, ld);

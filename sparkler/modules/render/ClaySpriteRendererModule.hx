@@ -1,45 +1,31 @@
-package sparkler.modules;
+package sparkler.modules.render;
 
-import sparkler.utils.ParticleEmitterMacro;
-import sparkler.utils.Vector2;
-import sparkler.utils.MacroUtils;
-import sparkler.utils.SortMode;
-import sparkler.components.Velocity;
+import sparkler.utils.macro.ParticleEmitterMacro;
+import sparkler.utils.macro.MacroUtils;
 import sparkler.ParticleModule;
-import sparkler.Particle;
 
 import haxe.macro.Context;
 import haxe.macro.Expr;
 
 #if !macro
 import clay.graphics.Texture;
+import clay.math.FastMatrix3;
 
-class SpriteRenderer {
+class ClaySpriteRenderer {
 
-	public var image(get, set):String;
-	var _image:String;
-	inline function get_image() return _image; 
-	function set_image(v:String):String {
-		_texture = clay.Clay.resources.texture(v);
-		if(_texture == null) _texture = _defaultTexture;
-		return _image = v;
-	}
-	
-	@:noCompletion public var _texture:Texture;
-	var _defaultTexture:Texture;
+	public var texture:Texture;
 
-	public function new() {
-		_defaultTexture = Texture.create(1, 1, TextureFormat.RGBA32);
-		var pixels = _defaultTexture.lock();
-		pixels.setInt32(0, 0xffffffff);
-		_defaultTexture.unlock();
-	}
+	@:noCompletion public var _transformPrev:FastMatrix3 = new FastMatrix3();
+	@:noCompletion public var _transform:FastMatrix3 = new FastMatrix3();
+	@:noCompletion public var _drawMatrix:FastMatrix3 = new FastMatrix3();
+
+	public function new() {}
 
 }
 #end
 
 @group('renderer')
-class SpriteRendererModule extends ParticleInjectModule {
+class ClaySpriteRendererModule extends ParticleInjectModule {
 
 #if (macro || display)
 	static public function inject(options:ParticleEmitterBuildOptions) {
@@ -51,24 +37,24 @@ class SpriteRendererModule extends ParticleInjectModule {
 		var newExprs = options.newExprs;
 		var optFields = options.optFields;
 
-		var imageOptVar = MacroUtils.buildVar(
+		var textureOptVar = MacroUtils.buildVar(
 			'spriteRenderer', 
 			[Access.APublic], 
 			macro: {
-				image:String
+				?texture:clay.graphics.Texture
 			}, 
 			null, 
 			[{name: ':optional', pos: pos}]
 		);
-		optFields.push(imageOptVar);
+		optFields.push(textureOptVar);
 
-		var spriteRendererVar = MacroUtils.buildVar('spriteRenderer', [Access.APublic], macro: sparkler.modules.SpriteRendererModule.SpriteRenderer);
+		var spriteRendererVar = MacroUtils.buildVar('spriteRenderer', [Access.APublic], macro: sparkler.modules.render.ClaySpriteRendererModule.ClaySpriteRenderer);
 		fields.push(spriteRendererVar);
 
 		newExprs.push(macro {
-			spriteRenderer = new sparkler.modules.SpriteRendererModule.SpriteRenderer();
+			spriteRenderer = new sparkler.modules.render.ClaySpriteRendererModule.ClaySpriteRenderer();
 			if(options.spriteRenderer != null) {
-				if(options.spriteRenderer.image != null) spriteRenderer.image = options.spriteRenderer.image;
+				if(options.spriteRenderer.texture != null) spriteRenderer.texture = options.spriteRenderer.texture;
 			}
 		});
 
@@ -84,6 +70,9 @@ class SpriteRendererModule extends ParticleInjectModule {
 
 		var originXexpr = macro 16.0;
 		var originYexpr = macro 16.0;
+
+		var skewXexpr = macro 0.0;
+		var skewYexpr = macro 0.0;
 
 		var regionXexpr = macro null;
 		var regionYexpr = macro null;
@@ -114,6 +103,11 @@ class SpriteRendererModule extends ParticleInjectModule {
 			rotationExpr = macro p.rotation;
 		}
 
+		if(particleFieldNames.indexOf('skew') != -1) {
+			skewXexpr = macro p.skew.x;
+			skewYexpr = macro p.skew.y;
+		}
+
 		if(particleFieldNames.indexOf('region') != -1) {
 			regionXexpr = macro p.region.x;
 			regionYexpr = macro p.region.y;
@@ -135,40 +129,49 @@ class SpriteRendererModule extends ParticleInjectModule {
 			);
 		}
 
-		// if(MacroUtils.hasField(fields, 'transform')) {
-		// 	preExprs.push(
-		// 		macro {
-		// 			if(localSpace) {
-		// 				batcher.transform.copyFrom(transform);
-		// 			}
-		// 		}
-		// 	);
-		// }
-
 		var drawFunc = MacroUtils.buildFunction(
 			'draw', 
 			[Access.APublic], 
-			[{name: 'batcher', type: macro: clay.graphics.batchers.SpriteBatch}], // batcher
+			[{name: 'batcher', type: macro: clay.graphics.batchers.SpriteBatch}],
 			macro: Void,
 			[macro {
 				if(activeCount > 0) {
 					var sortedParticles = getSorted();
-					var texture = spriteRenderer._texture;
+					var texture = spriteRenderer.texture;
+					var drawMatrix = spriteRenderer._drawMatrix;
+
+					if(localSpace) {
+						spriteRenderer._transformPrev.copyFrom(batcher.transform);
+						spriteRenderer._transform.set(_a, _b, _c, _d, _tx, _ty);
+						batcher.transform = spriteRenderer._transform;
+					}
+
 					$b{preExprs}
 					var p;
 					var i:Int = 0;
 					while(i < activeCount) {
 						p = sortedParticles[i];
 						$b{exprs}
-						batcher.drawImage(
-							texture,
-							p.x, p.y,
-							$sizeXexpr * $scaleExpr, $sizeYexpr * $scaleExpr,
+
+						drawMatrix.setTransform(
+							p.x, p.y, 
 							$rotationExpr,
-							$originXexpr * $scaleExpr, $originYexpr * $scaleExpr,
+							$scaleExpr, $scaleExpr, 
+							$originXexpr, $originYexpr,
+							$skewXexpr, $skewYexpr
+						);
+
+						batcher.drawImageTransform(
+							texture,
+							drawMatrix,
+							$sizeXexpr, $sizeYexpr, 
 							$regionXexpr, $regionYexpr, $regionWexpr, $regionHexpr
 						);
 						i++;
+					}
+
+					if(localSpace) {
+						batcher.transform = spriteRenderer._transformPrev;
 					}
 				}
 			}]
@@ -180,4 +183,3 @@ class SpriteRendererModule extends ParticleInjectModule {
 #end
 
 }
-

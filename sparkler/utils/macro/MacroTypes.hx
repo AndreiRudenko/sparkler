@@ -1,4 +1,4 @@
-package sparkler.utils;
+package sparkler.utils.macro;
 
 import haxe.macro.Context;
 import haxe.macro.Expr;

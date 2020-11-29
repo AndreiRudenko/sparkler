@@ -1,4 +1,4 @@
-package sparkler.modules;
+package sparkler.modules.scale;
 
 import sparkler.components.Scale;
 import sparkler.ParticleModule;

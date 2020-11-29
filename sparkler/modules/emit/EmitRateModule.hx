@@ -1,18 +1,18 @@
-package sparkler.modules;
+package sparkler.modules.emit;
 
 import sparkler.utils.Vector2;
 import sparkler.components.Velocity;
 import sparkler.ParticleModule;
 import sparkler.Particle;
 
-@group('rate')
-class SpawnRateModule extends ParticleModule<Particle> {
+@group('emit')
+class EmitRateModule extends ParticleModule<Particle> {
 
-	public var spawnRate:Float = 40;
+	public var emitRate:Float = 40;
 	var _frameOffset:Float = 0;
 
-	function new(options:{?spawnRate:Float}) {
-		if(options.spawnRate != null) spawnRate = options.spawnRate;
+	function new(options:{?emitRate:Float}) {
+		if(options.emitRate != null) emitRate = options.emitRate;
 	}
 
 	override function onStart() {
@@ -30,8 +30,8 @@ class SpawnRateModule extends ParticleModule<Particle> {
 		var ft:Float = 0;
 		var lt:Float = 0;
 
-		if(enabled && spawnRate > 0) {
-			var invRate = 1 / spawnRate;
+		if(enabled && emitRate > 0) {
+			var invRate = 1 / emitRate;
 			var t:Float = 0;
 			while (_frameOffset + elapsed >= invRate) { // TODO: test >=
 				t = invRate - _frameOffset;
@@ -56,7 +56,7 @@ class SpawnRateModule extends ParticleModule<Particle> {
 				_y = lerp(_lastY, py, ft / _frameTime);
 			}
 			updateParticles(elapsed);
-			if (enabled && spawnRate > 0) {
+			if (enabled && emitRate > 0) {
 				_frameOffset += elapsed;
 			}
 		}

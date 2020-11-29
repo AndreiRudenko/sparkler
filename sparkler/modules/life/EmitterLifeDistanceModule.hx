@@ -1,22 +1,22 @@
-package sparkler.modules;
+package sparkler.modules.life;
 
 import sparkler.utils.Vector2;
 import sparkler.components.Velocity;
 import sparkler.ParticleModule;
 import sparkler.Particle;
 
-@group('updateStep')
-class DistanceModule extends ParticleModule<Particle> {
+@group('emitterLife')
+class EmitterLifeDistanceModule extends ParticleModule<Particle> {
 
-	public var distance:Float = 1000;
-	var _distanceOffset:Float = 0;
+	public var emitterLifeDistance:Float = 1000;
+	var _emDist:Float = 0;
 
-	function new(options:{?distance:Float}) {
-		if(options.distance != null) distance = options.distance;
+	function new(options:{?emitterLifeDistance:Float}) {
+		if(options.emitterLifeDistance != null) emitterLifeDistance = options.emitterLifeDistance;
 	}
 	
 	override function onStart() {
-		_distanceOffset = 0;
+		_emDist = 0;
 	}
 
 	override function onUpdate(elapsed:Float) {
@@ -30,13 +30,13 @@ class DistanceModule extends ParticleModule<Particle> {
 			var frameTime:Float = 0;
 
 			var d:Float = 0;
-			while(_distanceOffset + distLeft >= distance) {
-				d = distance - _distanceOffset;
+			while(_emDist + distLeft >= emitterLifeDistance) {
+				d = emitterLifeDistance - _emDist;
 				frameTime = d * f;
 				step(frameTime);
 				elapsed -= frameTime;
 				distLeft -= d;
-				_distanceOffset = 0;
+				_emDist = 0;
 				progress = 1;
 				if(loops >= 0 && _loopsCounter >= loops) {
 					stop();
@@ -48,8 +48,8 @@ class DistanceModule extends ParticleModule<Particle> {
 
 			if(elapsed > 0) {
 				step(elapsed);
-				_distanceOffset += distLeft;
-				progress = _distanceOffset / distance;
+				_emDist += distLeft;
+				progress = _emDist / emitterLifeDistance;
 			}
 		} else {			
 			step(elapsed);
