@@ -65,9 +65,9 @@ class ParticleModule<T:ParticleBase> implements IParticleEmitter<T> {
 
 	function random1To1() return 0;
 	function randomInt(min:Float, ?max:Null<Float>) return 0;
-    function randomFloat(min:Float, ?max:Null<Float>) return 0;
+	function randomFloat(min:Float, ?max:Null<Float>) return 0;
 
-    // additional
+	// additional
 	function onPreStepStart(elapsed:Float) {}
 	function onPostStepStart(elapsed:Float) {}
 

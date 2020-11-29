@@ -20,7 +20,7 @@ class EmitterLifeTimeModule extends ParticleModule<Particle> {
 	}
 
 	override function onUpdate(elapsed:Float) {
-	    while(enabled && _emTime + elapsed >= emitterLifeTime) {
+		while(enabled && _emTime + elapsed >= emitterLifeTime) {
 			step(emitterLifeTime - _emTime);
 			elapsed -= (emitterLifeTime - _emTime);
 			_emTime = emitterLifeTime;

@@ -49,7 +49,7 @@ abstract Color(Int) from Int to Int {
 	}
 
 	public inline function clone():Color {
-	    return Color.fromValue(this);
+		return Color.fromValue(this);
 	}
 
 	inline function get_r():Float {

@@ -16,7 +16,7 @@ class EmitRateModule extends ParticleModule<Particle> {
 	}
 
 	override function onStart() {
-	    _frameOffset = 0;
+		_frameOffset = 0;
 	}
 
 	inline function lerp(start:Float, end:Float, t:Float) {

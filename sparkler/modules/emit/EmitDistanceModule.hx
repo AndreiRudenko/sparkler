@@ -16,7 +16,7 @@ class EmitDistanceModule extends ParticleModule<Particle> {
 	}
 
 	override function onStart() {
-	    _dOffset = 0;
+		_dOffset = 0;
 	}
 
 	inline function lerp(start:Float, end:Float, t:Float) {
