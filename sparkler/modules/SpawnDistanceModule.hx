@@ -4,29 +4,15 @@ import sparkler.utils.Vector2;
 import sparkler.components.Velocity;
 import sparkler.ParticleModule;
 import sparkler.Particle;
-import sparkler.modules.RateOverDistanceModule.RateOverDistance;
-
-class RateOverDistance {
-
-	public var rate:Float = 1;
-	public var distance:Float = 64;
-
-	public function new() {}
-
-}
 
 @group('rate')
-class RateOverDistanceModule extends ParticleModule<Particle> {
+class SpawnDistanceModule extends ParticleModule<Particle> {
 
-	public var rateOverDistance:RateOverDistance;
+	public var spawnDistance:Float = 32;
 	var _dOffset:Float = 0;
 
-	function new(options:{?rateOverDistance: {?rate:Float, ?distance:Float}}) {
-		rateOverDistance = new RateOverDistance();
-		if(options.rateOverDistance != null) {
-			if(options.rateOverDistance.distance != null) rateOverDistance.distance = options.rateOverDistance.distance;
-			if(options.rateOverDistance.rate != null) rateOverDistance.rate = options.rateOverDistance.rate;
-		}
+	function new(options:{?spawnDistance:Float}) {
+		if(options.spawnDistance != null) spawnDistance = options.spawnDistance;
 	}
 
 	override function onStart() {
@@ -38,8 +24,7 @@ class RateOverDistanceModule extends ParticleModule<Particle> {
 	}
 
 	override function onStep(elapsed:Float) {
-		if(enabled && !localSpace && (_lastX != _x || _lastY != _y)) {
-			var distance = rateOverDistance.distance / rateOverDistance.rate;
+		if(enabled && !localSpace && spawnDistance > 0 && (_lastX != _x || _lastY != _y)) {
 			var px:Float = _x;
 			var py:Float = _y;
 
@@ -58,8 +43,8 @@ class RateOverDistanceModule extends ParticleModule<Particle> {
 			var ld:Float = 0;
 
 			var d:Float = 0;
-			while(_dOffset + distLeft >= distance) {
-				d = distance - _dOffset;
+			while(_dOffset + distLeft >= spawnDistance) {
+				d = spawnDistance - _dOffset;
 
 				ld += d / tickDistance;
 				_x = lerp(_lastX, px, ld);

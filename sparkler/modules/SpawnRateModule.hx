@@ -4,29 +4,15 @@ import sparkler.utils.Vector2;
 import sparkler.components.Velocity;
 import sparkler.ParticleModule;
 import sparkler.Particle;
-import sparkler.modules.RateOverTimeModule.RateOverTime;
-
-class RateOverTime {
-
-	public var rate:Float = 40;
-	public var time:Float = 1;
-
-	public function new() {}
-
-}
 
 @group('rate')
-class RateOverTimeModule extends ParticleModule<Particle> {
+class SpawnRateModule extends ParticleModule<Particle> {
 
-	public var rateOverTime:RateOverTime;
+	public var spawnRate:Float = 40;
 	var _frameOffset:Float = 0;
 
-	function new(options:{?rateOverTime: {?rate:Float, ?time:Float}}) {
-		rateOverTime = new RateOverTime();
-		if(options.rateOverTime != null) {
-			if(options.rateOverTime.time != null) rateOverTime.time = options.rateOverTime.time;
-			if(options.rateOverTime.rate != null) rateOverTime.rate = options.rateOverTime.rate;
-		}
+	function new(options:{?spawnRate:Float}) {
+		if(options.spawnRate != null) spawnRate = options.spawnRate;
 	}
 
 	override function onStart() {
@@ -44,10 +30,8 @@ class RateOverTimeModule extends ParticleModule<Particle> {
 		var ft:Float = 0;
 		var lt:Float = 0;
 
-		var rate = rateOverTime.rate / rateOverTime.time;
-
-		if(enabled && rate > 0) {
-			var invRate = 1 / rate;
+		if(enabled && spawnRate > 0) {
+			var invRate = 1 / spawnRate;
 			var t:Float = 0;
 			while (_frameOffset + elapsed >= invRate) { // TODO: test >=
 				t = invRate - _frameOffset;
@@ -72,7 +56,7 @@ class RateOverTimeModule extends ParticleModule<Particle> {
 				_y = lerp(_lastY, py, ft / _frameTime);
 			}
 			updateParticles(elapsed);
-			if (enabled && rate > 0) {
+			if (enabled && spawnRate > 0) {
 				_frameOffset += elapsed;
 			}
 		}
