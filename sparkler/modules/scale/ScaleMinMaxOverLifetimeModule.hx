@@ -14,8 +14,8 @@ class ScaleMinMaxOverLifetime {
 	public var ease:(v:Float)->Float;
 
 	public function new() {
-		start = new Bounds(1,1);
-		end = new Bounds(1,1);
+		start = new Bounds(1.0, 1.0);
+		end = new Bounds(1.0, 1.0);
 	}
 
 }
@@ -47,16 +47,18 @@ class ScaleMinMaxOverLifetimeModule extends ParticleModule<Particle<Scale, Scale
 	}
 
 	override function onParticleUpdate(p:Particle<Scale, ScaleRange>, elapsed:Float) {
-		p.scale = interpolate(_lerp);
+		p.scale = interpolate(p.scaleRange.start, p.scaleRange.end, _lerp);
 	}
 
 	override function onParticleSpawn(p:Particle<Scale, ScaleRange>) {
-		p.scale = scaleMinMaxOverLifetime.start;
+		p.scaleRange.start = randomFloat(scaleMinMaxOverLifetime.start.min, scaleMinMaxOverLifetime.start.max);
+		p.scaleRange.end = randomFloat(scaleMinMaxOverLifetime.end.min, scaleMinMaxOverLifetime.end.max);
+		p.scale = p.scaleRange.start;
 	}
 
-	inline function interpolate(t:Float):Float {
+	inline function interpolate(start:Float, end:Float, t:Float):Float {
 		if(scaleMinMaxOverLifetime.ease != null) t = scaleMinMaxOverLifetime.ease(t);
-		return scaleMinMaxOverLifetime.start + (scaleMinMaxOverLifetime.end - scaleMinMaxOverLifetime.start) * t;
+		return start + (end - start) * t;
 	}
 	
 }
