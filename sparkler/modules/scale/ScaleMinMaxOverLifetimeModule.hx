@@ -47,7 +47,7 @@ class ScaleMinMaxOverLifetimeModule extends ParticleModule<Particle<Scale, Scale
 	}
 
 	override function onParticleUpdate(p:Particle<Scale, ScaleRange>, elapsed:Float) {
-		p.scale = interpolate(p.scaleRange.start, p.scaleRange.end, _lerp);
+		p.scale = lerpScale(p.scaleRange.start, p.scaleRange.end, _lerp);
 	}
 
 	override function onParticleSpawn(p:Particle<Scale, ScaleRange>) {
@@ -56,7 +56,7 @@ class ScaleMinMaxOverLifetimeModule extends ParticleModule<Particle<Scale, Scale
 		p.scale = p.scaleRange.start;
 	}
 
-	inline function interpolate(start:Float, end:Float, t:Float):Float {
+	inline function lerpScale(start:Float, end:Float, t:Float):Float {
 		if(scaleMinMaxOverLifetime.ease != null) t = scaleMinMaxOverLifetime.ease(t);
 		return start + (end - start) * t;
 	}

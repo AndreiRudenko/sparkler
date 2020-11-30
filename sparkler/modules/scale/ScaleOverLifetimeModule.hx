@@ -40,14 +40,14 @@ class ScaleOverLifetimeModule extends ParticleModule<Particle<Scale>> {
 	}
 
 	override function onParticleUpdate(p:Particle<Scale>, elapsed:Float) {
-		p.scale = interpolate(_lerp);
+		p.scale = lerpScale(_lerp);
 	}
 
 	override function onParticleSpawn(p:Particle<Scale>) {
 		p.scale = scaleOverLifetime.start;
 	}
 
-	inline function interpolate(t:Float):Float {
+	inline function lerpScale(t:Float):Float {
 		if(scaleOverLifetime.ease != null) t = scaleOverLifetime.ease(t);
 		return scaleOverLifetime.start + (scaleOverLifetime.end - scaleOverLifetime.start) * t;
 	}

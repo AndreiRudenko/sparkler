@@ -43,14 +43,14 @@ class ColorOverLifetimeModule extends ParticleModule<Particle<Color>> {
 	}
 
 	override function onParticleUpdate(p:Particle<Color>, elapsed:Float) {
-		p.color = interpolate(_lerp);
+		p.color = lerpColor(_lerp);
 	}
 
 	override function onParticleSpawn(p:Particle<Color>) {
 		p.color = colorOverLifetime.start;
 	}
 
-	inline function interpolate(t:Float):Color {
+	inline function lerpColor(t:Float):Color {
 		if(colorOverLifetime.ease != null) t = colorOverLifetime.ease(t);
 		return Color.lerp(colorOverLifetime.start, colorOverLifetime.end, t);
 	}
