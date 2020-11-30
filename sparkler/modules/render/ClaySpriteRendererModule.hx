@@ -74,8 +74,8 @@ class ClaySpriteRendererModule extends ParticleInjectModule {
 		var skewXexpr = macro 0.0;
 		var skewYexpr = macro 0.0;
 
-		var regionXexpr = macro null;
-		var regionYexpr = macro null;
+		var regionXexpr = macro 0;
+		var regionYexpr = macro 0;
 		var regionWexpr = macro null;
 		var regionHexpr = macro null;
 
