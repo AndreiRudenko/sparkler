@@ -12,15 +12,15 @@ A modular 2d particle system.
 ```haxe
 
 var emitter = new ParticleEmitter<
-	ColorListOverLifeTimeModule,
+	ColorListOverLifetimeModule,
 	VelocityModule,
 	KhaSpriteRendererModule
 >({
 	cacheSize: 512,
-	lifeTime: 2,
-	emitterLifeTime: 5,
+	lifetime: 2,
+	emitterLifetime: 5,
 	emitRate: 50,
-	colorListOverLifeTime: {
+	colorListOverLifetime: {
 		ease: null,
 		list: [
 			{
