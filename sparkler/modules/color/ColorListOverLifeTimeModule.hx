@@ -7,25 +7,25 @@ import sparkler.Particle;
 
 @priority(5)
 @group('color')
-class ColorListOverLifeTimeModule extends ParticleModule<Particle<Color, ColorPropertyList>> {
+class ColorListOverLifetimeModule extends ParticleModule<Particle<Color, ColorPropertyList>> {
 
-	public var colorListOverLifeTime:ColorPropertyList;
+	public var colorListOverLifetime:ColorPropertyList;
 
 	@filter('_lerp')
 	var _lerp:Float = 0;
 
-	function new(options:{?colorListOverLifeTime:{?ease:(v:Float)->Float, list:Array<{time:Float, value:sparkler.utils.Color}>}}) {
-		if(options.colorListOverLifeTime != null) {
-			colorListOverLifeTime = ColorPropertyList.create(options.colorListOverLifeTime.list);
-			colorListOverLifeTime.ease = options.colorListOverLifeTime.ease;
+	function new(options:{?colorListOverLifetime:{?ease:(v:Float)->Float, list:Array<{time:Float, value:sparkler.utils.Color}>}}) {
+		if(options.colorListOverLifetime != null) {
+			colorListOverLifetime = ColorPropertyList.create(options.colorListOverLifetime.list);
+			colorListOverLifetime.ease = options.colorListOverLifetime.ease;
 		} else {
-			colorListOverLifeTime = new ColorPropertyList();
+			colorListOverLifetime = new ColorPropertyList();
 		}
 	}
 
 	@filter('_lerp')
 	override function onPreParticleUpdate(p:Particle<Color, ColorPropertyList>, elapsed:Float) {
-		_lerp = p.age / p.lifeTime;
+		_lerp = p.age / p.lifetime;
 	}
 
 	override function onParticleUpdate(p:Particle<Color, ColorPropertyList>, elapsed:Float) {
@@ -33,7 +33,7 @@ class ColorListOverLifeTimeModule extends ParticleModule<Particle<Color, ColorPr
 		p.color = p.colorPropertyList.value;
 	}
 	override function onParticleSpawn(p:Particle<Color, ColorPropertyList>) {
-		p.colorPropertyList.set(colorListOverLifeTime);
+		p.colorPropertyList.set(colorListOverLifetime);
 		p.color = p.colorPropertyList.value;
 	}
 	

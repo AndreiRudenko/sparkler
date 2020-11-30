@@ -372,12 +372,12 @@ class ParticleEmitterMacro {
 			defTypes.push(Context.getType('sparkler.modules.emit.EmitRateModule'));
 		}
 
-		if(groupNames.indexOf('lifeTime') == -1) {
-			defTypes.push(Context.getType('sparkler.modules.life.LifeTimeModule'));
+		if(groupNames.indexOf('lifetime') == -1) {
+			defTypes.push(Context.getType('sparkler.modules.life.LifetimeModule'));
 		}
 
 		if(groupNames.indexOf('emitterLife') == -1) {
-			defTypes.push(Context.getType('sparkler.modules.life.EmitterLifeTimeModule'));
+			defTypes.push(Context.getType('sparkler.modules.life.EmitterLifetimeModule'));
 		}
 	}
 

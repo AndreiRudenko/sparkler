@@ -3,12 +3,12 @@ package sparkler.utils;
 @:structInit
 class Range<T> {
 
-	public var min:T;
-	public var max:T;
+	public var start:T;
+	public var end:T;
 
-	public function new(min:T, max:T) {
-		this.min = min;
-		this.max = max;
+	public function new(start:T, end:T) {
+		this.start = start;
+		this.end = end;
 	}
 
 }

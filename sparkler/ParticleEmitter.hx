@@ -162,8 +162,8 @@ class ParticleEmitterBase<T:ParticleBase> implements IParticleEmitter<T>{
 		var timeLeft:Float = 0;
 		while(i < len) {
 			p = particles[i];
-			if(p.age + elapsed >= p.lifeTime) {
-				timeLeft = (p.age + elapsed) - p.lifeTime;
+			if(p.age + elapsed >= p.lifetime) {
+				timeLeft = (p.age + elapsed) - p.lifetime;
 				if(timeLeft > 0) onParticleUpdate(p, timeLeft);
 				p.age += timeLeft;
 				unspawn(p);

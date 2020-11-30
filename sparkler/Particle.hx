@@ -12,7 +12,7 @@ class ParticleBase {
 	public var index:Int = 0;
 	public var x:Float = 0;
 	public var y:Float = 0;
-	public var lifeTime:Float = -1;
+	public var lifetime:Float = -1;
 	public var age:Float = 0;
 
 	public function new(id:Int) {

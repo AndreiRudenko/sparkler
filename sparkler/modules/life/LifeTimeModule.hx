@@ -3,21 +3,21 @@ package sparkler.modules.life;
 import sparkler.ParticleModule;
 import sparkler.Particle;
 
-@group('lifeTime')
-class LifeTimeModule extends ParticleModule<Particle> {
+@group('lifetime')
+class LifetimeModule extends ParticleModule<Particle> {
 
-	public var lifeTime:Float = 1;
+	public var lifetime:Float = 1;
 
-	function new(options:{?lifeTime:Float}) {
-		if(options.lifeTime != null) lifeTime = options.lifeTime;
+	function new(options:{?lifetime:Float}) {
+		if(options.lifetime != null) lifetime = options.lifetime;
 	}
 	
 	override function onPreParticleSpawn(p:Particle) {
-		p.lifeTime = lifeTime;
+		p.lifetime = lifetime;
 	}
 
 	override function onParticleUnspawn(p:Particle) {
-		p.lifeTime = -1;
+		p.lifetime = -1;
 	}
 	
 }
