@@ -1,7 +1,7 @@
 package sparkler.utils;
 
 @:structInit
-class Size {
+class Area {
 
 	public var width:Float;
 	public var height:Float;
