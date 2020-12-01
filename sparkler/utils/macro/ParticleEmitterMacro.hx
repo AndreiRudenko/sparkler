@@ -344,6 +344,10 @@ class ParticleEmitterMacro {
 				fields.push(onParticleUnspawnField);
 			}
 
+			// filter and check imports
+			emitterImports = filterDuplicateImport(emitterImports);
+			checkDuplicateClassImport(emitterImports);
+
 			// define emitter type
 			var eTDef:TypeDefinition = {
 				pack: ['sparkler'],
@@ -365,6 +369,54 @@ class ParticleEmitterMacro {
 		}
 
 		return Context.getType('sparkler.${eName}');
+	}
+
+	static function filterDuplicateImport(importExprs:Array<ImportExpr>):Array<ImportExpr> {
+		var importsNames:Array<String> = [];
+		var importsClean:Array<ImportExpr> = [];
+
+		// clear imports
+		var iPath:String;
+		for (i in importExprs) {
+			iPath = getImportPathString(i);
+			if(importsNames.indexOf(iPath) == -1) {
+				importsNames.push(iPath);
+				importsClean.push(i);
+			}
+		}
+		return importsClean;
+	}
+
+	static function getImportPathString(iExpr:ImportExpr):String {
+		var iPath = '';
+		for (j in 0...iExpr.path.length) {
+			iPath += iExpr.path[j].name;
+			if(j < iExpr.path.length-1) {
+				iPath += '.';
+			}
+		}
+		return iPath;
+	}
+
+	static function checkDuplicateClassImport(importExprs:Array<ImportExpr>) {
+		var importsClassNames:Array<String> = [];
+		var importPaths:Array<String> = [];
+
+		// clear imports
+		var iName:String;
+		var iPath:String;
+		for (i in importExprs) {
+			iPath = getImportPathString(i);
+			iName = i.path[i.path.length-1].name;
+			var idx = importsClassNames.indexOf(iName);
+			if(idx == -1) {
+				importPaths.push(iPath);
+				importsClassNames.push(iName);
+			} else {
+				var otherIPath = importPaths[idx];
+				trace('Warning: import class with different path but same name: "${otherIPath}", and "${iPath}"');
+			}
+		}
 	}
 
 	static function addDefaultModules(groupNames:Array<String>, defTypes:Array<Type>, injectTypes:Array<Type>) {
