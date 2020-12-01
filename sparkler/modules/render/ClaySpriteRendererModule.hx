@@ -100,7 +100,7 @@ class ClaySpriteRendererModule extends ParticleInjectModule {
 		}
 
 		if(particleFieldNames.indexOf('rotation') != -1) {
-			rotationExpr = macro p.rotation;
+			rotationExpr = macro p.rotation * (6.28318530717958648 / 360); // degrees to radians convertion
 		}
 
 		if(particleFieldNames.indexOf('skew') != -1) {

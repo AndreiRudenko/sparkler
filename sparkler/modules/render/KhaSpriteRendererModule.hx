@@ -102,7 +102,7 @@ class KhaSpriteRendererModule extends ParticleInjectModule {
 		if(particleFieldNames.indexOf('rotation') != -1) {
 			exprsBegin.push(
 				macro {
-					g.pushRotation(p.rotation, p.x, p.y);
+					g.pushRotation(p.rotation * (6.28318530717958648 / 360), p.x, p.y); // degrees to radians convertion
 				}
 			);
 			exprsEnd.push(
