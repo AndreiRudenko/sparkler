@@ -63,6 +63,8 @@ class KhaSpriteRendererModule extends ParticleInjectModule {
 		});
 
 		var preExprs:Array<Expr> = [];
+		var exprsBeginLocal:Array<Expr> = [];
+		var exprsEndLocal:Array<Expr> = [];
 		var exprsBegin:Array<Expr> = [];
 		var exprsEnd:Array<Expr> = [];
 
@@ -102,10 +104,24 @@ class KhaSpriteRendererModule extends ParticleInjectModule {
 		if(particleFieldNames.indexOf('rotation') != -1) {
 			exprsBegin.push(
 				macro {
-					g.pushRotation(p.rotation * (6.28318530717958648 / 360), p.x, p.y); // degrees to radians convertion
+					 // degrees to radians convertion
+					g.pushRotation(p.rotation * (6.28318530717958648 / 360), p.x, p.y);
 				}
 			);
 			exprsEnd.push(
+				macro {
+					g.popTransformation();
+				}
+			);
+
+			exprsBeginLocal.push(
+				macro {
+					var rx = t._00 * p.x + t._10 * p.y + t._20;
+					var ry = t._01 * p.x + t._11 * p.y + t._21;
+					g.pushRotation(p.rotation * (6.28318530717958648 / 360), rx, ry);
+				}
+			);
+			exprsEndLocal.push(
 				macro {
 					g.popTransformation();
 				}
@@ -120,6 +136,11 @@ class KhaSpriteRendererModule extends ParticleInjectModule {
 		}
 
 		if(particleFieldNames.indexOf('color') != -1) {
+			exprsBeginLocal.push(
+				macro {
+					g.color = p.color.value;
+				}
+			);
 			exprsBegin.push(
 				macro {
 					g.color = p.color.value;
@@ -133,6 +154,15 @@ class KhaSpriteRendererModule extends ParticleInjectModule {
 			);
 		}
 
+		var drawExpr = macro {
+			g.drawScaledSubImage(
+				image, 
+				$regionXexpr, $regionYexpr, $regionWexpr, $regionHexpr,
+				p.x - $originXexpr * $scaleExpr, p.y - $originYexpr * $scaleExpr,
+				$sizeXexpr * $scaleExpr, $sizeYexpr * $scaleExpr
+			);
+		};
+
 		var drawFunc = MacroUtils.buildFunction(
 			'draw', 
 			[Access.APublic], 
@@ -141,45 +171,45 @@ class KhaSpriteRendererModule extends ParticleInjectModule {
 			[macro {
 				if(activeCount > 0) {
 					var sortedParticles = getSorted();
+
 					var image = khaSpriteRenderer.image;
 					if(image == null) image = khaSpriteRenderer._imageDefault;
 
-					if(localSpace) {
-						var t = khaSpriteRenderer._transform;
-						t._00 = _a;
-						t._01 = _b;
-						t._10 = _c;
-						t._11 = _d;
-						t._20 = _tx;
-						t._21 = _ty;
-						g.pushTransformation(t);
-					}
-
 					$b{preExprs}
 
-					var p;
-					var i:Int = 0;
-					while(i < activeCount) {
-						p = sortedParticles[i];
-						$b{exprsBegin}
-						g.drawScaledSubImage(
-							image, 
-							$regionXexpr, $regionYexpr, $regionWexpr, $regionHexpr,
-							p.x - $originXexpr * $scaleExpr, p.y - $originYexpr * $scaleExpr,
-							$sizeXexpr * $scaleExpr, $sizeYexpr * $scaleExpr
-						);
-						$b{exprsEnd}
-						i++;
-					}
-
 					if(localSpace) {
+						var t = khaSpriteRenderer._transform;
+						t._00 = _a; t._01 = _b;
+						t._10 = _c; t._11 = _d;
+						t._20 = _tx; t._21 = _ty;
+						g.pushTransformation(t);
+
+						var p;
+						var i:Int = 0;
+						while(i < activeCount) {
+							p = sortedParticles[i];
+							$b{exprsBeginLocal}
+							$e{drawExpr}
+							$b{exprsEndLocal}
+							i++;
+						}
 						g.popTransformation();
+					} else {
+						var p;
+						var i:Int = 0;
+						while(i < activeCount) {
+							p = sortedParticles[i];
+							$b{exprsBegin}
+							$e{drawExpr}
+							$b{exprsEnd}
+							i++;
+						}
 					}
 				}
 			}]
 		);
+		
 		fields.push(drawFunc);
-
 	}
 
 #end
