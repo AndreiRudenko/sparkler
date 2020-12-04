@@ -6,10 +6,7 @@ A modular 2d particle system.
 * Customizable.
 * You can create custom `ParticleModule` to extend functionality.
 * Local/World Space rendering.
-
-### Supports  
-- [Kha](https://github.com/Kode/Kha)  
-- [Clay](https://github.com/clay2d/clay)  
+* Multiple frameworks support: [Kha](https://github.com/Kode/Kha) and [Clay](https://github.com/clay2d/clay) for now.
 
 ### Sample Usage  
 
