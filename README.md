@@ -14,7 +14,7 @@ A modular 2d particle system.
 
 var emitter = new ParticleEmitter<
 	ColorListOverLifetimeModule,
-	VelocityModule,
+	InitialVelocityModule,
 	KhaSpriteRendererModule
 >({
 	cacheSize: 512,
@@ -38,7 +38,7 @@ var emitter = new ParticleEmitter<
 			}
 		]
 	},
-	velocity: {x: 0, y: -200},
+	initialVelocity: {x: 0, y: -200},
 	khaSpriteRenderer: {
 		image: kha.Assets.images.particle
 	},
