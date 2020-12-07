@@ -16,12 +16,12 @@ class InitialVelocityModule extends ParticleModule<Particle<Velocity>> {
 	}
 
 	override function onParticleSpawn(p:Particle<Velocity>) {
-		if(!localSpace) {
-			p.velocity.x = getRotateX(initialVelocity.x, initialVelocity.y);
-			p.velocity.y = getRotateY(initialVelocity.x, initialVelocity.y);
-		} else {
+		if(localSpace) {
 			p.velocity.x = initialVelocity.x;
 			p.velocity.y = initialVelocity.y;
+		} else {
+			p.velocity.x = getRotateX(initialVelocity.x, initialVelocity.y);
+			p.velocity.y = getRotateY(initialVelocity.x, initialVelocity.y);
 		}
 	}
 

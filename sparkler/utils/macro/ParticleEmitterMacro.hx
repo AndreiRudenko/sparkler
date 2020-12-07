@@ -446,13 +446,7 @@ class ParticleEmitterMacro {
 
 		if(groupNames.indexOf('spawn') == -1) {
 			onParticleSpawnExprs.insert(0, macro {
-				if(localSpace) {
-					p.x = 0;
-					p.y = 0;
-				} else {
-					p.x = getTransformX(0, 0);
-					p.y = getTransformY(0, 0);
-				}
+				setParticlePos(p, 0, 0);
 			}); 
 		}
 	}

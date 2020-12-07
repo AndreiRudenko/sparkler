@@ -155,6 +155,16 @@ class ParticleEmitterBase<T:ParticleBase> implements IParticleEmitter<T>{
 		onStepEnd(elapsed);
 	}
 
+	function setParticlePos(p:T, x:Float, y:Float) {
+		if(localSpace) {
+			p.x = x;
+			p.y = y;
+		} else {
+			p.x = getTransformX(x, y);
+			p.y = getTransformY(x, y);
+		}
+	}
+
 	function updateParticles(elapsed:Float) {
 		var p:T;
 		var i:Int = 0;
@@ -341,6 +351,7 @@ interface IParticleEmitter<T:ParticleBase> {
 	public function emit():Void;
 	public function start():Void;
 	public function stop():Void;
+	private function setParticlePos(p:T, x:Float, y:Float):Void;
 	private function updateParticles(elapsed:Float):Void;
 	private function getSorted():haxe.ds.Vector<T>;
 	private function restart():Void;

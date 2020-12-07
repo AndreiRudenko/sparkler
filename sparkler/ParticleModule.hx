@@ -38,6 +38,7 @@ class ParticleModule<T:ParticleBase> implements IParticleEmitter<T> {
 	public function start() {}
 	public function stop() {}
 
+	function setParticlePos(p:T, x:Float, y:Float) {}
 	function updateParticles(elapsed:Float) {}
 	function getSorted():haxe.ds.Vector<T> return null;
 	function step(elapsed:Float) {}
