@@ -67,12 +67,23 @@ class ParticleModuleMacro {
 					}
 				case 'addModules':
 					for (p in m.params) {
-						switch (p.expr) {
-							case EField(e, f):
-								var at = Context.getType(f);
-								opt.addModules.push(at);
-							default: throw('@addModule meta must be a Type');
+						var pe = p.expr;
+						var tPath:Array<String> = [];
+						while(pe != null) {
+							switch (pe) {
+								case EField(e, f):
+									pe = e.expr;
+									tPath.insert(0, f);
+								case EConst(CIdent(s)):
+									tPath.insert(0, s);
+									pe = null;
+								default: break;
+							}
 						}
+
+						var name = tPath.join('.');
+						var at = Context.getType(name);
+						opt.addModules.push(at);
 					}
 				default:
 			}
