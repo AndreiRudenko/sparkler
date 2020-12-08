@@ -22,6 +22,8 @@ class UpdateSpeedModule extends ParticleModule<Particle<Speed, PrevPos>> {
 
 	override function onParticleSpawn(p:Particle<Speed, PrevPos>) {
 		p.speed = 0;
+		p.prevPos.x = p.x;
+		p.prevPos.y = p.y;
 	}
 
 }
