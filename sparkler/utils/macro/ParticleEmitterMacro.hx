@@ -133,11 +133,12 @@ class ParticleEmitterMacro {
 			optFields.push(sortFuncOpt);
 
 			// setup emitter exprs
-			var newExprs:Array<Expr> = [macro super(options)];
-
-			newExprs.push(macro {
-				if(options.sortFunc != null) sortFunc = options.sortFunc;
-			});
+			var newExprs:Array<Expr> = [
+				macro {
+					super(options);
+					if(options.sortFunc != null) sortFunc = options.sortFunc;
+				}
+			];
 
 			var emitExprs:Array<Expr> = [];
 			var onStartExprs:Array<Expr> = [];
@@ -208,6 +209,7 @@ class ParticleEmitterMacro {
 				}
 			}); 
 
+			// TODO: move to function
 			if(newExprs.length > 0) {
 				var newField = MacroUtils.buildFunction(
 					'new', 
@@ -387,7 +389,6 @@ class ParticleEmitterMacro {
 		var importsClassNames:Array<String> = [];
 		var importPaths:Array<String> = [];
 
-		// clear imports
 		var iName:String;
 		var iPath:String;
 		for (i in importExprs) {
@@ -404,6 +405,7 @@ class ParticleEmitterMacro {
 		}
 	}
 
+	// TODO: add from array of default modules
 	static function addDefaultModules(groupNames:Array<String>, modulesOpt:Array<ParticleModuleMacroOptions>) {
 		if(groupNames.indexOf('emit') == -1) {
 			modulesOpt.push(getModuleOptionsFromClassName('sparkler.modules.emit.EmitRateModule'));
