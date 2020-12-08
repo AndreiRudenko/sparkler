@@ -10,6 +10,7 @@ import haxe.macro.ComplexTypeTools;
 
 import sparkler.utils.macro.MacroUtils;
 import sparkler.utils.macro.ParticleModuleMacro;
+import sparkler.utils.macro.ParticleModuleMacro.ParticleModuleMacroOptions;
 
 class ParticleEmitterMacro {
 
@@ -31,8 +32,8 @@ class ParticleEmitterMacro {
 
 	static public function build() {
 		return switch (Context.getLocalType()) {
-			case TInst(_.get() => {name: typeName}, types):
-				buildEmitter(types);
+			case TInst(t, p):
+				buildEmitter(p);
 			default:
 				throw false;
 		}
@@ -52,63 +53,57 @@ class ParticleEmitterMacro {
 			var particleTypes:Array<Type> = [];
 			var optFields:Array<Field> = [];
 
-			var defTypes:Array<Type> = [];
-			var injectTypes:Array<Type> = [];
-
-			// separate default and inject modules
+			// get module options
+			var modulesOpt:Array<ParticleModuleMacroOptions> = [];
+			var additionalModuleTypes:Array<Type> = [];
+			var moduleName:String;
+			var moduleOptions:ParticleModuleMacroOptions;
 			for (t in types) {
-				var c = TypeTools.getClass(t);
-				if(c.superClass != null) {
-					var gName = getModuleGroup(c);
-					if(gName != null) {
-						if(groupNames.indexOf(gName) != -1) {
-							throw('Cant have more than one module "${c.name}" in group "${gName}"');
-						}
-						groupNames.push(gName);
-					}
-					var cname = c.superClass.t.toString();
-					if(cname == particleModulePath) {
-						defTypes.push(t);
-					} else if(cname == particleInjectModulePath){
-						injectTypes.push(t);
-					}
+				moduleName = MacroUtils.getTypePath(t);
+				moduleOptions = ParticleModuleMacro.moduleOptions.get(moduleName);
+
+				// get additional module types
+				for (am in moduleOptions.addModules) {
+					additionalModuleTypes.push(am);
 				}
+
+				modulesOpt.push(moduleOptions);
 			}
 
-			addDefaultModules(groupNames, defTypes, injectTypes);
+			// add additional module options
+			for (t in additionalModuleTypes) {
+				TypeTools.getClass(t); // build type
+				moduleName = MacroUtils.getTypePath(t);
+				moduleOptions = ParticleModuleMacro.moduleOptions.get(moduleName);
+				if(modulesOpt.indexOf(moduleOptions) == -1) modulesOpt.push(moduleOptions);
+			}
+
+			// check modules groups
+			for (o in modulesOpt) {
+				if(o.group == null) continue;
+
+				if(groupNames.indexOf(o.group) != -1) {
+					throw('Cant add ${o.name}, more than one module in group "${o.group}" is not allowed');
+				}
+				groupNames.push(o.group);
+			}
+
+			addDefaultModules(groupNames, modulesOpt);
 
 			// sort modules
-			defTypes.sort(function(a:Type, b:Type) {
-				var aidx = getModulePriority(TypeTools.getClass(a));
-				var bidx = getModulePriority(TypeTools.getClass(b));
-				return Std.int(aidx - bidx);
+			modulesOpt.sort(function(a:ParticleModuleMacroOptions, b:ParticleModuleMacroOptions) {
+				return Std.int(a.priority - b.priority);
 			});
-
-			injectTypes.sort(function(a:Type, b:Type) {
-				var aidx = getModulePriority(TypeTools.getClass(a));
-				var bidx = getModulePriority(TypeTools.getClass(b));
-				return Std.int(aidx - bidx);
-			});
-
-			types = defTypes;
 
 			// get particle types from all modules
-			for (t in types) {
-				var c = TypeTools.getClass(t);
-				var param = c.superClass.params[0];
-				switch (param) {
-					case TInst(t, p):
-						var pack = t.toString().split('.');
-						var pName = pack[pack.length-1];
-						var pTypes = ParticleMacro.particleTypes.get(pName);
-						if(pTypes != null) {
-							for (pt in pTypes) {
-								if(!MacroUtils.hasType(particleTypes, pt)) {
-									particleTypes.push(pt);
-								}
-							}
+			for (o in modulesOpt) {
+				var pTypes = ParticleMacro.particleTypes.get(o.particleTypeName);
+				if(pTypes != null) {
+					for (pt in pTypes) {
+						if(!MacroUtils.hasType(particleTypes, pt)) {
+							particleTypes.push(pt);
 						}
-					default:
+					}
 				}
 			}
 
@@ -180,18 +175,8 @@ class ParticleEmitterMacro {
 				emitterImports: emitterImports
 			};
 
-			// apply default modules
-			injectDefaultModules(peopt, types);
-
-			// apply inject modules
-			for (it in injectTypes) {
-				var n = MacroUtils.getTypePath(it);
-				for (i in 0...iModules.length) {
-					if(n == iModules[i].name) {
-						iModules[i].inject(peopt);
-					}
-				}
-			}
+			// inject modules
+			injectModules(peopt, modulesOpt);
 
 			// add default exprs
 			injectDefaultExprs(peopt);
@@ -419,17 +404,17 @@ class ParticleEmitterMacro {
 		}
 	}
 
-	static function addDefaultModules(groupNames:Array<String>, defTypes:Array<Type>, injectTypes:Array<Type>) {
+	static function addDefaultModules(groupNames:Array<String>, modulesOpt:Array<ParticleModuleMacroOptions>) {
 		if(groupNames.indexOf('emit') == -1) {
-			defTypes.push(Context.getType('sparkler.modules.emit.EmitRateModule'));
+			modulesOpt.push(getModuleOptionsFromClassName('sparkler.modules.emit.EmitRateModule'));
 		}
 
 		if(groupNames.indexOf('lifetime') == -1) {
-			defTypes.push(Context.getType('sparkler.modules.life.LifetimeModule'));
+			modulesOpt.push(getModuleOptionsFromClassName('sparkler.modules.life.LifetimeModule'));
 		}
 
 		if(groupNames.indexOf('emitterLife') == -1) {
-			defTypes.push(Context.getType('sparkler.modules.life.EmitterLifetimeModule'));
+			modulesOpt.push(getModuleOptionsFromClassName('sparkler.modules.life.EmitterLifetimeModule'));
 		}
 	}
 
@@ -451,8 +436,7 @@ class ParticleEmitterMacro {
 		}
 	}
 
-
-	static function injectDefaultModules(options:ParticleEmitterBuildOptions, types:Array<Type>) {
+	static function injectModules(options:ParticleEmitterBuildOptions, modulesOpt:Array<ParticleModuleMacroOptions>) {
 		var fields = options.fields;
 		var optFields = options.optFields;
 
@@ -470,11 +454,19 @@ class ParticleEmitterMacro {
 		var emitterImports = options.emitterImports;
 
 		// inject function exprs
+		for (o in modulesOpt) {
+			if(o.isInjectType) {
+				for (im in iModules) {
+					if(o.name == im.name) {
+						im.inject(options);
+						break;
+					}
+				}
+				continue;	
+			}
 
-		for (t in types) {
-			var moduleName = MacroUtils.getTypePath(t);
-			var moduleFields = ParticleModuleMacro.moduleFields.get(moduleName);
-			var moduleImports = ParticleModuleMacro.moduleImports.get(moduleName);
+			var moduleFields = o.fields;
+			var moduleImports = o.imports;
 			for (i in moduleImports) emitterImports.push(i);
 			
 			for (mf in moduleFields) {
@@ -544,10 +536,12 @@ class ParticleEmitterMacro {
 				}
 			}
 		}
-		for (t in types) {
-			var moduleName = MacroUtils.getTypePath(t);
-			var moduleFields = ParticleModuleMacro.moduleFields.get(moduleName);
+		for (o in modulesOpt) {			
+			if(o.isInjectType) continue;	
 			
+			var moduleFields = o.fields;
+			var moduleImports = o.imports;
+
 			for (mf in moduleFields) {
 				var filterTag:String = null;
 				for (m in mf.meta) {
@@ -638,65 +632,6 @@ class ParticleEmitterMacro {
 		return uuid;
 	}
 
-	static function getModulePriority(c:ClassType):Float {
-		var metas = c.meta.get();
-		for (m in metas) {
-			if(m.name == 'priority') {
-				var e = m.params[0].expr;
-				switch (e) {
-					case EConst(c):
-						switch (c) {
-							case CInt(i):
-								return Std.parseInt(i);
-							case CFloat(f):
-								return Std.parseFloat(f);
-							default:
-						}
-					default:
-				}
-			}
-		}
-		return 0;
-	}
-
-	static function getModuleGroup(c:ClassType):String {
-		var metas = c.meta.get();
-		for (m in metas) {
-			if(m.name == 'group') {
-				var e = m.params[0].expr;
-				switch (e) {
-					case EConst(c):
-						switch (c) {
-							case CString(s):
-								return s;
-							default:
-						}
-					default:
-				}
-			}
-		}
-		return null;
-	}
-
-	static function getFieldMetaTag(field:Field, meta:String):String {
-		var meta = MacroUtils.getFieldMeta(field, meta);
-		if(meta != null) {
-			for (e in meta.params) {
-				switch (e.expr) {
-					case EConst(c):
-						switch (c) {
-							case CString(s):
-								return s;
-							default:
-						}
-					default:
-				}
-			}
-		}
-
-		return null;
-	}
-
 	static function getMetaString(meta:MetadataEntry):String {
 		switch (meta.params[0].expr) {
 			case EConst(c):
@@ -709,6 +644,12 @@ class ParticleEmitterMacro {
 		}
 		return null;
 	}
+
+	static function getModuleOptionsFromClassName(name:String):ParticleModuleMacroOptions {
+		TypeTools.getClass(Context.getType(name)); // build type
+		return ParticleModuleMacro.moduleOptions.get(name);
+	}
+
 }
 
 typedef InjectModule = {

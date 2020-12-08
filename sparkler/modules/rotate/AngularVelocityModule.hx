@@ -8,6 +8,7 @@ import sparkler.Particle;
 
 @priority(10)
 @group('angularVelocity')
+@addModules(sparkler.modules.rotate.UpdateAngularVelocityModule)
 class AngularVelocityModule extends ParticleModule<Particle<AngularVelocity, Rotation>> {
 
 	public var angularVelocity:Float = 90;
@@ -22,11 +23,6 @@ class AngularVelocityModule extends ParticleModule<Particle<AngularVelocity, Rot
 
 	override function onParticleUnspawn(p:Particle<AngularVelocity, Rotation>) {
 		p.rotation = 0;
-	}
-
-	@filter('angularVelocity')
-	override function onPostParticleUpdate(p:Particle<AngularVelocity, Rotation>, elapsed:Float) {
-		p.rotation += p.angularVelocity * elapsed;
 	}
 
 }

@@ -19,8 +19,8 @@ class ParticleMacro {
 
 	static function build() {
 		return switch (Context.getLocalType()) {
-			case TInst(_.get() => {name: typeName}, types):
-				buildParticle(types);
+			case TInst(t, p):
+				buildParticle(p);
 			default:
 				throw false;
 		}

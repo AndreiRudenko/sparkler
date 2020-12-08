@@ -3,6 +3,7 @@ package sparkler.modules.render;
 import sparkler.utils.macro.ParticleEmitterMacro;
 import sparkler.utils.macro.MacroUtils;
 import sparkler.ParticleModule;
+import sparkler.Particle;
 
 import haxe.macro.Context;
 import haxe.macro.Expr;
@@ -28,8 +29,9 @@ class KhaSpriteRenderer {
 }
 #end
 
+@inject
 @group('renderer')
-class KhaSpriteRendererModule extends ParticleInjectModule {
+class KhaSpriteRendererModule extends ParticleModule<ParticleBase> {
 
 #if (macro || display)
 	static public function inject(options:ParticleEmitterBuildOptions) {

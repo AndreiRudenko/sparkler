@@ -8,6 +8,7 @@ import sparkler.utils.Bounds;
 
 @priority(10)
 @group('velocity')
+@addModules(sparkler.modules.velocity.UpdateVelocityModule)
 class InitialVelocityMinMaxModule extends ParticleModule<Particle<Velocity>> {
 
 	public var initialVelocityMinMax:Bounds<Vector2>;
@@ -25,12 +26,6 @@ class InitialVelocityMinMaxModule extends ParticleModule<Particle<Velocity>> {
 	override function onParticleSpawn(p:Particle<Velocity>) {
 		p.velocity.x = randomFloat(initialVelocityMinMax.min.x, initialVelocityMinMax.max.x);
 		p.velocity.y = randomFloat(initialVelocityMinMax.min.y, initialVelocityMinMax.max.y);
-	}
-
-	@filter('velocity')
-	override function onPostParticleUpdate(p:Particle<Velocity>, elapsed:Float) {
-		p.x += p.velocity.x * elapsed;
-		p.y += p.velocity.y * elapsed;
 	}
 
 }

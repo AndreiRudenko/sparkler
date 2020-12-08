@@ -7,6 +7,7 @@ import sparkler.Particle;
 
 @priority(10)
 @group('velocity')
+@addModules(sparkler.modules.velocity.UpdateVelocityModule)
 class InitialVelocityModule extends ParticleModule<Particle<Velocity>> {
 
 	public var initialVelocity:Vector2;
@@ -23,12 +24,6 @@ class InitialVelocityModule extends ParticleModule<Particle<Velocity>> {
 			p.velocity.x = getRotateX(initialVelocity.x, initialVelocity.y);
 			p.velocity.y = getRotateY(initialVelocity.x, initialVelocity.y);
 		}
-	}
-
-	@filter('velocity')
-	override function onPostParticleUpdate(p:Particle<Velocity>, elapsed:Float) {
-		p.x += p.velocity.x * elapsed;
-		p.y += p.velocity.y * elapsed;
 	}
 
 }
