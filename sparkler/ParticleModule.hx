@@ -96,6 +96,6 @@ class ParticleModule<T:ParticleBase> implements IParticleEmitter<T> {
 }
 
 #if !macro
-@:autoBuild(sparkler.utils.macro.ParticleInjectModuleMacro.build())
+@:autoBuild(sparkler.utils.macro.ParticleModuleMacro.buildInject())
 #end
 class ParticleInjectModule {}

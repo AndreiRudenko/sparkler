@@ -97,6 +97,7 @@ class ParticleEmitterMacro {
 
 			// get particle types from all modules
 			for (o in modulesOpt) {
+				if(o.isInjectType) continue;
 				var pTypes = ParticleMacro.particleTypes.get(o.particleTypeName);
 				if(pTypes != null) {
 					for (pt in pTypes) {

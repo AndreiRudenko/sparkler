@@ -29,9 +29,8 @@ class KhaSpriteRenderer {
 }
 #end
 
-@inject
 @group('renderer')
-class KhaSpriteRendererModule extends ParticleModule<ParticleBase> {
+class KhaSpriteRendererModule extends ParticleInjectModule {
 
 #if (macro || display)
 	static public function inject(options:ParticleEmitterBuildOptions) {

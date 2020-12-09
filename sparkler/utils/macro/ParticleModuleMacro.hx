@@ -16,26 +16,52 @@ class ParticleModuleMacro {
 	static public function build():Array<Field> {
 		var cp:String = Context.getLocalModule();
 		var t = Context.getLocalType();
+		var fields = Context.getBuildFields();
+		var imports = Context.getLocalImports();
 
+		var fFields:Array<Field> = [];
+		for (f in fields) {
+			if(!MacroUtils.hasFieldMeta(f, 'virtual')) fFields.push(f);
+		}
+
+		addModuleOptions(cp, t, fFields, imports, false);
+
+		return fields;
+	}
+
+	static public function buildInject():Array<Field> {
+		var cp:String = Context.getLocalModule();
+		var t = Context.getLocalType();
+		var fields = Context.getBuildFields();
+		var imports = Context.getLocalImports();
+
+		addModuleOptions(cp, t, [], imports, true);
+
+		return fields;
+	}
+
+	static public function addModuleOptions(name:String, type:Type, fields:Array<Field>, imports:Array<ImportExpr>, isInjectType:Bool) {
 		var opt:ParticleModuleMacroOptions = {
-			name: cp,
-			type: t,
+			name: name,
+			type: type,
 			particleTypeName: null,
-			isInjectType: false,
+			isInjectType: isInjectType,
 			priority: 0,
 			group: null,
-			imports: [],
-			fields: [],
+			imports: imports,
+			fields: fields,
 			addModules: []
 		}
 
-		var c = TypeTools.getClass(t);
-		switch (c.superClass.params[0]) {
-			case TInst(t, p):
-				var pack = t.toString().split('.');
-				var pName = pack[pack.length-1];
-				opt.particleTypeName = pack[pack.length-1];
-			default:
+		var c = TypeTools.getClass(type);
+		if(c.superClass.params.length > 0) {
+			switch (c.superClass.params[0]) {
+				case TInst(t, p):
+					var pack = t.toString().split('.');
+					var pName = pack[pack.length-1];
+					opt.particleTypeName = pack[pack.length-1];
+				default:
+			}
 		}
 
 		var metas = c.meta.get();
@@ -89,17 +115,7 @@ class ParticleModuleMacro {
 			}
 		}
 
-		var fields = Context.getBuildFields();
-
-		opt.imports = Context.getLocalImports();
-
-		for (f in fields) {
-			if(!MacroUtils.hasFieldMeta(f, 'virtual')) opt.fields.push(f);
-		}
-
-		moduleOptions.set(cp, opt);
-
-		return fields;
+		moduleOptions.set(name, opt);
 	}
 
 }

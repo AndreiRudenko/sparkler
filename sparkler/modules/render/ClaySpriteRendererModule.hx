@@ -25,9 +25,8 @@ class ClaySpriteRenderer {
 }
 #end
 
-@inject
 @group('renderer')
-class ClaySpriteRendererModule extends ParticleModule<ParticleBase> {
+class ClaySpriteRendererModule extends ParticleInjectModule {
 
 #if (macro || display)
 	static public function inject(options:ParticleEmitterBuildOptions) {
