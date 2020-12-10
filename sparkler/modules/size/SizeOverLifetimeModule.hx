@@ -19,7 +19,7 @@ class SizeOverLifetime {
 
 @priority(90)
 @group('size')
-@addModules(sparkler.modules.life.LifeProgressModule)
+@addModules(sparkler.modules.helpers.LifeProgressModule)
 class SizeOverLifetimeModule extends ParticleModule<Particle<Size, LifeProgress>> {
 
 	public var sizeOverLifetime:SizeOverLifetime;

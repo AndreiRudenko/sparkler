@@ -8,7 +8,7 @@ import sparkler.Particle;
 
 @priority(100)
 @group('scale')
-@addModules(sparkler.modules.life.LifeProgressModule)
+@addModules(sparkler.modules.helpers.LifeProgressModule)
 class ScaleListOverLifetimeModule extends ParticleModule<Particle<Scale, ScalePropertyList, LifeProgress>> {
 
 	public var scaleListOverLifetime:ScalePropertyList;

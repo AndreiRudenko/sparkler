@@ -7,7 +7,7 @@ import sparkler.Particle;
 
 @priority(20)
 @group('force')
-@addModules(sparkler.modules.velocity.UpdatePosFromVelocityModule)
+@addModules(sparkler.modules.helpers.UpdatePosFromVelocityModule)
 class ForceModule extends ParticleModule<Particle<Velocity>> {
 
 	public var force:Vector2;

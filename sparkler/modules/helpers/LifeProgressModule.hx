@@ -1,4 +1,4 @@
-package sparkler.modules.life;
+package sparkler.modules.helpers;
 
 import sparkler.utils.Vector2;
 import sparkler.components.LifeProgress;

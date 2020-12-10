@@ -18,7 +18,7 @@ class ColorOverLifetime {
 
 @priority(80)
 @group('color')
-@addModules(sparkler.modules.life.LifeProgressModule)
+@addModules(sparkler.modules.helpers.LifeProgressModule)
 class ColorOverLifetimeModule extends ParticleModule<Particle<Color, LifeProgress>> {
 
 	public var colorOverLifetime:ColorOverLifetime;

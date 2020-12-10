@@ -18,7 +18,7 @@ class RotateOverLifetime {
 
 @priority(110)
 @group('rotate')
-@addModules(sparkler.modules.life.LifeProgressModule)
+@addModules(sparkler.modules.helpers.LifeProgressModule)
 class RotateOverLifetimeModule extends ParticleModule<Particle<Rotation, LifeProgress>> {
 
 	public var rotateOverLifetime:RotateOverLifetime;
