@@ -21,7 +21,7 @@ class ColorMinMaxOverLifetime {
 
 }
 
-@priority(5)
+@priority(80)
 @group('color')
 @addModules(sparkler.modules.life.LifeProgressModule)
 class ColorMinMaxOverLifetimeModule extends ParticleModule<Particle<Color, ColorRange, LifeProgress>> {

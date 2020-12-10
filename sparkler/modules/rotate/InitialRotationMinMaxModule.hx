@@ -5,7 +5,7 @@ import sparkler.ParticleModule;
 import sparkler.Particle;
 import sparkler.utils.Bounds;
 
-@priority(3)
+@priority(110)
 @group('rotation')
 class InitialRotationMinMaxModule extends ParticleModule<Particle<Rotation>> {
 

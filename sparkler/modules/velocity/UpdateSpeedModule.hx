@@ -6,7 +6,7 @@ import sparkler.components.Speed;
 import sparkler.ParticleModule;
 import sparkler.Particle;
 
-@priority(55) // after position set by velocity
+@priority(70)
 class UpdateSpeedModule extends ParticleModule<Particle<Speed, PrevPos>> {
 
 	override function onPreParticleUpdate(p:Particle<Speed, PrevPos>, elapsed:Float) {

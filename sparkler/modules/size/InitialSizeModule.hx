@@ -5,7 +5,7 @@ import sparkler.ParticleModule;
 import sparkler.Particle;
 import sparkler.utils.Vector2;
 
-@priority(3)
+@priority(90)
 @group('size')
 class InitialSizeModule extends ParticleModule<Particle<Size>> {
 

@@ -6,7 +6,7 @@ import sparkler.components.Scale;
 import sparkler.ParticleModule;
 import sparkler.Particle;
 
-@priority(3)
+@priority(100)
 @group('scale')
 @addModules(sparkler.modules.life.LifeProgressModule)
 class ScaleListOverLifetimeModule extends ParticleModule<Particle<Scale, ScalePropertyList, LifeProgress>> {

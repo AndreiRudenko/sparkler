@@ -8,7 +8,7 @@ import sparkler.utils.Bounds;
 
 @priority(10)
 @group('velocity')
-@addModules(sparkler.modules.velocity.UpdateVelocityModule)
+@addModules(sparkler.modules.velocity.UpdatePosFromVelocityModule)
 class InitialVelocityMinMaxModule extends ParticleModule<Particle<Velocity>> {
 
 	public var initialVelocityMinMax:Bounds<Vector2>;

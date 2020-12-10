@@ -5,7 +5,7 @@ import sparkler.components.Velocity;
 import sparkler.ParticleModule;
 import sparkler.Particle;
 
-@priority(19) // after all velocity changes
+@priority(30)
 @group('drag')
 class DragModule extends ParticleModule<Particle<Velocity>> {
 

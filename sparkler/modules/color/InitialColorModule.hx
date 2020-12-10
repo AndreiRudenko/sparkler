@@ -4,7 +4,7 @@ import sparkler.utils.Color;
 import sparkler.ParticleModule;
 import sparkler.Particle;
 
-@priority(5)
+@priority(80)
 @group('color')
 class InitialColorModule extends ParticleModule<Particle<Color>> {
 

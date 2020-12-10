@@ -6,7 +6,7 @@ import sparkler.components.Color;
 import sparkler.ParticleModule;
 import sparkler.Particle;
 
-@priority(5)
+@priority(80)
 @group('color')
 @addModules(sparkler.modules.life.LifeProgressModule)
 class ColorListOverLifetimeModule extends ParticleModule<Particle<Color, ColorPropertyList, LifeProgress>> {

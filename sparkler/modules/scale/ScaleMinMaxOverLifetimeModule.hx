@@ -21,7 +21,7 @@ class ScaleMinMaxOverLifetime {
 
 }
 
-@priority(3)
+@priority(100)
 @group('scale')
 @addModules(sparkler.modules.life.LifeProgressModule)
 class ScaleMinMaxOverLifetimeModule extends ParticleModule<Particle<Scale, ScaleRange, LifeProgress>> {

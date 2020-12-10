@@ -5,8 +5,8 @@ import sparkler.components.Velocity;
 import sparkler.ParticleModule;
 import sparkler.Particle;
 
-@priority(50)
-class UpdateVelocityModule extends ParticleModule<Particle<Velocity>> {
+@priority(60)
+class UpdatePosFromVelocityModule extends ParticleModule<Particle<Velocity>> {
 
 	override function onPostParticleUpdate(p:Particle<Velocity>, elapsed:Float) {
 		p.x += p.velocity.x * elapsed;

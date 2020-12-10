@@ -3,6 +3,39 @@ package sparkler;
 import sparkler.utils.Color;
 import sparkler.Particle;
 
+
+/*
+onUpdate order
+
+0      p.lifeProgress = p.age / p.life
+       p.prevPos = p.pos
+
+// 10 - velocity start
+
+10     p.velocity += velocity
+20     p.velocity += force
+30     p.velocity *= drag
+
+40     p.angularVelocity += angularVelocity
+50     p.angularVelocity *= angularDrag
+
+// 60 - velocity end
+
+// 60 - position start
+
+60     p.pos += velocity
+
+// 70 - position end
+
+70     p.speed = p.pos - p.prevPos
+
+80     p.color = color
+90     p.size = size
+100    p.scale = scale
+110    p.rotation = rotation or angularVelocity
+
+*/
+
 #if !macro
 @:genericBuild(sparkler.utils.macro.ParticleEmitterMacro.build())
 #end

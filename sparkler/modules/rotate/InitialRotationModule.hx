@@ -4,7 +4,7 @@ import sparkler.components.Rotation;
 import sparkler.ParticleModule;
 import sparkler.Particle;
 
-@priority(3)
+@priority(110)
 @group('rotate')
 class InitialRotationModule extends ParticleModule<Particle<Rotation>> {
 

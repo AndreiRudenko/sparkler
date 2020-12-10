@@ -6,9 +6,9 @@ import sparkler.components.Rotation;
 import sparkler.ParticleModule;
 import sparkler.Particle;
 
-@priority(10)
+@priority(40)
 @group('angularVelocity')
-@addModules(sparkler.modules.rotate.UpdateAngularVelocityModule)
+@addModules(sparkler.modules.rotate.UpdateRotationFromAngularVelocityModule)
 class AngularVelocityModule extends ParticleModule<Particle<AngularVelocity, Rotation>> {
 
 	public var angularVelocity:Float = 90;

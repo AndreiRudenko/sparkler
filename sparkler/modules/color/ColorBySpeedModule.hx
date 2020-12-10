@@ -20,7 +20,7 @@ class ColorBySpeed {
 
 }
 
-@priority(60) // after speed set by prev and current position
+@priority(80) // after speed set by prev and current position
 @group('color')
 @addModules(sparkler.modules.velocity.UpdateSpeedModule)
 class ColorBySpeedModule extends ParticleModule<Particle<Color, Speed>> {

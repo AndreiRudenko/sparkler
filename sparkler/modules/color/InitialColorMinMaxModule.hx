@@ -5,7 +5,7 @@ import sparkler.ParticleModule;
 import sparkler.Particle;
 import sparkler.utils.Bounds;
 
-@priority(5)
+@priority(80)
 @group('color')
 class InitialColorMinMaxModule extends ParticleModule<Particle<Color>> {
 

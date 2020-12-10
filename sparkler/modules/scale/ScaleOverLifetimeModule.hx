@@ -16,7 +16,7 @@ class ScaleOverLifetime {
 
 }
 
-@priority(3)
+@priority(100)
 @group('scale')
 @addModules(sparkler.modules.life.LifeProgressModule)
 class ScaleOverLifetimeModule extends ParticleModule<Particle<Scale, LifeProgress>> {

@@ -7,7 +7,7 @@ import sparkler.Particle;
 
 @priority(10)
 @group('velocity')
-@addModules(sparkler.modules.velocity.UpdateVelocityModule)
+@addModules(sparkler.modules.velocity.UpdatePosFromVelocityModule)
 class InitialVelocityModule extends ParticleModule<Particle<Velocity>> {
 
 	public var initialVelocity:Vector2;

@@ -4,7 +4,7 @@ import sparkler.components.Scale;
 import sparkler.ParticleModule;
 import sparkler.Particle;
 
-@priority(3)
+@priority(100)
 @group('scale')
 class InitialScaleModule extends ParticleModule<Particle<Scale>> {
 
