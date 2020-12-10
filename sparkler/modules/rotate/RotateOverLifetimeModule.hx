@@ -1,5 +1,6 @@
 package sparkler.modules.rotate;
 
+import sparkler.utils.Maths;
 import sparkler.components.LifeProgress;
 import sparkler.components.Rotation;
 import sparkler.ParticleModule;
@@ -33,7 +34,7 @@ class RotateOverLifetimeModule extends ParticleModule<Particle<Rotation, LifePro
 	}
 
 	override function onParticleUpdate(p:Particle<Rotation, LifeProgress>, elapsed:Float) {
-		p.rotation = rotateOverLifetime.start + (rotateOverLifetime.end - rotateOverLifetime.start) * (rotateOverLifetime.ease != null ? rotateOverLifetime.ease(p.lifeProgress) : p.lifeProgress);
+		p.rotation = Maths.lerp(rotateOverLifetime.start, rotateOverLifetime.end, rotateOverLifetime.ease != null ? rotateOverLifetime.ease(p.lifeProgress) : p.lifeProgress);
 	}
 
 	override function onParticleSpawn(p:Particle<Rotation, LifeProgress>) {

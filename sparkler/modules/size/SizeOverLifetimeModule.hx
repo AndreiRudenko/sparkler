@@ -3,6 +3,7 @@ package sparkler.modules.size;
 import sparkler.components.LifeProgress;
 import sparkler.components.Size;
 import sparkler.utils.Vector2;
+import sparkler.utils.Maths;
 import sparkler.ParticleModule;
 import sparkler.Particle;
 import sparkler.modules.size.SizeOverLifetimeModule.SizeOverLifetime;
@@ -36,10 +37,9 @@ class SizeOverLifetimeModule extends ParticleModule<Particle<Size, LifeProgress>
 	}
 
 	override function onParticleUpdate(p:Particle<Size, LifeProgress>, elapsed:Float) {
-		var t = p.lifeProgress;
-		if(sizeOverLifetime.ease != null) t = sizeOverLifetime.ease(t);
-		v.x = sizeOverLifetime.start.x + (sizeOverLifetime.end.x - sizeOverLifetime.start.x) * t;
-		v.y = sizeOverLifetime.start.y + (sizeOverLifetime.end.y - sizeOverLifetime.start.y) * t;
+		var t = sizeOverLifetime.ease != null ? sizeOverLifetime.ease(p.lifeProgress) : p.lifeProgress;
+		v.x = Maths.lerp(sizeOverLifetime.start.x, sizeOverLifetime.end.x, t);
+		v.y = Maths.lerp(sizeOverLifetime.start.y, sizeOverLifetime.end.y, t);
 	}
 
 	override function onParticleSpawn(p:Particle<Size, LifeProgress>) {

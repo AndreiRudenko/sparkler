@@ -1,5 +1,6 @@
 package sparkler.modules.scale;
 
+import sparkler.utils.Maths;
 import sparkler.components.Scale;
 import sparkler.components.LifeProgress;
 import sparkler.ParticleModule;
@@ -34,8 +35,7 @@ class ScaleOverLifetimeModule extends ParticleModule<Particle<Scale, LifeProgres
 	}
 
 	override function onParticleUpdate(p:Particle<Scale, LifeProgress>, elapsed:Float) {
-		p.scale = scaleOverLifetime.start + (scaleOverLifetime.end - scaleOverLifetime.start) * (scaleOverLifetime.ease != null ? scaleOverLifetime.ease(p.lifeProgress) : p.lifeProgress);
-		p.scale = lerpScale(_lerp);
+		p.scale = Maths.lerp(scaleOverLifetime.start, scaleOverLifetime.end, scaleOverLifetime.ease != null ? scaleOverLifetime.ease(p.lifeProgress) : p.lifeProgress);
 	}
 
 	override function onParticleSpawn(p:Particle<Scale, LifeProgress>) {

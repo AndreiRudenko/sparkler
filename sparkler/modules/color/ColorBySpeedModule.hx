@@ -2,6 +2,7 @@ package sparkler.modules.color;
 
 import sparkler.components.Speed;
 import sparkler.utils.Color;
+import sparkler.utils.Maths;
 import sparkler.ParticleModule;
 import sparkler.Particle;
 import sparkler.modules.color.ColorBySpeedModule.ColorBySpeed;
@@ -51,21 +52,8 @@ class ColorBySpeedModule extends ParticleModule<Particle<Color, Speed>> {
 	}
 	
 	override function onPostParticleUpdate(p:Particle<Color, Speed>, elapsed:Float) {
-		var colorSpeedInvLerp = (p.speed - colorBySpeed.minSpeed) / (colorBySpeed.maxSpeed - colorBySpeed.minSpeed);
-
-		if(colorSpeedInvLerp < 0) {
-			colorSpeedInvLerp = 0;
-		} else if(colorSpeedInvLerp > 1) {
-			colorSpeedInvLerp = 1;
-		}
-
-		p.color = lerpColor(colorSpeedInvLerp);
-	}
-
-
-	inline function lerpColor(t:Float):Color {
-		if(colorBySpeed.ease != null) t = colorBySpeed.ease(t);
-		return Color.lerp(colorBySpeed.minColor, colorBySpeed.maxColor, t);
+		var colorSpeedInvLerp = Maths.clamp(Maths.inverseLerp(colorBySpeed.minSpeed, colorBySpeed.maxSpeed, p.speed), 0, 1);
+		p.color = Color.lerp(colorBySpeed.minColor, colorBySpeed.maxColor, colorBySpeed.ease != null ? colorBySpeed.ease(colorSpeedInvLerp) : colorSpeedInvLerp);
 	}
 
 }

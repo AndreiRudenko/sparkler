@@ -1,5 +1,6 @@
 package sparkler.modules.scale;
 
+import sparkler.utils.Maths;
 import sparkler.components.Scale;
 import sparkler.components.LifeProgress;
 import sparkler.components.ScaleRange;
@@ -41,7 +42,7 @@ class ScaleMinMaxOverLifetimeModule extends ParticleModule<Particle<Scale, Scale
 	}
 
 	override function onParticleUpdate(p:Particle<Scale, ScaleRange, LifeProgress>, elapsed:Float) {
-		p.scale = p.scaleRange.start + (p.scaleRange.end - p.scaleRange.start) * (scaleMinMaxOverLifetime.ease != null ? scaleMinMaxOverLifetime.ease(p.lifeProgress) : p.lifeProgress);
+		p.scale = Maths.lerp(p.scaleRange.start, p.scaleRange.end, scaleMinMaxOverLifetime.ease != null ? scaleMinMaxOverLifetime.ease(p.lifeProgress) : p.lifeProgress);
 	}
 
 	override function onParticleSpawn(p:Particle<Scale, ScaleRange, LifeProgress>) {

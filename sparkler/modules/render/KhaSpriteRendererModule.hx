@@ -105,8 +105,7 @@ class KhaSpriteRendererModule extends ParticleInjectModule {
 		if(particleFieldNames.indexOf('rotation') != -1) {
 			exprsBegin.push(
 				macro {
-					 // degrees to radians convertion
-					g.pushRotation(p.rotation * (6.28318530717958648 / 360), p.x, p.y);
+					g.pushRotation(sparkler.utils.Maths.radians(p.rotation), p.x, p.y);
 				}
 			);
 			exprsEnd.push(
@@ -119,7 +118,7 @@ class KhaSpriteRendererModule extends ParticleInjectModule {
 				macro {
 					var rx = t._00 * p.x + t._10 * p.y + t._20;
 					var ry = t._01 * p.x + t._11 * p.y + t._21;
-					g.pushRotation(p.rotation * (6.28318530717958648 / 360), rx, ry);
+					g.pushRotation(sparkler.utils.Maths.radians(p.rotation), rx, ry);
 				}
 			);
 			exprsEndLocal.push(

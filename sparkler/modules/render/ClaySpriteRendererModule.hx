@@ -101,7 +101,7 @@ class ClaySpriteRendererModule extends ParticleInjectModule {
 		}
 
 		if(particleFieldNames.indexOf('rotation') != -1) {
-			rotationExpr = macro p.rotation * (6.28318530717958648 / 360); // degrees to radians convertion
+			rotationExpr = macro sparkler.utils.Maths.radians(p.rotation);
 		}
 
 		if(particleFieldNames.indexOf('skew') != -1) {
