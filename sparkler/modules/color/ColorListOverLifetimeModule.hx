@@ -1,18 +1,17 @@
 package sparkler.modules.color;
 
 import sparkler.components.ColorPropertyList;
+import sparkler.components.LifeProgress;
 import sparkler.components.Color;
 import sparkler.ParticleModule;
 import sparkler.Particle;
 
 @priority(5)
 @group('color')
-class ColorListOverLifetimeModule extends ParticleModule<Particle<Color, ColorPropertyList>> {
+@addModules(sparkler.modules.life.LifeProgressModule)
+class ColorListOverLifetimeModule extends ParticleModule<Particle<Color, ColorPropertyList, LifeProgress>> {
 
 	public var colorListOverLifetime:ColorPropertyList;
-
-	@filter('_lerp')
-	var _lerp:Float = 0;
 
 	function new(options:{?colorListOverLifetime:{?ease:(v:Float)->Float, list:Array<{time:Float, value:sparkler.utils.Color}>}}) {
 		if(options.colorListOverLifetime != null) {
@@ -23,16 +22,11 @@ class ColorListOverLifetimeModule extends ParticleModule<Particle<Color, ColorPr
 		}
 	}
 
-	@filter('_lerp')
-	override function onPreParticleUpdate(p:Particle<Color, ColorPropertyList>, elapsed:Float) {
-		_lerp = p.age / p.lifetime;
-	}
-
-	override function onParticleUpdate(p:Particle<Color, ColorPropertyList>, elapsed:Float) {
-		p.colorPropertyList.interpolate(_lerp);
+	override function onParticleUpdate(p:Particle<Color, ColorPropertyList, LifeProgress>, elapsed:Float) {
+		p.colorPropertyList.interpolate(p.lifeProgress);
 		p.color = p.colorPropertyList.value;
 	}
-	override function onParticleSpawn(p:Particle<Color, ColorPropertyList>) {
+	override function onParticleSpawn(p:Particle<Color, ColorPropertyList, LifeProgress>) {
 		p.colorPropertyList.set(colorListOverLifetime);
 		p.color = p.colorPropertyList.value;
 	}

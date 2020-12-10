@@ -2,6 +2,7 @@ package sparkler.modules.color;
 
 import sparkler.components.Color;
 import sparkler.components.ColorRange;
+import sparkler.components.LifeProgress;
 import sparkler.utils.Bounds;
 import sparkler.ParticleModule;
 import sparkler.Particle;
@@ -22,12 +23,10 @@ class ColorMinMaxOverLifetime {
 
 @priority(5)
 @group('color')
-class ColorMinMaxOverLifetimeModule extends ParticleModule<Particle<Color, ColorRange>> {
+@addModules(sparkler.modules.life.LifeProgressModule)
+class ColorMinMaxOverLifetimeModule extends ParticleModule<Particle<Color, ColorRange, LifeProgress>> {
 
 	public var colorMinMaxOverLifetime:ColorMinMaxOverLifetime;
-
-	@filter('_lerp')
-	var _lerp:Float = 0;
 
 	function new(
 		options:{
@@ -49,24 +48,14 @@ class ColorMinMaxOverLifetimeModule extends ParticleModule<Particle<Color, Color
 		}
 	}
 
-	@filter('_lerp')
-	override function onPreParticleUpdate(p:Particle<Color, ColorRange>, elapsed:Float) {
-		_lerp = p.age / p.lifetime;
+	override function onParticleUpdate(p:Particle<Color, ColorRange, LifeProgress>, elapsed:Float) {
+		p.color = Color.lerp(p.colorRange.start, p.colorRange.end, colorMinMaxOverLifetime.ease != null ? colorMinMaxOverLifetime.ease(p.lifeProgress) : p.lifeProgress);
 	}
 
-	override function onParticleUpdate(p:Particle<Color, ColorRange>, elapsed:Float) {
-		p.color = lerpColor(p.colorRange.start, p.colorRange.end, _lerp);
-	}
-
-	override function onParticleSpawn(p:Particle<Color, ColorRange>) {
+	override function onParticleSpawn(p:Particle<Color, ColorRange, LifeProgress>) {
 		p.colorRange.start = randomColor(colorMinMaxOverLifetime.start.min, colorMinMaxOverLifetime.start.max);
 		p.colorRange.end = randomColor(colorMinMaxOverLifetime.end.min, colorMinMaxOverLifetime.end.max);
 		p.color = p.colorRange.start;
-	}
-
-	inline function lerpColor(start:Color, end:Color, t:Float):Color {
-		if(colorMinMaxOverLifetime.ease != null) t = colorMinMaxOverLifetime.ease(t);
-		return Color.lerp(start, end, t);
 	}
 	
 	inline function randomColor(a:Color, b:Color):Color {

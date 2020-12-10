@@ -1,6 +1,7 @@
 package sparkler.modules.scale;
 
 import sparkler.components.Scale;
+import sparkler.components.LifeProgress;
 import sparkler.ParticleModule;
 import sparkler.Particle;
 import sparkler.modules.scale.ScaleOverLifetimeModule.ScaleOverLifetime;
@@ -17,12 +18,10 @@ class ScaleOverLifetime {
 
 @priority(3)
 @group('scale')
-class ScaleOverLifetimeModule extends ParticleModule<Particle<Scale>> {
+@addModules(sparkler.modules.life.LifeProgressModule)
+class ScaleOverLifetimeModule extends ParticleModule<Particle<Scale, LifeProgress>> {
 
 	public var scaleOverLifetime:ScaleOverLifetime;
-
-	@filter('_lerp')
-	var _lerp:Float = 0;
 
 	function new(options:{?scaleOverLifetime:{?ease:(v:Float)->Float, start:Float, end:Float}}) {
 		scaleOverLifetime = new ScaleOverLifetime();
@@ -34,22 +33,13 @@ class ScaleOverLifetimeModule extends ParticleModule<Particle<Scale>> {
 		}
 	}
 
-	@filter('_lerp')
-	override function onPreParticleUpdate(p:Particle<Scale>, elapsed:Float) {
-		_lerp = p.age / p.lifetime;
-	}
-
-	override function onParticleUpdate(p:Particle<Scale>, elapsed:Float) {
+	override function onParticleUpdate(p:Particle<Scale, LifeProgress>, elapsed:Float) {
+		p.scale = scaleOverLifetime.start + (scaleOverLifetime.end - scaleOverLifetime.start) * (scaleOverLifetime.ease != null ? scaleOverLifetime.ease(p.lifeProgress) : p.lifeProgress);
 		p.scale = lerpScale(_lerp);
 	}
 
-	override function onParticleSpawn(p:Particle<Scale>) {
+	override function onParticleSpawn(p:Particle<Scale, LifeProgress>) {
 		p.scale = scaleOverLifetime.start;
-	}
-
-	inline function lerpScale(t:Float):Float {
-		if(scaleOverLifetime.ease != null) t = scaleOverLifetime.ease(t);
-		return scaleOverLifetime.start + (scaleOverLifetime.end - scaleOverLifetime.start) * t;
 	}
 	
 }

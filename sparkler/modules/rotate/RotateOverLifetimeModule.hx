@@ -1,5 +1,6 @@
 package sparkler.modules.rotate;
 
+import sparkler.components.LifeProgress;
 import sparkler.components.Rotation;
 import sparkler.ParticleModule;
 import sparkler.Particle;
@@ -17,16 +18,13 @@ class RotateOverLifetime {
 
 @priority(3)
 @group('rotate')
-class RotateOverLifetimeModule extends ParticleModule<Particle<Rotation>> {
+@addModules(sparkler.modules.life.LifeProgressModule)
+class RotateOverLifetimeModule extends ParticleModule<Particle<Rotation, LifeProgress>> {
 
 	public var rotateOverLifetime:RotateOverLifetime;
 
-	@filter('_lerp')
-	var _lerp:Float = 0;
-
 	function new(options:{?rotateOverLifetime:{?ease:(v:Float)->Float, start:Float, end:Float}}) {
 		rotateOverLifetime = new RotateOverLifetime();
-
 		if(options.rotateOverLifetime != null) {
 			rotateOverLifetime.start = options.rotateOverLifetime.start;
 			rotateOverLifetime.end = options.rotateOverLifetime.end;
@@ -34,22 +32,12 @@ class RotateOverLifetimeModule extends ParticleModule<Particle<Rotation>> {
 		}
 	}
 
-	@filter('_lerp')
-	override function onPreParticleUpdate(p:Particle<Rotation>, elapsed:Float) {
-		_lerp = p.age / p.lifetime;
+	override function onParticleUpdate(p:Particle<Rotation, LifeProgress>, elapsed:Float) {
+		p.rotation = rotateOverLifetime.start + (rotateOverLifetime.end - rotateOverLifetime.start) * (rotateOverLifetime.ease != null ? rotateOverLifetime.ease(p.lifeProgress) : p.lifeProgress);
 	}
 
-	override function onParticleUpdate(p:Particle<Rotation>, elapsed:Float) {
-		p.rotation = lerpRotate(_lerp);
-	}
-
-	override function onParticleSpawn(p:Particle<Rotation>) {
+	override function onParticleSpawn(p:Particle<Rotation, LifeProgress>) {
 		p.rotation = rotateOverLifetime.start;
-	}
-
-	inline function lerpRotate(t:Float):Float {
-		if(rotateOverLifetime.ease != null) t = rotateOverLifetime.ease(t);
-		return rotateOverLifetime.start + (rotateOverLifetime.end - rotateOverLifetime.start) * t;
 	}
 	
 }

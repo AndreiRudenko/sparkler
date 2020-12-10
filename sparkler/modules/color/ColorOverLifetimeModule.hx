@@ -1,6 +1,7 @@
 package sparkler.modules.color;
 
 import sparkler.components.Color;
+import sparkler.components.LifeProgress;
 import sparkler.ParticleModule;
 import sparkler.Particle;
 import sparkler.modules.color.ColorOverLifetimeModule.ColorOverLifetime;
@@ -17,12 +18,10 @@ class ColorOverLifetime {
 
 @priority(5)
 @group('color')
-class ColorOverLifetimeModule extends ParticleModule<Particle<Color>> {
+@addModules(sparkler.modules.life.LifeProgressModule)
+class ColorOverLifetimeModule extends ParticleModule<Particle<Color, LifeProgress>> {
 
 	public var colorOverLifetime:ColorOverLifetime;
-
-	@filter('_lerp')
-	var _lerp:Float = 0;
 
 	function new(options:{?colorOverLifetime:{?ease:(v:Float)->Float, start:sparkler.utils.Color, end:sparkler.utils.Color}}) {
 		colorOverLifetime = new ColorOverLifetime();
@@ -37,22 +36,12 @@ class ColorOverLifetimeModule extends ParticleModule<Particle<Color>> {
 		}
 	}
 
-	@filter('_lerp')
-	override function onPreParticleUpdate(p:Particle<Color>, elapsed:Float) {
-		_lerp = p.age / p.lifetime;
+	override function onParticleUpdate(p:Particle<Color, LifeProgress>, elapsed:Float) {
+		p.color = Color.lerp(colorOverLifetime.start, colorOverLifetime.end, colorOverLifetime.ease != null ? colorOverLifetime.ease(p.lifeProgress) : p.lifeProgress);
 	}
 
-	override function onParticleUpdate(p:Particle<Color>, elapsed:Float) {
-		p.color = lerpColor(_lerp);
-	}
-
-	override function onParticleSpawn(p:Particle<Color>) {
+	override function onParticleSpawn(p:Particle<Color, LifeProgress>) {
 		p.color = colorOverLifetime.start;
 	}
 
-	inline function lerpColor(t:Float):Color {
-		if(colorOverLifetime.ease != null) t = colorOverLifetime.ease(t);
-		return Color.lerp(colorOverLifetime.start, colorOverLifetime.end, t);
-	}
-	
 }
