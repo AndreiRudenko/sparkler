@@ -113,6 +113,11 @@ class ParticleEmitterBase<T:ParticleBase> implements IParticleEmitter<T>{
 	public function new(options:ParticleEmitterOptions) {
 		if(options.x != null) _x = options.x;
 		if(options.y != null) _y = options.y;
+		if(options.rotation != null) rotation = options.rotation;
+		if(options.scaleX != null) scaleX = options.scaleX;
+		if(options.scaleY != null) scaleY = options.scaleY;
+		if(options.originX != null) originX = options.originX;
+		if(options.originY != null) originY = options.originY;
 
 		_lastX = _x;
 		_lastY = _y;
@@ -373,7 +378,7 @@ interface IParticleEmitter<T:ParticleBase> {
 	public var scaleY:Float;
 	public var originX:Float;
 	public var originY:Float;
-	
+
 	private var _x:Float;
 	private var _y:Float;
 	private var _lastX:Float;
@@ -426,6 +431,11 @@ typedef ParticleEmitterOptions = {
 	?name:String,
 	?x:Float,
 	?y:Float,
+	?rotation:Float,
+	?scaleX:Float,
+	?scaleY:Float,
+	?originX:Float,
+	?originY:Float,
 
 	?active:Bool,
 	?enabled:Bool,
