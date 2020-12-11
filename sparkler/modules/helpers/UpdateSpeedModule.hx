@@ -17,7 +17,7 @@ class UpdateSpeedModule extends ParticleModule<Particle<Speed, PrevPos>> {
 	override function onPostParticleUpdate(p:Particle<Speed, PrevPos>, elapsed:Float) {
 		var dx = p.x - p.prevPos.x;
 		var dy = p.y - p.prevPos.y;
-		p.speed = Math.sqrt(dx * dx + dy * dy);
+		p.speed = Math.sqrt(dx * dx + dy * dy) / elapsed;
 	}
 
 	override function onParticleSpawn(p:Particle<Speed, PrevPos>) {
