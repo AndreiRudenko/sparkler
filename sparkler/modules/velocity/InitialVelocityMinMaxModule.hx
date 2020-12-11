@@ -24,8 +24,16 @@ class InitialVelocityMinMaxModule extends ParticleModule<Particle<Velocity>> {
 	}
 
 	override function onParticleSpawn(p:Particle<Velocity>) {
-		p.velocity.x = randomFloat(initialVelocityMinMax.min.x, initialVelocityMinMax.max.x);
-		p.velocity.y = randomFloat(initialVelocityMinMax.min.y, initialVelocityMinMax.max.y);
+		var rx = randomFloat(initialVelocityMinMax.min.x, initialVelocityMinMax.max.x);
+		var ry = randomFloat(initialVelocityMinMax.min.y, initialVelocityMinMax.max.y);
+
+		if(localSpace) {
+			p.velocity.x = rx;
+			p.velocity.y = ry;
+		} else {
+			p.velocity.x = getRotateX(rx, ry);
+			p.velocity.y = getRotateY(rx, ry);
+		}
 	}
 
 }
