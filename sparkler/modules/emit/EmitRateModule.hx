@@ -1,6 +1,7 @@
 package sparkler.modules.emit;
 
 import sparkler.utils.Vector2;
+import sparkler.utils.Maths;
 import sparkler.components.Velocity;
 import sparkler.ParticleModule;
 import sparkler.Particle;
@@ -19,10 +20,6 @@ class EmitRateModule extends ParticleModule<Particle> {
 		_frameOffset = 0;
 	}
 
-	inline function lerp(start:Float, end:Float, t:Float) {
-		return (start + t * (end - start));
-	}
-
 	override function onStep(elapsed:Float) {
 		var px:Float = _x;
 		var py:Float = _y;
@@ -38,8 +35,8 @@ class EmitRateModule extends ParticleModule<Particle> {
 				ft += t;
 				if(!localSpace) {
 					lt = ft / _frameTime;
-					_x = lerp(_lastX, px, lt);
-					_y = lerp(_lastY, py, lt);
+					_x = Maths.lerp(_lastX, px, lt);
+					_y = Maths.lerp(_lastY, py, lt);
 				}
 				updateParticles(t);
 				elapsed -= t;
@@ -52,8 +49,8 @@ class EmitRateModule extends ParticleModule<Particle> {
 			ft += elapsed;
 			if(!localSpace) {
 				lt = ft / _frameTime;
-				_x = lerp(_lastX, px, ft / _frameTime);
-				_y = lerp(_lastY, py, ft / _frameTime);
+				_x = Maths.lerp(_lastX, px, ft / _frameTime);
+				_y = Maths.lerp(_lastY, py, ft / _frameTime);
 			}
 			updateParticles(elapsed);
 			if (enabled && emitRate > 0) {

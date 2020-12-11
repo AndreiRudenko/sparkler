@@ -9,7 +9,7 @@ import sparkler.Particle;
 @priority(0)
 class LifeProgressModule extends ParticleModule<Particle<LifeProgress>> {
 
-	override function onPreParticleUpdate(p:Particle<LifeProgress>, elapsed:Float) {
+	override function onParticleUpdate(p:Particle<LifeProgress>, elapsed:Float) {
 		p.lifeProgress = p.age / p.lifetime;
 	}
 

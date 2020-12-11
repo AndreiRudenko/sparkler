@@ -21,7 +21,7 @@ class ScaleBySpeed {
 
 }
 
-@priority(100) // after speed set by prev and current position
+@priority(100)
 @group('scale')
 @addModules(sparkler.modules.helpers.UpdateSpeedModule)
 class ScaleBySpeedModule extends ParticleModule<Particle<Scale, Speed>> {
@@ -51,7 +51,7 @@ class ScaleBySpeedModule extends ParticleModule<Particle<Scale, Speed>> {
 		p.scale = scaleBySpeed.minScale;
 	}
 	
-	override function onPostParticleUpdate(p:Particle<Scale, Speed>, elapsed:Float) {
+	override function onParticleUpdate(p:Particle<Scale, Speed>, elapsed:Float) {
 		var scaleSpeedInvLerp = Maths.clamp(Maths.inverseLerp(scaleBySpeed.minSpeed, scaleBySpeed.maxSpeed, p.speed), 0, 1);
 		p.scale = Maths.lerp(scaleBySpeed.minScale, scaleBySpeed.maxScale, scaleBySpeed.ease != null ? scaleBySpeed.ease(scaleSpeedInvLerp) : scaleSpeedInvLerp);
 	}

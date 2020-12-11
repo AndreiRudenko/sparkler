@@ -8,7 +8,7 @@ import sparkler.Particle;
 @priority(60)
 class UpdatePosFromVelocityModule extends ParticleModule<Particle<Velocity>> {
 
-	override function onPostParticleUpdate(p:Particle<Velocity>, elapsed:Float) {
+	override function onParticleUpdate(p:Particle<Velocity>, elapsed:Float) {
 		p.x += p.velocity.x * elapsed;
 		p.y += p.velocity.y * elapsed;
 	}

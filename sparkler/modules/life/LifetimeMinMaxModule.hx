@@ -17,7 +17,7 @@ class LifetimeMinMaxModule extends ParticleModule<Particle> {
 		}
 	}
 	
-	override function onPreParticleSpawn(p:Particle) {
+	override function onParticleSpawn(p:Particle) {
 		p.lifetime = randomFloat(lifetimeMinMax.min, lifetimeMinMax.max);
 	}
 

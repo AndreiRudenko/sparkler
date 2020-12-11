@@ -12,7 +12,7 @@ class LifetimeModule extends ParticleModule<Particle> {
 		if(options.lifetime != null) lifetime = options.lifetime;
 	}
 	
-	override function onPreParticleSpawn(p:Particle) {
+	override function onParticleSpawn(p:Particle) {
 		p.lifetime = lifetime;
 	}
 

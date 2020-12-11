@@ -9,7 +9,7 @@ import sparkler.Particle;
 @priority(110)
 class UpdateRotationFromAngularVelocityModule extends ParticleModule<Particle<AngularVelocity, Rotation>> {
 
-	override function onPostParticleUpdate(p:Particle<AngularVelocity, Rotation>, elapsed:Float) {
+	override function onParticleUpdate(p:Particle<AngularVelocity, Rotation>, elapsed:Float) {
 		p.rotation += p.angularVelocity * elapsed;
 	}
 

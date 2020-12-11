@@ -15,7 +15,7 @@ class DragModule extends ParticleModule<Particle<Velocity>> {
 		if(options.drag != null) drag = options.drag;
 	}
 
-	override function onPostParticleUpdate(p:Particle<Velocity>, elapsed:Float) {
+	override function onParticleUpdate(p:Particle<Velocity>, elapsed:Float) {
 		var d = 1 / (1 + (elapsed * drag));
 		p.velocity.x *= d;
 		p.velocity.y *= d;

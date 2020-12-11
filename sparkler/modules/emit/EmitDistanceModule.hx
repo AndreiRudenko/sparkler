@@ -1,6 +1,7 @@
 package sparkler.modules.emit;
 
 import sparkler.utils.Vector2;
+import sparkler.utils.Maths;
 import sparkler.components.Velocity;
 import sparkler.ParticleModule;
 import sparkler.Particle;
@@ -17,10 +18,6 @@ class EmitDistanceModule extends ParticleModule<Particle> {
 
 	override function onStart() {
 		_dOffset = 0;
-	}
-
-	inline function lerp(start:Float, end:Float, t:Float) {
-		return (start + t * (end - start));
 	}
 
 	override function onStep(elapsed:Float) {
@@ -47,8 +44,8 @@ class EmitDistanceModule extends ParticleModule<Particle> {
 				d = emitDistance - _dOffset;
 
 				ld += d / tickDistance;
-				_x = lerp(_lastX, px, ld);
-				_y = lerp(_lastY, py, ld);
+				_x = Maths.lerp(_lastX, px, ld);
+				_y = Maths.lerp(_lastY, py, ld);
 
 				frameTime = d * f;
 				updateParticles(frameTime);
@@ -60,8 +57,8 @@ class EmitDistanceModule extends ParticleModule<Particle> {
 
 			if (elapsed > 0) {
 				framePos = elapsed / _frameTime;
-				_x = lerp(_lastX, px, framePos);
-				_y = lerp(_lastY, py, framePos);
+				_x = Maths.lerp(_lastX, px, framePos);
+				_y = Maths.lerp(_lastY, py, framePos);
 				updateParticles(elapsed);
 				_dOffset += distLeft;
 			}
@@ -72,8 +69,8 @@ class EmitDistanceModule extends ParticleModule<Particle> {
 			var px:Float = _x;
 			var py:Float = _y;
 			var framePos = elapsed / _frameTime;
-			_x = lerp(_lastX, px, framePos);
-			_y = lerp(_lastY, py, framePos);
+			_x = Maths.lerp(_lastX, px, framePos);
+			_y = Maths.lerp(_lastY, py, framePos);
 			updateParticles(elapsed);
 			_x = px;
 			_y = py;

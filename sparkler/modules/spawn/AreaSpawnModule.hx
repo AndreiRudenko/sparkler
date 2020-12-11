@@ -17,7 +17,7 @@ class AreaSpawnModule extends ParticleModule<Particle> {
 		}
 	}
 
-	override function onPreParticleSpawn(p:Particle) {
+	override function onParticleSpawn(p:Particle) {
 		var px = areaSpawn.width * 0.5 * random1To1();
 		var py = areaSpawn.height * 0.5 * random1To1();
 		setParticlePos(p, px, py);

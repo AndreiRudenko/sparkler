@@ -13,7 +13,7 @@ class CircleSpawnModule extends ParticleModule<Particle> {
 		if(options.circleSpawn != null) circleSpawn = options.circleSpawn;
 	}
 
-	override function onPreParticleSpawn(p:Particle) {
+	override function onParticleSpawn(p:Particle) {
 		var a = random() * Math.PI * 2;
 		var r = random() * circleSpawn;
 		var px = Math.cos(a) * r;

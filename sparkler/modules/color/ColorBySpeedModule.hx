@@ -21,7 +21,7 @@ class ColorBySpeed {
 
 }
 
-@priority(80) // after speed set by prev and current position
+@priority(80)
 @group('color')
 @addModules(sparkler.modules.helpers.UpdateSpeedModule)
 class ColorBySpeedModule extends ParticleModule<Particle<Color, Speed>> {
@@ -51,7 +51,7 @@ class ColorBySpeedModule extends ParticleModule<Particle<Color, Speed>> {
 		p.color = colorBySpeed.minColor;
 	}
 	
-	override function onPostParticleUpdate(p:Particle<Color, Speed>, elapsed:Float) {
+	override function onParticleUpdate(p:Particle<Color, Speed>, elapsed:Float) {
 		var colorSpeedInvLerp = Maths.clamp(Maths.inverseLerp(colorBySpeed.minSpeed, colorBySpeed.maxSpeed, p.speed), 0, 1);
 		p.color = Color.lerp(colorBySpeed.minColor, colorBySpeed.maxColor, colorBySpeed.ease != null ? colorBySpeed.ease(colorSpeedInvLerp) : colorSpeedInvLerp);
 	}
