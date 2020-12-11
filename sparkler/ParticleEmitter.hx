@@ -134,6 +134,7 @@ class ParticleEmitterBase<T:ParticleBase> implements IParticleEmitter<T>{
 	public final function start() {
 		_loopsCounter = 0;
 		startInternal();
+		emit();
 		if(preprocess > 0) {
 			update(preprocess);
 		}
