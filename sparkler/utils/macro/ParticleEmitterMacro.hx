@@ -493,7 +493,6 @@ class ParticleEmitterMacro {
 						//TODO: set emitter Particle type if so
 						pushFilteredField(fields, filterTag, mf);
 					case FFun(f):
-					trace('${o.priority}: ${o.name} - ${mf.name}');
 						switch (mf.name) {
 							case 'new': 
 								switch (mf.kind) {
