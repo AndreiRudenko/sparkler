@@ -97,6 +97,7 @@ class ParticleEmitterMacro {
 
 			// get particle types from all modules
 			for (o in modulesOpt) {
+				// trace('${o.priority}: ${o.name}');
 				if(o.isInjectType) continue;
 				var pTypes = ParticleMacro.particleTypes.get(o.particleTypeName);
 				if(pTypes != null) {
@@ -483,12 +484,16 @@ class ParticleEmitterMacro {
 					}
 				}
 
+
 				switch (mf.kind) {
 					case FVar(t, e):
+						//TODO: set emitter Particle type if so
 						pushFilteredField(fields, filterTag, mf);
 					case FProp(g, s):
+						//TODO: set emitter Particle type if so
 						pushFilteredField(fields, filterTag, mf);
 					case FFun(f):
+					trace('${o.priority}: ${o.name} - ${mf.name}');
 						switch (mf.name) {
 							case 'new': 
 								switch (mf.kind) {
@@ -533,7 +538,9 @@ class ParticleEmitterMacro {
 							'onPostParticleSpawn' | 'onPostParticleUnspawn' | 
 							'onPostParticleUpdate' | 'onPostStart' | 'onPostStop':
 
-							default: pushFilteredField(fields, filterTag, mf);
+							default:
+								setFunctionArgsParticleType(mf, options.particleType);
+								pushFilteredField(fields, filterTag, mf);
 						}
 					default:
 				}
@@ -572,6 +579,21 @@ class ParticleEmitterMacro {
 					default:
 				}
 			}
+		}
+	}
+
+	static function setFunctionArgsParticleType(mf:Field, pType:Type) {
+		switch (mf.kind) {
+			case FFun(f):
+				for (a in f.args) {
+					switch (a.type) {
+						case TPath(p):
+							// convert particle type
+							if(p.name == 'Particle') a.type = Context.toComplexType(pType);
+						default:
+					}
+				}
+			default:
 		}
 	}
 
