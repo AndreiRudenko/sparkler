@@ -368,6 +368,12 @@ interface IParticleEmitter<T:ParticleBase> {
 	public var random:()->Float;
 	public var sortFunc:(a:T, b:T)->Int;
 
+	public var rotation:Float;
+	public var scaleX:Float;
+	public var scaleY:Float;
+	public var originX:Float;
+	public var originY:Float;
+	
 	private var _x:Float;
 	private var _y:Float;
 	private var _lastX:Float;

@@ -20,6 +20,12 @@ class ParticleModule<T:ParticleBase> implements IParticleEmitter<T> {
 	public var random:()->Float;
 	public var sortFunc:(a:T, b:T)->Int;
 
+	public var rotation:Float;
+	public var scaleX:Float;
+	public var scaleY:Float;
+	public var originX:Float;
+	public var originY:Float;
+	
 	var _x:Float;
 	var _y:Float;
 	var _lastX:Float;
@@ -33,6 +39,7 @@ class ParticleModule<T:ParticleBase> implements IParticleEmitter<T> {
 	var _d:Float;
 	var _tx:Float;
 	var _ty:Float;
+
 
 	public function emit() {}
 	public function start() {}
