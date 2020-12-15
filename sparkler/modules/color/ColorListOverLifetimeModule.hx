@@ -22,12 +22,13 @@ class ColorListOverLifetimeModule extends ParticleModule<Particle<Color, ColorPr
 		}
 	}
 
-	override function onParticleUpdate(p:Particle<Color, ColorPropertyList, LifeProgress>, elapsed:Float) {
-		p.colorPropertyList.interpolate(p.lifeProgress);
-		p.color = p.colorPropertyList.value;
-	}
 	override function onParticleSpawn(p:Particle<Color, ColorPropertyList, LifeProgress>) {
 		p.colorPropertyList.set(colorListOverLifetime);
+		p.color = p.colorPropertyList.value;
+	}
+
+	override function onParticleUpdate(p:Particle<Color, ColorPropertyList, LifeProgress>, elapsed:Float) {
+		p.colorPropertyList.interpolate(p.lifeProgress);
 		p.color = p.colorPropertyList.value;
 	}
 	
