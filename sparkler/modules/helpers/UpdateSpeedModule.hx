@@ -1,24 +1,29 @@
 package sparkler.modules.helpers;
 
 import sparkler.utils.Vector2;
-import sparkler.components.Velocity;
+import sparkler.components.PrevPos;
 import sparkler.components.Speed;
 import sparkler.ParticleModule;
 import sparkler.Particle;
 
 @priority(70)
-class UpdateSpeedModule extends ParticleModule<Particle<Speed, Velocity>> {
+class UpdateSpeedModule extends ParticleModule<Particle<Speed, PrevPos>> {
 
-	override function onParticleUpdate(p:Particle<Speed, Velocity>, elapsed:Float) {
-		updateParticleSpeed(p);
+	override function onParticleSpawn(p:Particle<Speed, PrevPos>) {
+		p.prevPos.x = p.x;
+		p.prevPos.y = p.y;
+		p.speed = 0;
 	}
 
-	override function onParticleSpawn(p:Particle<Speed, Velocity>) {
-		updateParticleSpeed(p);
+	override function onPreParticleUpdate(p:Particle<Speed, PrevPos>, elapsed:Float) {
+		p.prevPos.x = p.x;
+		p.prevPos.y = p.y;
 	}
 
-	inline function updateParticleSpeed(p:Particle<Speed, Velocity>) {
-		p.speed = Math.sqrt(p.velocity.x * p.velocity.x + p.velocity.y * p.velocity.y);
+	override function onParticleUpdate(p:Particle<Speed, PrevPos>, elapsed:Float) {
+		var dx = p.x - p.prevPos.x;
+		var dy = p.y - p.prevPos.y;
+		p.speed = Math.sqrt(dx * dx + dy * dy) / elapsed;
 	}
 
 }
