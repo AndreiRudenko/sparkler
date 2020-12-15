@@ -30,8 +30,13 @@ class MovementListOverLifetimeModule extends ParticleModule<Particle<Vector2Prop
 
 	override function onParticleUpdate(p:Particle<Vector2PropertyList, LifeProgress>, elapsed:Float) {
 		p.vector2PropertyList.interpolate(p.lifeProgress);
-		p.x += p.vector2PropertyList.value.x * elapsed;
-		p.y += p.vector2PropertyList.value.y * elapsed;
+		if(localSpace) {
+			p.x += p.vector2PropertyList.value.x * elapsed;
+			p.y += p.vector2PropertyList.value.y * elapsed;
+		} else {
+			p.x += getRotateX(p.vector2PropertyList.value.x, p.vector2PropertyList.value.y) * elapsed;
+			p.y += getRotateY(p.vector2PropertyList.value.x, p.vector2PropertyList.value.y) * elapsed;
+		}
 	}
 
 }

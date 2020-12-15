@@ -39,8 +39,15 @@ class MovementOverLifetimeModule extends ParticleModule<Particle<LifeProgress>> 
 
 	override function onParticleUpdate(p:Particle<LifeProgress>, elapsed:Float) {
 		var t = movementOverLifetime.ease != null ? movementOverLifetime.ease(p.lifeProgress) : p.lifeProgress;
-		p.x += Maths.lerp(movementOverLifetime.start.x, movementOverLifetime.end.x, t) * elapsed;
-		p.y += Maths.lerp(movementOverLifetime.start.y, movementOverLifetime.end.y, t) * elapsed;
+		if(localSpace) {
+			p.x += Maths.lerp(movementOverLifetime.start.x, movementOverLifetime.end.x, t) * elapsed;
+			p.y += Maths.lerp(movementOverLifetime.start.y, movementOverLifetime.end.y, t) * elapsed;
+		} else {
+			var dx = Maths.lerp(movementOverLifetime.start.x, movementOverLifetime.end.x, t);
+			var dy = Maths.lerp(movementOverLifetime.start.y, movementOverLifetime.end.y, t);
+			p.x += getRotateX(dx, dy) * elapsed;
+			p.y += getRotateY(dx, dy) * elapsed;
+		}
 	}
 
 }
