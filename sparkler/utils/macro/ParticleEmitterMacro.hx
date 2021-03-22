@@ -24,6 +24,7 @@ class ParticleEmitterMacro {
 	static var emitterTypeNames:Array<String> = ['ParticleEmitterBase'];
 
 	static var iModules:Array<InjectModule> = [
+		{name:'sparkler.modules.render.NucSpriteRendererModule', inject:sparkler.modules.render.NucSpriteRendererModule.inject},
 		{name:'sparkler.modules.render.ClaySpriteRendererModule', inject:sparkler.modules.render.ClaySpriteRendererModule.inject},
 		{name:'sparkler.modules.render.KhaSpriteRendererModule', inject:sparkler.modules.render.KhaSpriteRendererModule.inject}
 	];
