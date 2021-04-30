@@ -38,13 +38,13 @@ class SizeOverLifetimeModule extends ParticleModule<Particle<Size, LifeProgress>
 
 	override function onParticleUpdate(p:Particle<Size, LifeProgress>, elapsed:Float) {
 		var t = sizeOverLifetime.ease != null ? sizeOverLifetime.ease(p.lifeProgress) : p.lifeProgress;
-		v.x = Maths.lerp(sizeOverLifetime.start.x, sizeOverLifetime.end.x, t);
-		v.y = Maths.lerp(sizeOverLifetime.start.y, sizeOverLifetime.end.y, t);
+		p.size.x = Maths.lerp(sizeOverLifetime.start.x, sizeOverLifetime.end.x, t);
+		p.size.y = Maths.lerp(sizeOverLifetime.start.y, sizeOverLifetime.end.y, t);
 	}
 
 	override function onParticleSpawn(p:Particle<Size, LifeProgress>) {
 		p.size.x = sizeOverLifetime.start.x;
 		p.size.y = sizeOverLifetime.start.y;
 	}
-	
+
 }
