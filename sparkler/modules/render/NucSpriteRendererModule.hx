@@ -171,7 +171,7 @@ class NucSpriteRendererModule extends ParticleInjectModule {
 		var drawFunc = MacroUtils.buildFunction(
 			'draw', 
 			[Access.APublic], 
-			[{name: 'g', type: macro: nuc.Graphics}],
+			[{name: 'g', type: macro: nuc.graphics.SpriteBatch}],
 			macro: Void,
 			[macro {
 				if(activeCount > 0) {
