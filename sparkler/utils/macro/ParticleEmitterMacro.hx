@@ -237,7 +237,7 @@ class ParticleEmitterMacro {
 
 			if(emitExprs.length > 0) {
 				var emit = MacroUtils.buildFunction(
-					'emit', 
+					'onEmit', 
 					[AOverride], 
 					[],
 					macro: Void,

@@ -12,7 +12,7 @@ class ParticlesPerEmitModule extends ParticleModule<Particle> {
 		if(options.particlesPerEmit != null) particlesPerEmit = options.particlesPerEmit;
 	}
 
-	override function emit() {
+	override function onEmit() {
 		var count = this.particlesPerEmit > cacheSize ? cacheSize : this.particlesPerEmit;
 		while(count > 0) {
 			spawn();

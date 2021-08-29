@@ -37,7 +37,7 @@ class DirectionMinMaxModule extends ParticleModule<Particle<Velocity>> {
 	override function onParticleSpawn(p:Particle<Velocity>) {
 		var dAngle:Float = Maths.radians(randomFloat(directionMinMax.angle.min, directionMinMax.angle.max));
 		var dSpeed:Float = randomFloat(directionMinMax.speed.min, directionMinMax.speed.max);
-		if(!localSpace) dAngle += rotation;
+		if(!localSpace) dAngle += _rotation;
 		
 		p.velocity.x = dSpeed * Math.cos(dAngle);
 		p.velocity.y = dSpeed * Math.sin(dAngle);

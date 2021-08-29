@@ -34,7 +34,7 @@ class DirectionModule extends ParticleModule<Particle<Velocity>> {
 	override function onParticleSpawn(p:Particle<Velocity>) {
 		var angle:Float = Maths.radians(direction.angle);
 		
-		if(!localSpace) angle += rotation;
+		if(!localSpace) angle += this._rotation;
 		
 		p.velocity.x = direction.speed * Math.cos(angle);
 		p.velocity.y = direction.speed * Math.sin(angle);

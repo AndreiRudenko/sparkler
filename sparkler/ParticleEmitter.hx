@@ -49,6 +49,7 @@ class ParticleEmitterBase<T:ParticleBase> implements IParticleEmitter<T>{
 	inline function get_x() return _x;
 	function set_x(v:Float):Float {
 		_lastX = _x;
+		_transformDirty = true;
 		return _x = v;
 	}
 
@@ -57,19 +58,59 @@ class ParticleEmitterBase<T:ParticleBase> implements IParticleEmitter<T>{
 	inline function get_y() return _y;
 	function set_y(v:Float):Float {
 		_lastY = _y;
+		_transformDirty = true;
 		return _y = v;
+	}
+
+	public var rotation(get, set):Float;
+	var _rotation:Float = 0;
+	inline function get_rotation() return _rotation;
+	function set_rotation(v:Float):Float {
+		_rotation = v;
+		_transformDirty = true;
+		return _rotation = v;
+	}
+
+	public var scaleX(get, set):Float;
+	var _scaleX:Float = 0;
+	inline function get_scaleX() return _scaleX;
+	function set_scaleX(v:Float):Float {
+		_scaleX = v;
+		_transformDirty = true;
+		return _scaleX = v;
+	}
+
+	public var scaleY(get, set):Float;
+	var _scaleY:Float = 0;
+	inline function get_scaleY() return _scaleY;
+	function set_scaleY(v:Float):Float {
+		_scaleY = v;
+		_transformDirty = true;
+		return _scaleY = v;
+	}
+
+	public var originX(get, set):Float;
+	var _originX:Float = 0;
+	inline function get_originX() return _originX;
+	function set_originX(v:Float):Float {
+		_originX = v;
+		_transformDirty = true;
+		return _originX = v;
+	}
+
+	public var originY(get, set):Float;
+	var _originY:Float = 0;
+	inline function get_originY() return _originY;
+	function set_originY(v:Float):Float {
+		_originY = v;
+		_transformDirty = true;
+		return _originY = v;
 	}
 
 	var _lastX:Float = 0;
 	var _lastY:Float = 0;
 
-	public var rotation:Float = 0;
-
-	public var scaleX:Float = 1;
-	public var scaleY:Float = 1;
-
-	public var originX:Float = 0;
-	public var originY:Float = 0;
+	var _transformDirty:Bool = false;
 
 	// emitter name 
 	public var name:String;
@@ -152,7 +193,7 @@ class ParticleEmitterBase<T:ParticleBase> implements IParticleEmitter<T>{
 	public final function update(elapsed:Float) {
 		if(!active) return;
 		_frameTime = elapsed;
-		setTransform(_x, _y, rotation, scaleX, scaleY, originX, originY, 0, 0);
+		updateTransform();
 
 		onUpdate(elapsed);
 
@@ -160,7 +201,10 @@ class ParticleEmitterBase<T:ParticleBase> implements IParticleEmitter<T>{
 		_lastY = _y;
 	}
 
-	public function emit() {}
+	public final function emit() {
+		updateTransform();
+		onEmit();
+	}
 
 	public function unspawnAll() {
 		for (i in 0...activeCount) {
@@ -168,13 +212,14 @@ class ParticleEmitterBase<T:ParticleBase> implements IParticleEmitter<T>{
 		}
 		activeCount = 0;
 	}
-	
+
 	function startInternal() {
 		progress = 0;
 		_wrapIdx = 0;
 		enabled = true;
 		_lastX = _x;
 		_lastY = _y;
+		updateTransform();
 		onStart();
 	}
 
@@ -279,6 +324,7 @@ class ParticleEmitterBase<T:ParticleBase> implements IParticleEmitter<T>{
 		}
 	}
 
+	function onEmit() {}
 	function onStart() {}
 	function onStop() {}
 	function onUpdate(elapsed:Float) {}
@@ -288,6 +334,13 @@ class ParticleEmitterBase<T:ParticleBase> implements IParticleEmitter<T>{
 	function onParticleUpdate(p:T, elapsed:Float) {}
 	function onParticleSpawn(p:T) {}
 	function onParticleUnspawn(p:T) {}
+
+	function updateTransform() {
+		if (_transformDirty) {
+			setTransform(_x, _y, rotation, scaleX, scaleY, originX, originY, 0, 0);
+			_transformDirty = false;
+		}
+	}
 
 	function getRotateX(x:Float, y:Float):Float {
 		return _cos * x - _sin * y;
@@ -373,11 +426,11 @@ interface IParticleEmitter<T:ParticleBase> {
 	public var random:()->Float;
 	public var sortFunc:(a:T, b:T)->Int;
 
-	public var rotation:Float;
-	public var scaleX:Float;
-	public var scaleY:Float;
-	public var originX:Float;
-	public var originY:Float;
+	private var _rotation:Float;
+	private var _scaleX:Float;
+	private var _scaleY:Float;
+	private var _originX:Float;
+	private var _originY:Float;
 
 	private var _x:Float;
 	private var _y:Float;
@@ -404,6 +457,7 @@ interface IParticleEmitter<T:ParticleBase> {
 	private function unspawn(p:T):Void;
 	private function step(elapsed:Float):Void;
 
+	private function onEmit():Void;
 	private function onUpdate(elapsed:Float):Void;
 	private function onStepStart(elapsed:Float):Void;
 	private function onStep(elapsed:Float):Void;

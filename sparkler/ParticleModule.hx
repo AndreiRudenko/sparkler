@@ -20,12 +20,12 @@ class ParticleModule<T:ParticleBase> implements IParticleEmitter<T> {
 	public var random:()->Float;
 	public var sortFunc:(a:T, b:T)->Int;
 
-	public var rotation:Float;
-	public var scaleX:Float;
-	public var scaleY:Float;
-	public var originX:Float;
-	public var originY:Float;
-	
+	var _rotation:Float;
+	var _scaleX:Float;
+	var _scaleY:Float;
+	var _originX:Float;
+	var _originY:Float;
+
 	var _x:Float;
 	var _y:Float;
 	var _lastX:Float;
@@ -53,6 +53,7 @@ class ParticleModule<T:ParticleBase> implements IParticleEmitter<T> {
 	function spawn() {}
 	function unspawn(p:T) {}
 
+	function onEmit() {}
 	function onStart() {}
 	function onStop() {}
 
