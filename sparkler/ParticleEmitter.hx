@@ -110,7 +110,7 @@ class ParticleEmitterBase<T:ParticleBase> implements IParticleEmitter<T>{
 	var _lastX:Float = 0;
 	var _lastY:Float = 0;
 
-	var _transformDirty:Bool = false;
+	var _transformDirty:Bool = true;
 
 	// emitter name 
 	public var name:String;
