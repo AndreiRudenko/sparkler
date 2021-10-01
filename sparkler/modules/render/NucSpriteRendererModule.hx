@@ -10,13 +10,13 @@ import haxe.macro.Expr;
 
 #if !macro
 import nuc.graphics.Texture;
-import nuc.math.FastTransform2;
+import nuc.math.FastAffine;
 
 class NucSpriteRenderer {
 
 	public var texture:Texture;
 
-	@:noCompletion public var _transform:FastTransform2 = new FastTransform2();
+	@:noCompletion public var _transform:FastAffine = new FastAffine();
 
 	public function new() {}
 
